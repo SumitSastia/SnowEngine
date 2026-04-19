@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/SecondRenderer.dir/src/glad.c.o CMakeFiles/SecondRenderer.dir/src/main.cpp.o -o SecondRenderer  -lglfw 

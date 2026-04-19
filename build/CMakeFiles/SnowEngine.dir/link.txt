@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/SnowEngine.dir/src/glad.c.o CMakeFiles/SnowEngine.dir/src/main.cpp.o -o SnowEngine  -lglfw 

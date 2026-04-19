@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/ArcEngine.dir/src/glad.c.o CMakeFiles/ArcEngine.dir/src/main.cpp.o -o ArcEngine  -lglfw 
