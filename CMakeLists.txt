@@ -7,6 +7,8 @@ project(${TARGET_NAME})
 add_executable(${TARGET_NAME} 
     src/glad.c
     src/main.cpp
+    src/shader.cpp
+    src/camera.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)
