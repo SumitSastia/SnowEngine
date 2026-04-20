@@ -10,6 +10,7 @@ add_executable(${TARGET_NAME}
     src/shader.cpp
     src/camera.cpp
     src/shapes.cpp
+    src/renderer.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)

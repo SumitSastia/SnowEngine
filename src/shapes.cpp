@@ -102,11 +102,11 @@ void coloredCube::render() const {
 Allocates vertices & indices into Memory.
 Initializes the VBO, VAO, EBO
 */
-void shape2D::bindVertices(
+void shape::bindVertices2D(
     const float* vertices, const size_t& size_v,
     const unsigned int* indices, const size_t& size_i
 ) {
-    indicesCount = size_i / sizeof(float);
+    indicesCount = size_i / sizeof(u_int);
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -128,93 +128,19 @@ void shape2D::bindVertices(
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
 /*
-Loads texture of the Shape.
+Allocates vertices & indices into Memory.
+Initializes the VBO, VAO, EBO
 */
-void shape2D::loadTexture(const char* texturePath) {
-    shape2DTexture.load(texturePath);
-}
-
-/*
-Renders the Object in Forward Rendering.
-*/
-void shape2D::draw(const unsigned int& shader, const glm::mat4& model) const {
-
-    glUseProgram(shader);
-    glDisable(GL_CULL_FACE);
-
-    // Vert Uniforms
-    setMat4(shader, "finalMatrix", camera::instance().getPerspective() * camera::instance().getView() * model);
-    setMat4(shader, "model", model);
-
-    // Frag Uniforms
-    glm::vec3 normal = glm::transpose(glm::inverse(glm::mat3(model))) * glm::vec3(0.0f, 0.0f, 1.0f);
-    normal = glm::normalize(normal);
-
-    setVec3(shader, "normal", normal);
-    setVec3(shader, "viewPos", camera::instance().getPos());
-
-    // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
-
-    setInt(shader, "texture1", 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shape2DTexture.getID());
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_CULL_FACE);
-}
-
-/*
-Renders the geometry Details of the Object into gBuffer Memory.
-*/
-void shape2D::draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const {
-
-    glUseProgram(shader);
-    glDisable(GL_CULL_FACE);
-
-    setMat4(shader, "projection", camera::instance().getPerspective());
-    setMat4(shader, "view", camera::instance().getView());
-    setMat4(shader, "model", model);
-
-    setVec3(shader, "normal", glm::normalize(normal));
-
-    setInt(shader, "texture1", 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shape2DTexture.getID());
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glEnable(GL_CULL_FACE);
-}
-
-
-// void shape2D::drawShadow() const {
-
-//     glBindVertexArray(VAO);
-//     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-//     glBindVertexArray(0);
-// }
-
-//-------------------------------------------------------------------------------------//
-
-void shape::bindVertices(
+void shape::bindVertices3D(
     const float* vertices, const size_t& size_v,
     const unsigned int* indices, const size_t& size_i
 ) {
-    indicesCount = size_i / sizeof(float);
+    indicesCount = size_i / sizeof(u_int);
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -240,6 +166,7 @@ void shape::bindVertices(
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
@@ -247,58 +174,14 @@ void shape::loadTexture(const char* diffusePath) {
     shapeDiffuseTexture.load(diffusePath);
 }
 
-void shape::draw(const unsigned int& shader, const glm::mat4& model) const {
-
-    glUseProgram(shader);
-
-    // setMat4(shader, "finalMatrix", camera::instance().getPerspective() * camera::instance().getView() * model);
-    // setMat4(shader, "model", model);
-    // setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
-    // setVec3(shader, "viewPos", camera::instance().getPos());
-
-    // // setMaterial(shader, "m1");
-    // // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
-
-    // setInt(shader, "texture1", 0);
-    // setInt(shader, "texture2", 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
+void shape::draw() const {
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
     glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void shape::draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const {
-
-    glUseProgram(shader);
-
-    setMat4(shader, "projection", camera::instance().getPerspective());
-    setMat4(shader, "view", camera::instance().getView());
-    setMat4(shader, "model", model);
-    setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
-
-    setInt(shader, "texture1", 0);
-    setInt(shader, "texture2", 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+//-------------------------------------------------------------------------------------//
 
 void specShape::loadTexture(const char* diffusePath, const char* specularPath) {
 
@@ -306,74 +189,17 @@ void specShape::loadTexture(const char* diffusePath, const char* specularPath) {
     shapeSpecularTexture.load(specularPath);
 }
 
-void specShape::draw(const unsigned int& shader, const glm::mat4& model) const {
-
-    glUseProgram(shader);
-
-    setMat4(shader, "finalMatrix", camera::instance().getPerspective() * camera::instance().getView() * model);
-    setMat4(shader, "model", model);
-    setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
-    setVec3(shader, "viewPos", camera::instance().getPos());
-
-    // setMaterial(shader, "m1");
-    // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
-
-    setInt(shader, "texture1", 0);
-    setInt(shader, "texture2", 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeSpecularTexture.getID());
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void specShape::draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const {
-
-    glUseProgram(shader);
-
-    setMat4(shader, "projection", camera::instance().getPerspective());
-    setMat4(shader, "view", camera::instance().getView());
-    setMat4(shader, "model", model);
-    setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
-
-    setInt(shader, "texture1", 0);
-    setInt(shader, "texture2", 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeSpecularTexture.getID());
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-// void shape::drawShadow() const {
-
-//     glBindVertexArray(VAO);
-//     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-//     glBindVertexArray(0);
-// }
-
 //-------------------------------------------------------------------------------------//
 
 void shapeInstanced::bindVertices(
     const float* vertices, const size_t& size_v,
-    const unsigned int* indices, const size_t& size_i
+    const unsigned int* indices, const size_t& size_i,
+    const glm::mat4* models, const size_t& size_m,
+    const glm::mat3* normals, const size_t& size_n
 ) {
 
-    indicesCount = size_i / sizeof(float);
+    indicesCount = size_i / sizeof(u_int);
+    instanceCounts = size_m / sizeof(glm::mat4);
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -398,67 +224,61 @@ void shapeInstanced::bindVertices(
     // TextureCords
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    
+    // InstancedModel
+    glGenBuffers(1, &instanceModelVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceModelVBO);
+    glBufferData(GL_ARRAY_BUFFER, instanceCounts * sizeof(glm::mat4), models, GL_STATIC_DRAW);
 
+    std::size_t vec4Size = sizeof(glm::vec4);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceModelVBO);
+    
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+    glVertexAttribDivisor(3, 1);
+    
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+    glVertexAttribDivisor(4, 1);
+    
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glVertexAttribDivisor(5, 1);
+    
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+    glVertexAttribDivisor(6, 1);
+    
+    // InstancedNormal
+    glGenBuffers(1, &instanceNormalVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceNormalVBO);
+    glBufferData(GL_ARRAY_BUFFER, instanceCounts * sizeof(glm::mat3), normals, GL_STATIC_DRAW);
+
+    std::size_t vec3Size = sizeof(glm::vec3);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceNormalVBO);
+    
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * vec3Size, (void*)0);
+    glVertexAttribDivisor(7, 1);
+    
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 3, GL_FLOAT, GL_FALSE, 3 * vec3Size, (void*)(1 * vec3Size));
+    glVertexAttribDivisor(8, 1);
+    
+    glEnableVertexAttribArray(9);
+    glVertexAttribPointer(9, 3, GL_FLOAT, GL_FALSE, 3 * vec3Size, (void*)(2 * vec3Size));
+    glVertexAttribDivisor(9, 1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void shapeInstanced::draw(const unsigned int& shader, const unsigned int& instanceCounts) const {
-
-    glUseProgram(shader);
-
-    setMat4(shader, "projection", camera::instance().getPerspective());
-    setMat4(shader, "view", camera::instance().getView());
-
-    setVec3(shader, "viewPos", camera::instance().getPos());
-    // setMaterial(shader, "m1");
-    // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
-
-    setInt(shader, "texture1", 0);
-    setInt(shader, "texture2", 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeSpecularTexture.getID());
+void shapeInstanced::draw() const {
 
     glBindVertexArray(VAO);
     glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
     glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
 }
-
-void shapeInstanced::draw_gbuffer(const unsigned int& shader, const unsigned int& instanceCounts) const {
-
-    glUseProgram(shader);
-
-    setMat4(shader, "projection", camera::instance().getPerspective());
-    setMat4(shader, "view", camera::instance().getView());
-
-    setInt(shader, "texture1", 0);
-    setInt(shader, "texture2", 1);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeSpecularTexture.getID());
-
-    glBindVertexArray(VAO);
-    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-// void shapeInstanced::drawShadow(const unsigned int& instanceCounts) const {
-
-//     glBindVertexArray(VAO);
-//     glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
-//     glBindVertexArray(0);
-// }
 
 //-------------------------------------------------------------------------------------//
 
@@ -535,14 +355,48 @@ defaultShapes::defaultShapes(){
         21,23,22
     };
 
-    cube.bindVertices(vertices, sizeof(vertices), indices, sizeof(indices));
+    cube.bindVertices3D(vertices, sizeof(vertices), indices, sizeof(indices));
     cube.loadTexture(
         "/assets/textures/wood_box.png",
         "/assets/textures/metal_frame.png"
     );
 
     // Instanced
-    cubeInstanced.bindVertices(vertices, sizeof(vertices), indices, sizeof(indices));
+
+    // Multiple Cubes
+    unsigned int totalCubes = 10;
+    glm::vec3 cubePositions[totalCubes] = {
+
+        glm::vec3(5.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    
+    glm::mat4 objModels[10];
+    glm::mat3 objNormals[10];
+
+    for (unsigned int i = 0; i < totalCubes; i++) {
+
+        glm::mat4 objModel = glm::translate(glm::mat4(1.0f), cubePositions[i]);
+
+        objModels[i] = glm::rotate(objModel, i * 15.0f, glm::vec3(1.0f, 2.0f, 3.0f));
+        objNormals[i] = glm::transpose(glm::inverse(glm::mat3(objModels[i])));
+    }
+
+    cubeInstanced.bindVertices(
+        vertices,   sizeof(vertices), 
+        indices,    sizeof(indices), 
+        objModels,  sizeof(objModels), 
+        objNormals, sizeof(objNormals)
+    );
+
     cubeInstanced.loadTexture(
         "/assets/textures/wood_box.png",
         "/assets/textures/metal_frame.png"
@@ -564,7 +418,7 @@ defaultShapes::defaultShapes(){
         1,3,2
     };
 
-    square.bindVertices(vertices2, sizeof(vertices2), indices2, sizeof(indices2));
+    square.bindVertices2D(vertices2, sizeof(vertices2), indices2, sizeof(indices2));
     square.loadTexture(
         "/assets/textures/window_tint.png"
     );

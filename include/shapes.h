@@ -18,29 +18,8 @@ struct coloredCube {
     void render() const;
 };
 
-// Hardcoded 2D Models
-struct shape2D {
 
-    unsigned int VBO, VAO, EBO;
-    unsigned int indicesCount;
-
-    texture2D shape2DTexture;
-    glm::vec3 normal;
-
-    shape2D() : normal(glm::vec3(0.0f, 0.0f, 1.0f)) {}
-
-    void bindVertices(
-        const float* vertices, const size_t& size_v,
-        const unsigned int* indices, const size_t& size_i
-    );
-
-    void loadTexture(const char* texturePath);
-    void draw(const unsigned int& shader, const glm::mat4& model) const;
-    void draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const;
-    void drawShadow() const;
-};
-
-// Hardcoded 3D Models
+// Hardcoded Model
 struct shape {
 
     unsigned int VBO, VAO, EBO;
@@ -48,38 +27,40 @@ struct shape {
 
     texture2D shapeDiffuseTexture;
 
-    void bindVertices(
+    void bindVertices2D(
+        const float* vertices, const size_t& size_v,
+        const unsigned int* indices, const size_t& size_i
+    );
+
+    void bindVertices3D(
         const float* vertices, const size_t& size_v,
         const unsigned int* indices, const size_t& size_i
     );
 
     void loadTexture(const char* diffusePath);
-    void draw(const unsigned int& shader, const glm::mat4& model) const;
-    void draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const;
-    void drawShadow() const;
+    void draw() const;
 };
 
-// 3D Model with Specular Texture
+// Model with Specular Texture
 struct specShape : public shape {
 
     texture2D shapeSpecularTexture;
-
     void loadTexture(const char* diffusePath, const char* specularPath);
-    void draw(const unsigned int& shader, const glm::mat4& model) const;
-    void draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const;
 };
 
 struct shapeInstanced : specShape {
 
+    unsigned int instanceModelVBO, instanceNormalVBO;
+    unsigned int instanceCounts;
+
     void bindVertices(
         const float* vertices, const size_t& size_v,
-        const unsigned int* indices, const size_t& size_i
+        const unsigned int* indices, const size_t& size_i,
+        const glm::mat4* models, const size_t& size_m,
+        const glm::mat3* normals, const size_t& size_n
     );
 
-    void draw(const unsigned int& shader, const unsigned int& instanceCounts) const;
-    void draw_gbuffer(const unsigned int& shader, const unsigned int& instanceCounts) const;
-
-    void drawShadow(const unsigned int& instanceCounts) const;
+    void draw() const;
 };
 
 /*
@@ -88,7 +69,7 @@ Hardcoded Shapes
 */
 struct defaultShapes {
 
-    shape2D square;
+    shape square;
     specShape cube;
     shapeInstanced cubeInstanced;
 
