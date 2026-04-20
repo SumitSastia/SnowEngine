@@ -2,6 +2,7 @@
 #include <camera.h>
 
 #include <iostream>
+#include <stb_image.h>
 
 //-------------------------------------------------------------------------------------//
 
@@ -97,13 +98,10 @@ void coloredCube::render() const {
 
 //-------------------------------------------------------------------------------------//
 
-shape2D::~shape2D() {
-
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteVertexArrays(1, &VAO);
-}
-
+/*
+Allocates vertices & indices into Memory.
+Initializes the VBO, VAO, EBO
+*/
 void shape2D::bindVertices(
     const float* vertices, const size_t& size_v,
     const unsigned int* indices, const size_t& size_i
@@ -133,10 +131,16 @@ void shape2D::bindVertices(
     glBindVertexArray(0);
 }
 
+/*
+Loads texture of the Shape.
+*/
 void shape2D::loadTexture(const char* texturePath) {
     shape2DTexture.load(texturePath);
 }
 
+/*
+Renders the Object in Forward Rendering.
+*/
 void shape2D::draw(const unsigned int& shader, const glm::mat4& model) const {
 
     glUseProgram(shader);
@@ -153,7 +157,7 @@ void shape2D::draw(const unsigned int& shader, const glm::mat4& model) const {
     setVec3(shader, "normal", normal);
     setVec3(shader, "viewPos", camera::instance().getPos());
 
-    setSpotLight(shader, "s1", lights::lights::instance().flashlight);
+    // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
 
     setInt(shader, "texture1", 0);
 
@@ -169,6 +173,9 @@ void shape2D::draw(const unsigned int& shader, const glm::mat4& model) const {
     glEnable(GL_CULL_FACE);
 }
 
+/*
+Renders the geometry Details of the Object into gBuffer Memory.
+*/
 void shape2D::draw_gbuffer(const unsigned int& shader, const glm::mat4& model) const {
 
     glUseProgram(shader);
@@ -193,21 +200,15 @@ void shape2D::draw_gbuffer(const unsigned int& shader, const glm::mat4& model) c
     glEnable(GL_CULL_FACE);
 }
 
-void shape2D::drawShadow() const {
 
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-}
+// void shape2D::drawShadow() const {
+
+//     glBindVertexArray(VAO);
+//     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
+//     glBindVertexArray(0);
+// }
 
 //-------------------------------------------------------------------------------------//
-
-specShape::~specShape() {
-
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteVertexArrays(1, &VAO);
-}
 
 void shape::bindVertices(
     const float* vertices, const size_t& size_v,
@@ -250,16 +251,16 @@ void shape::draw(const unsigned int& shader, const glm::mat4& model) const {
 
     glUseProgram(shader);
 
-    setMat4(shader, "finalMatrix", camera::instance().getPerspective() * camera::instance().getView() * model);
-    setMat4(shader, "model", model);
-    setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
-    setVec3(shader, "viewPos", camera::instance().getPos());
+    // setMat4(shader, "finalMatrix", camera::instance().getPerspective() * camera::instance().getView() * model);
+    // setMat4(shader, "model", model);
+    // setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
+    // setVec3(shader, "viewPos", camera::instance().getPos());
 
-    setMaterial(shader, "m1");
-    setSpotLight(shader, "s1", lights::lights::instance().flashlight);
+    // // setMaterial(shader, "m1");
+    // // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
 
-    setInt(shader, "texture1", 0);
-    setInt(shader, "texture2", 1);
+    // setInt(shader, "texture1", 0);
+    // setInt(shader, "texture2", 1);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
@@ -314,8 +315,8 @@ void specShape::draw(const unsigned int& shader, const glm::mat4& model) const {
     setMat3(shader, "normalModel", glm::transpose(glm::inverse(glm::mat3(model))));
     setVec3(shader, "viewPos", camera::instance().getPos());
 
-    setMaterial(shader, "m1");
-    setSpotLight(shader, "s1", lights::lights::instance().flashlight);
+    // setMaterial(shader, "m1");
+    // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
 
     setInt(shader, "texture1", 0);
     setInt(shader, "texture2", 1);
@@ -358,12 +359,12 @@ void specShape::draw_gbuffer(const unsigned int& shader, const glm::mat4& model)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void shape::drawShadow() const {
+// void shape::drawShadow() const {
 
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-}
+//     glBindVertexArray(VAO);
+//     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
+//     glBindVertexArray(0);
+// }
 
 //-------------------------------------------------------------------------------------//
 
@@ -409,8 +410,8 @@ void shapeInstanced::draw(const unsigned int& shader, const unsigned int& instan
     setMat4(shader, "view", camera::instance().getView());
 
     setVec3(shader, "viewPos", camera::instance().getPos());
-    setMaterial(shader, "m1");
-    setSpotLight(shader, "s1", lights::lights::instance().flashlight);
+    // setMaterial(shader, "m1");
+    // setSpotLight(shader, "s1", lights::lights::instance().flashlight);
 
     setInt(shader, "texture1", 0);
     setInt(shader, "texture2", 1);
@@ -452,21 +453,21 @@ void shapeInstanced::draw_gbuffer(const unsigned int& shader, const unsigned int
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void shapeInstanced::drawShadow(const unsigned int& instanceCounts) const {
+// void shapeInstanced::drawShadow(const unsigned int& instanceCounts) const {
 
-    glBindVertexArray(VAO);
-    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
-    glBindVertexArray(0);
-}
+//     glBindVertexArray(VAO);
+//     glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
+//     glBindVertexArray(0);
+// }
 
 //-------------------------------------------------------------------------------------//
 
-shapes& shapes::instance() {
-    static shapes instance;
+defaultShapes& defaultShapes::instance() {
+    static defaultShapes instance;
     return instance;
 }
 
-shapes::shapes(){
+defaultShapes::defaultShapes(){
 
     const float vertices[] = {
 
@@ -536,15 +537,15 @@ shapes::shapes(){
 
     cube.bindVertices(vertices, sizeof(vertices), indices, sizeof(indices));
     cube.loadTexture(
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/assets/textures/wood_box.png",
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/assets/textures/metal_frame.png"
+        "/assets/textures/wood_box.png",
+        "/assets/textures/metal_frame.png"
     );
 
     // Instanced
     cubeInstanced.bindVertices(vertices, sizeof(vertices), indices, sizeof(indices));
     cubeInstanced.loadTexture(
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/assets/textures/wood_box.png",
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/assets/textures/metal_frame.png"
+        "/assets/textures/wood_box.png",
+        "/assets/textures/metal_frame.png"
     );
 
     float vertices2[] = {
@@ -565,7 +566,7 @@ shapes::shapes(){
 
     square.bindVertices(vertices2, sizeof(vertices2), indices2, sizeof(indices2));
     square.loadTexture(
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/assets/textures/window_tint.png"
+        "/assets/textures/window_tint.png"
     );
 }
 
@@ -668,10 +669,4 @@ cubeMap::cubeMap(const std::vector <std::string>& textureFaces) {
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
-}
-
-cubeMap::~cubeMap() {
-    glDeleteBuffers(1, &VBO);
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteTextures(1, &textureID);
 }

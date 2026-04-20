@@ -6,6 +6,7 @@
 #include <interface.h>
 #include <shader.h>
 #include <camera.h>
+#include <shapes.h>
 
 // ------------------------------ Global Variables ----------------------------------- //
 
@@ -192,7 +193,7 @@ int main() {
         "../shaders/cube.frag"
     );
 
-    
+    specShape myCube = defaultShapes::instance().cube;
 
     // ---------- Loop ------------------------ //
 
@@ -223,9 +224,14 @@ int main() {
         setMat4(shader, "view"      , mainCamera.getView());
         setMat4(shader, "model"     , glm::mat4(1.0f));
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-        glBindVertexArray(0);
+        // glBindVertexArray(VAO);
+        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
+        // glBindVertexArray(0);
+
+        glm::mat4 objectModel(1.0f);
+        objectModel = glm::scale(objectModel, glm::vec3(0.2f));
+
+        myCube.draw(shader, objectModel);
 
         glfwSwapBuffers(window);
     }

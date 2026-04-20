@@ -3,6 +3,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+std::filesystem::path base = std::filesystem::current_path();
 
 /*
 Returns content of a Shader file in string format.
@@ -163,6 +169,74 @@ const unsigned int createShader2(const char* vertPath, const char* geomPath, con
     glDeleteShader(fragmentShader);
 
     return shaderProgram;
+}
+
+/*
+Renders the Object (vertices & indices).
+NOTE: This method is used in rendering the shadow of the object.
+*/
+void renderShadow(const u_int& VAO, const u_int& indicesCount) {
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
+    glBindVertexArray(0);
+}
+
+/*
+Renders the Object (vertices & indices),
+instanceCounts = No. of instances of the object to render.
+NOTE: This method is used in rendering the shadow of the object.
+*/
+void renderShadowInstanced(const u_int& VAO, const u_int& indicesCount, const u_int& instanceCounts){
+
+    glBindVertexArray(VAO);
+    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
+    glBindVertexArray(0);
+}
+
+// ------------------------------ Class Functions ------------------------------------ //
+
+/*
+Loads the image and allocate it into the Memory.
+NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
+*/
+void texture2D::load(const char* path){
+
+    std::string path_str(path);
+    std::string base_str = base.string();
+
+    base_str.erase(base_str.size() - 5);
+
+    std::string finalPath = base_str + path_str;
+
+    pixelData = stbi_load(finalPath.c_str(), &width, &height, nullptr, 4);
+
+    if(!pixelData){
+        std::cerr << "Failed to Load Image!\n" << finalPath << std::endl;
+        return;
+    }
+
+    glGenTextures(1,&textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(pixelData);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void texture2D::destroy() {
+
 }
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //
