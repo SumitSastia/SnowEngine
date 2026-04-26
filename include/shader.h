@@ -11,12 +11,7 @@
 
 // ------------------------------ Function Delcarations ------------------------------ //
 
-std::string loadShaderFile(const char* path);
-const unsigned int createShader(const char* vertPath, const char* fragPath);
-const unsigned int createShader2(const char* vertPath, const char* geomPath, const char* fragPath);
 
-void renderShadow(const u_int& VAO, const u_int& indicesCount);
-void renderShadowInstanced(const u_int& VAO, const u_int& indicesCount, const u_int& instanceCounts);
 
 // ------------------------------ Classes -------------------------------------------- //
 

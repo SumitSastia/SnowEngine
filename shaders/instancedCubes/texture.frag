@@ -178,50 +178,52 @@ vec3 init_spotLight(spotLight sl, vec3 normal, vec3 vPos, vec3 viewPos, vec3 t1,
 
 void main(){
 
-    vec3 normal = normalize(vNormal);
+    // vec3 normal = normalize(vNormal);
     
-    vec3 t1 = (texture(texture1, vTexCords)).rgb;
-    vec3 t2 = (texture(texture2, vTexCords)).rgb;
+    // vec3 t1 = (texture(texture1, vTexCords)).rgb;
+    // vec3 t2 = (texture(texture2, vTexCords)).rgb;
     
-    float alpha = texture(texture1, vTexCords).a;
+    // float alpha = texture(texture1, vTexCords).a;
 
-    vec3 finalColor = vec3(0.0);
-    vec3 lightColors[MAX_LIGHTS];
+    // vec3 finalColor = vec3(0.0);
+    // vec3 lightColors[MAX_LIGHTS];
 
-    // PointLight
-    for (int i = 0; i < lights_count; i++) {
+    // // PointLight
+    // for (int i = 0; i < lights_count; i++) {
         
-        lightColors[i] = init_pointLight(plights[i], normal, vPos, viewPos, t1, t2);
-        lightColors[i] *= (1.0 - init_shadow(vPos, depthCubeMap[i], lightPos[i]));
-    }
+    //     lightColors[i] = init_pointLight(plights[i], normal, vPos, viewPos, t1, t2);
+    //     lightColors[i] *= (1.0 - init_shadow(vPos, depthCubeMap[i], lightPos[i]));
+    // }
 
-    for (int i = 0; i < lights_count; i++) {
+    // for (int i = 0; i < lights_count; i++) {
         
-        finalColor += lightColors[i];
-    }
+    //     finalColor += lightColors[i];
+    // }
 
-    if(s1.isVisible){
-        finalColor += init_spotLight(s1, normal, vPos, viewPos, t1, t2);
-    }    
+    // if(s1.isVisible){
+    //     finalColor += init_spotLight(s1, normal, vPos, viewPos, t1, t2);
+    // }    
 
-    vec3 incident_ray = normalize(vPos - viewPos);
+    // vec3 incident_ray = normalize(vPos - viewPos);
 
-    // Reflection of Skybox
-    vec3 reflected_ray = reflect(incident_ray, normal);
-    vec4 reflected_color = vec4(texture(skybox, reflected_ray).rgb, 1.0);
+    // // Reflection of Skybox
+    // vec3 reflected_ray = reflect(incident_ray, normal);
+    // vec4 reflected_color = vec4(texture(skybox, reflected_ray).rgb, 1.0);
 
-    // Ambient
-    vec3 ambientLight = vec3(((m1.ambient * t1) + skyboxIntensity * t1) / 2.00);
+    // // Ambient
+    // vec3 ambientLight = vec3(((m1.ambient * t1) + skyboxIntensity * t1) / 2.00);
 
-    FragColor = vec4(ambientLight + finalColor, alpha);
+    // FragColor = vec4(ambientLight + finalColor, alpha);
 
-    // Bloom
-    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    // // Bloom
+    // float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 	
-	if (brightness > 0.75) {
-		BrightColor = FragColor;
-	}
-	else {
-		BrightColor = vec4(0.0,0.0,0.0,1.0);
-	}
+	// if (brightness > 0.75) {
+	// 	BrightColor = FragColor;
+	// }
+	// else {
+	// 	BrightColor = vec4(0.0,0.0,0.0,1.0);
+	// }
+
+    FragColor = vec4(0.0, 0.0, 1.0, 1.0); // Blue-Color
 }

@@ -15,9 +15,9 @@ uniform mat4 view;
 
 void main(){
 
-    gl_Position = projection * view * instanceModel * vec4(aPos , 1.0);
+    gl_Position = projection * view * instanceModel * vec4(aPos, 1.0);
 
-    vPos = vec3(instanceModel * vec4(aPos , 1.0));
+    vPos = vec3(instanceModel * vec4(aPos, 1.0));
     vNormal = instanceNormal * aNormal;
     vTexCords = aTexCords;
 }

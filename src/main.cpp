@@ -42,20 +42,26 @@ int main() {
 
     camera& mainCamera = camera::instance();
 
-    unsigned int cubeShader = createShader(
+    unsigned int cubeShader = Renderer::createShader(
         "../shaders/normalCube/cube.vert",
         "../shaders/normalCube/cube.frag"
     );
 
-    unsigned int planeShader = createShader(
+    unsigned int planeShader = Renderer::createShader(
         "../shaders/planes/plane.vert",
         "../shaders/planes/plane.frag"
     );
 
-    const unsigned int shader = planeShader;
+    unsigned int instanceShader = Renderer::createShader(
+        "../shaders/instancedCubes/texture.vert",
+        "../shaders/instancedCubes/texture.frag"
+    );
+
+    const unsigned int shader = instanceShader;
 
     specShape myCube = defaultShapes::instance().cube;
-    shape plane      = defaultShapes::instance().square; 
+    shape plane      = defaultShapes::instance().square;
+    shapeInstanced cubes = defaultShapes::instance().cubeInstanced;
 
     // ---------- Loop ------------------------ //
 
@@ -89,13 +95,14 @@ int main() {
         // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
         // glBindVertexArray(0);
 
-        glm::mat4 objectModel(1.0f);
+        // glm::mat4 objectModel(1.0f);
         // objectModel = glm::scale(objectModel, glm::vec3(0.2f));
 
-        setMat4(shader, "model", objectModel);
+        // setMat4(shader, "model", objectModel);
 
-        plane.draw();
+        cubes.draw();
 
+        // plane.draw();
         // myCube.draw();
 
         glfwSwapBuffers(window);

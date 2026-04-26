@@ -1,5 +1,6 @@
 #include <shapes.h>
 #include <camera.h>
+#include <renderer.h>
 
 #include <iostream>
 #include <stb_image.h>
@@ -62,7 +63,7 @@ coloredCube::coloredCube(const glm::vec3& color) :
 
     glBindVertexArray(0);
 
-    colorShader = createShader(
+    colorShader = Renderer::createShader(
         "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/shaders/colorCube/cube.vert",
         "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/shaders/colorCube/cube.frag"
     );
