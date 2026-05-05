@@ -1,4 +1,5 @@
 #include <shader.h>
+#include <renderer.h>
 
 #include <iostream>
 #include <filesystem>
@@ -55,7 +56,7 @@ void texture2D::destroy() {
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //
 
-void setBool(const unsigned int& shaderProgram, const char* target, const bool& value) {
+void Renderer::setBool(const unsigned int& shaderProgram, const char* target, const bool& value) {
 
     glUniform1i(
         glGetUniformLocation(shaderProgram, target),
@@ -63,7 +64,7 @@ void setBool(const unsigned int& shaderProgram, const char* target, const bool& 
     );
 }
 
-void setInt(const unsigned int &shaderProgram, const char* target, const int &value){
+void Renderer::setInt(const unsigned int &shaderProgram, const char* target, const int &value){
 
     glUniform1i(
         glGetUniformLocation(shaderProgram, target),
@@ -71,7 +72,7 @@ void setInt(const unsigned int &shaderProgram, const char* target, const int &va
     );
 }
 
-void setFloat(const unsigned int &shaderProgram, const char* target, const float &value){
+void Renderer::setFloat(const unsigned int &shaderProgram, const char* target, const float &value){
 
     glUniform1f(
         glGetUniformLocation(shaderProgram, target),
@@ -79,7 +80,7 @@ void setFloat(const unsigned int &shaderProgram, const char* target, const float
     );
 }
 
-void setVec3(const unsigned int &shaderProgram, const char* target, const glm::vec3 &vector){
+void Renderer::setVec3(const unsigned int &shaderProgram, const char* target, const glm::vec3 &vector){
 
     glUniform3fv(
         glGetUniformLocation(shaderProgram, target),
@@ -88,7 +89,7 @@ void setVec3(const unsigned int &shaderProgram, const char* target, const glm::v
     );
 }
 
-void setMat3(const unsigned int &shaderProgram, const char* target, const glm::mat3 &matrix){
+void Renderer::setMat3(const unsigned int &shaderProgram, const char* target, const glm::mat3 &matrix){
 
     glUniformMatrix3fv(
         glGetUniformLocation(shaderProgram, target),
@@ -98,7 +99,7 @@ void setMat3(const unsigned int &shaderProgram, const char* target, const glm::m
     );
 }
 
-void setMat4(const unsigned int &shaderProgram, const char* target, const glm::mat4 &matrix){
+void Renderer::setMat4(const unsigned int &shaderProgram, const char* target, const glm::mat4 &matrix){
 
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, target),

@@ -21,6 +21,7 @@ bool Renderer::init() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
+
     // ---------- Monitor --------------------- //
 
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -61,6 +62,8 @@ bool Renderer::init() {
     glViewport(0,0,frameWidth,frameHeight);
     
     glfwSwapInterval(1); // V-Sync
+
+    glEnable(GL_DEPTH_TEST);
 
     return true;
 }

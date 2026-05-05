@@ -1,23 +1,8 @@
 #pragma once
 
 #include <shader.h>
+#include <renderer.h>
 #include <vector>
-
-// Colored Models
-struct coloredCube {
-
-    unsigned int VBO, VAO, EBO;
-    unsigned int colorShader;
-
-    glm::vec3 color;
-
-    coloredCube(const glm::vec3& color);
-    ~coloredCube();
-
-    void update(const float& delta_time);
-    void render() const;
-};
-
 
 // Hardcoded Model
 struct shape {
@@ -37,6 +22,7 @@ struct shape {
         const unsigned int* indices, const size_t& size_i
     );
 
+    void bindTexture(const unsigned int textureUnit);
     void loadTexture(const char* diffusePath);
     void draw() const;
 };

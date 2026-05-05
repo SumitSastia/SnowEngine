@@ -4,6 +4,7 @@
 #include <shader.h>
 #include <camera.h>
 #include <shapes.h>
+#include <debug.h>
 
 // ------------------------------ Global Variables ----------------------------------- //
 
@@ -44,7 +45,7 @@ int main() {
 
     unsigned int cubeShader = Renderer::createShader(
         "../shaders/normalCube/cube.vert",
-        "../shaders/normalCube/cube.frag"
+        "../shaders/normalCube/texturedCube.frag"
     );
 
     unsigned int planeShader = Renderer::createShader(
@@ -57,11 +58,17 @@ int main() {
         "../shaders/instancedCubes/texture.frag"
     );
 
-    const unsigned int shader = instanceShader;
+    const unsigned int shader = cubeShader;
 
-    specShape myCube = defaultShapes::instance().cube;
-    shape plane      = defaultShapes::instance().square;
+    shape         myCube = defaultShapes::instance().cube;
+    shape          plane = defaultShapes::instance().square;
     shapeInstanced cubes = defaultShapes::instance().cubeInstanced;
+
+    myCube.loadTexture(
+        "assets/textures/wood_box.png"
+    );
+
+    debug_menu::instance().init(window);
 
     // ---------- Loop ------------------------ //
 
@@ -81,6 +88,7 @@ int main() {
         
         // Updates // 
         mainCamera.update(deltaTime);
+        debug_menu::instance().update();
 
         // Rendering //
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -88,27 +96,29 @@ int main() {
 
         glUseProgram(shader);
 
-        setMat4(shader, "projection", mainCamera.getPerspective());
-        setMat4(shader, "view"      , mainCamera.getView());
+        Renderer::setMat4(shader, "projection", mainCamera.getPerspective());
+        Renderer::setMat4(shader, "view"      , mainCamera.getView());
 
-        // glBindVertexArray(VAO);
-        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-        // glBindVertexArray(0);
-
-        // glm::mat4 objectModel(1.0f);
+        glm::mat4 objectModel(1.0f);
         // objectModel = glm::scale(objectModel, glm::vec3(0.2f));
 
-        // setMat4(shader, "model", objectModel);
+        Renderer::setMat4(shader, "model", objectModel);
 
-        cubes.draw();
-
+        // cubes.draw();
         // plane.draw();
-        // myCube.draw();
+
+        myCube.bindTexture(GL_TEXTURE0);
+        myCube.draw();
+
+        // Debug Menu
+        debug_menu::instance().render();
 
         glfwSwapBuffers(window);
     }
 
     // ---------- Termination ----------------- //
+
+    debug_menu::instance().destroy();
 
     glfwDestroyWindow(window);
     glfwTerminate();

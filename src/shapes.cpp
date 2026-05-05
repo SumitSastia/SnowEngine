@@ -7,98 +7,6 @@
 
 //-------------------------------------------------------------------------------------//
 
-coloredCube::coloredCube(const glm::vec3& color) :
-    color(color)
-{
-
-    const float vertices[] = {
-
-        // Position
-        -0.5, 0.5, 0.5,
-         0.5, 0.5, 0.5,
-        -0.5,-0.5, 0.5,
-         0.5,-0.5, 0.5,
-
-        -0.5, 0.5,-0.5,
-         0.5, 0.5,-0.5,
-        -0.5,-0.5,-0.5,
-         0.5,-0.5,-0.5,
-    };
-
-    const unsigned int indices[] = {
-
-        0,1,2,
-        1,3,2,
-
-        5,4,7,
-        4,6,7,
-
-        4,0,6,
-        0,2,6,
-
-        1,5,3,
-        5,7,3,
-
-        4,5,0,
-        5,1,0,
-
-        7,6,3,
-        6,2,3
-    };
-
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-    glBindVertexArray(0);
-
-    colorShader = Renderer::createShader(
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/shaders/colorCube/cube.vert",
-        "C:/Users/sumit/Documents/GitHub/OpenGLRenderer/shaders/colorCube/cube.frag"
-    );
-}
-
-coloredCube::~coloredCube() {
-
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteVertexArrays(1, &VAO);
-}
-
-void coloredCube::update(const float& delta_time) {
-
-}
-
-void coloredCube::render() const {
-
-    // std::cout << VAO << std::endl;
-
-    glUseProgram(colorShader);
-
-    setMat4(colorShader, "projection", camera::instance().getPerspective());
-    setMat4(colorShader, "view", camera::instance().getView());
-    setMat4(colorShader, "model", glm::mat4(1.0f));
-
-    setVec3(colorShader, "color", color);
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
-
-//-------------------------------------------------------------------------------------//
-
 /*
 Allocates vertices & indices into Memory.
 Initializes the VBO, VAO, EBO
@@ -169,6 +77,12 @@ void shape::bindVertices3D(
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+void shape::bindTexture(const unsigned int textureUnit) {
+
+    glActiveTexture(textureUnit);
+    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
 }
 
 void shape::loadTexture(const char* diffusePath) {

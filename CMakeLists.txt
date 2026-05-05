@@ -4,13 +4,26 @@ set(TARGET_NAME SnowEngine)
 
 project(${TARGET_NAME})
 
-add_executable(${TARGET_NAME} 
+set(IMGUI_SRC
+
+    include/imgui/imgui.cpp
+    include/imgui/imgui_draw.cpp
+    include/imgui/imgui_tables.cpp
+    include/imgui/imgui_widgets.cpp
+    include/imgui/imgui_impl_glfw.cpp
+    include/imgui/imgui_impl_opengl3.cpp
+)
+
+add_executable(${TARGET_NAME}
+
     src/glad.c
     src/main.cpp
     src/shader.cpp
     src/camera.cpp
     src/shapes.cpp
     src/renderer.cpp
+    src/debug.cpp
+    ${IMGUI_SRC}
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)
