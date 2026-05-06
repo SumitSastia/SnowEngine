@@ -11,7 +11,7 @@
 Allocates vertices & indices into Memory.
 Initializes the VBO, VAO, EBO
 */
-void shape::bindVertices2D(
+void Shape::bindVertices2D(
     const float* vertices, const size_t& size_v,
     const unsigned int* indices, const size_t& size_i
 ) {
@@ -45,7 +45,7 @@ void shape::bindVertices2D(
 Allocates vertices & indices into Memory.
 Initializes the VBO, VAO, EBO
 */
-void shape::bindVertices3D(
+void Shape::bindVertices3D(
     const float* vertices, const size_t& size_v,
     const unsigned int* indices, const size_t& size_i
 ) {
@@ -79,17 +79,17 @@ void shape::bindVertices3D(
     glBindVertexArray(0);
 }
 
-void shape::bindTexture(const unsigned int textureUnit) {
+void Shape::bindTexture(const unsigned int textureUnit) const {
 
     glActiveTexture(textureUnit);
     glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
 }
 
-void shape::loadTexture(const char* diffusePath) {
+void Shape::loadTexture(const char* diffusePath) {
     shapeDiffuseTexture.load(diffusePath);
 }
 
-void shape::draw() const {
+void Shape::draw() const {
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
@@ -98,7 +98,7 @@ void shape::draw() const {
 
 //-------------------------------------------------------------------------------------//
 
-void specShape::loadTexture(const char* diffusePath, const char* specularPath) {
+void SpecShape::loadTexture(const char* diffusePath, const char* specularPath) {
 
     shapeDiffuseTexture.load(diffusePath);
     shapeSpecularTexture.load(specularPath);
@@ -106,7 +106,7 @@ void specShape::loadTexture(const char* diffusePath, const char* specularPath) {
 
 //-------------------------------------------------------------------------------------//
 
-void shapeInstanced::bindVertices(
+void ShapeInstanced::bindVertices(
     const float* vertices, const size_t& size_v,
     const unsigned int* indices, const size_t& size_i,
     const glm::mat4* models, const size_t& size_m,
@@ -188,7 +188,7 @@ void shapeInstanced::bindVertices(
     glBindVertexArray(0);
 }
 
-void shapeInstanced::draw() const {
+void ShapeInstanced::draw() const {
 
     glBindVertexArray(VAO);
     glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
@@ -197,12 +197,12 @@ void shapeInstanced::draw() const {
 
 //-------------------------------------------------------------------------------------//
 
-defaultShapes& defaultShapes::instance() {
-    static defaultShapes instance;
+DefaultShapes& DefaultShapes::instance() {
+    static DefaultShapes instance;
     return instance;
 }
 
-defaultShapes::defaultShapes(){
+DefaultShapes::DefaultShapes(){
 
     const float vertices[] = {
 
@@ -272,8 +272,7 @@ defaultShapes::defaultShapes(){
 
     cube.bindVertices3D(vertices, sizeof(vertices), indices, sizeof(indices));
     cube.loadTexture(
-        "/assets/textures/wood_box.png",
-        "/assets/textures/metal_frame.png"
+        "/assets/textures/wood_box.png"
     );
 
     // Instanced
@@ -341,7 +340,7 @@ defaultShapes::defaultShapes(){
 
 //-------------------------------------------------------------------------------------//
 
-cubeMap::cubeMap(const std::vector <std::string>& textureFaces) {
+CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

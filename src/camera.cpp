@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-camera::camera() {
+Camera::Camera() {
 
     position = glm::vec3(0.0f, 0.0f, 3.0f);
     target = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -29,12 +29,12 @@ camera::camera() {
     Uturn = false;
 }
 
-camera& camera::instance() {
-    static camera instance;
+Camera& Camera::instance() {
+    static Camera instance;
     return instance;
 }
 
-void camera::update(const float& delta_time) {
+void Camera::update(const float& delta_time) {
 
     if (Uturn) {
         mouseEnabled = false;
@@ -59,11 +59,11 @@ void camera::update(const float& delta_time) {
     look_at();
 }
 
-void camera::set_position(const glm::vec3 position){
+void Camera::set_position(const glm::vec3 position){
     this->position = position;
 }
 
-void camera::set_target(const glm::vec3 target){
+void Camera::set_target(const glm::vec3 target){
 
     this->target = target;
 
@@ -76,11 +76,11 @@ void camera::set_target(const glm::vec3 target){
     yaw = glm::degrees(yaw);
 }
 
-void camera::set_speed(const float speed){
+void Camera::set_speed(const float speed){
     camSpeed = speed;
 }
 
-void camera::set_fov(const float fov){
+void Camera::set_fov(const float fov){
 
     this->fov = fov;
 
@@ -90,21 +90,21 @@ void camera::set_fov(const float fov){
     projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
 }
 
-void camera::set_aspect(const int frameWidth, const int frameHeight){
+void Camera::set_aspect(const int frameWidth, const int frameHeight){
 
     aspectRatio = (float)frameWidth / (float)frameHeight;
     projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
 }
 
-void camera::set_yaw(const float& yaw) {
+void Camera::set_yaw(const float& yaw) {
     this->yaw = yaw;
 }
 
-void camera::look_at(){
+void Camera::look_at(){
     viewMatrix = glm::lookAt(position, position + target, up_axis);
 }
 
-void camera::input_handler(GLFWwindow* window, float deltaTime){
+void Camera::input_handler(GLFWwindow* window, float deltaTime){
 
     static bool PRESSED_E = false;
     static bool PRESSED_X = false;
@@ -168,7 +168,7 @@ void camera::input_handler(GLFWwindow* window, float deltaTime){
     }
 }
 
-void camera::mouse_handler(GLFWwindow* window){
+void Camera::mouse_handler(GLFWwindow* window){
     
     double pos_x = 0.0;
     double pos_y = 0.0;
@@ -200,7 +200,7 @@ void camera::mouse_handler(GLFWwindow* window){
     if(pitch < -89.0f) pitch = -89.0f;
 }
 
-void camera::scroll_handler(float &scrollOffset){
+void Camera::scroll_handler(float &scrollOffset){
     
     set_fov(fov - scrollOffset);
     scrollOffset = 0.0f;

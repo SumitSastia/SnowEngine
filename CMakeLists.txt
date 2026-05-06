@@ -23,6 +23,8 @@ add_executable(${TARGET_NAME}
     src/shapes.cpp
     src/renderer.cpp
     src/debug.cpp
+    src/input.cpp
+    src/scenes.cpp
     ${IMGUI_SRC}
 )
 

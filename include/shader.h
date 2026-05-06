@@ -5,13 +5,30 @@
 
 #include <string>
 
+const uint8_t MAX_SHADERS = 8;
+
 // ------------------------------ Function Delcarations ------------------------------ //
 
 
 
 // ------------------------------ Classes -------------------------------------------- //
 
-class texture2D {
+class Shader {
+
+    unsigned int shaderProgram;
+
+public:
+
+    Shader(const char* vertPath, const char* fragPath);
+    Shader(const char* vertPath, const char* geomPath, const char* fragPath);
+
+    const unsigned int getShader() const { return shaderProgram; }
+
+    void use() const;
+    void destroy();
+};
+
+class Texture2D {
 
     int width;
     int height;
@@ -23,7 +40,12 @@ class texture2D {
     
 public:
 
+    /*
+    Loads the image and allocate it into the Memory.
+    NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
+    */
     void load(const char* path);
+
     void destroy();
 
     const unsigned int& getID() const { return textureID; }

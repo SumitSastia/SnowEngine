@@ -2,15 +2,17 @@
 
 #include <shader.h>
 #include <renderer.h>
+#include <entity.h>
+
 #include <vector>
 
 // Hardcoded Model
-struct shape {
+struct Shape : public Entity {
 
     unsigned int VBO, VAO, EBO;
     unsigned int indicesCount;
 
-    texture2D shapeDiffuseTexture;
+    Texture2D shapeDiffuseTexture;
 
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
@@ -22,19 +24,19 @@ struct shape {
         const unsigned int* indices, const size_t& size_i
     );
 
-    void bindTexture(const unsigned int textureUnit);
+    void bindTexture(const unsigned int textureUnit) const;
     void loadTexture(const char* diffusePath);
     void draw() const;
 };
 
 // Model with Specular Texture
-struct specShape : public shape {
+struct SpecShape : public Shape {
 
-    texture2D shapeSpecularTexture;
+    Texture2D shapeSpecularTexture;
     void loadTexture(const char* diffusePath, const char* specularPath);
 };
 
-struct shapeInstanced : specShape {
+struct ShapeInstanced : SpecShape {
 
     unsigned int instanceModelVBO, instanceNormalVBO;
     unsigned int instanceCounts;
@@ -53,23 +55,23 @@ struct shapeInstanced : specShape {
 Hardcoded Shapes
 (Already allocated in the Memory)
 */
-struct defaultShapes {
+struct DefaultShapes {
 
-    shape square;
-    specShape cube;
-    shapeInstanced cubeInstanced;
+    Shape square;
+    Shape cube;
+    ShapeInstanced cubeInstanced;
 
-    defaultShapes();
-    static defaultShapes& instance();
+    DefaultShapes();
+    static DefaultShapes& instance();
 };
 
-class cubeMap {
+class CubeMap {
     
     unsigned int VBO, VAO, textureID;
 
 public:
 
-    cubeMap(const std::vector <std::string>& textureFaces);
+    CubeMap(const std::vector <std::string>& textureFaces);
 
     const unsigned int& get_VAO() const { return VAO; }
     const unsigned int& get_ID() const { return textureID; }

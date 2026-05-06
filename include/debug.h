@@ -6,13 +6,13 @@
 
 #include <renderer.h>
 
-class debug_menu {
+class Debug_menu {
 
 
 public:
 
-    static debug_menu& instance() {
-        static debug_menu instance{};
+    static Debug_menu& instance() {
+        static Debug_menu instance{};
         return instance;
     }
 

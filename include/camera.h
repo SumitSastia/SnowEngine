@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class camera{
+class Camera{
 
     glm::vec3 position;
     glm::vec3 direction;
@@ -38,8 +38,8 @@ class camera{
 
 public:
 
-    camera();
-    static camera& instance();
+    Camera();
+    static Camera& instance();
 
     void update(const float& delta_time);
     void look_at();

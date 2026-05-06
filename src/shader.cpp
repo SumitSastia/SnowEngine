@@ -7,15 +7,29 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-// ------------------------------ Class Functions ------------------------------------ //
-
 std::filesystem::path base = std::filesystem::current_path();
 
-/*
-Loads the image and allocate it into the Memory.
-NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
-*/
-void texture2D::load(const char* path){
+// ------------------------------ Class Functions ------------------------------------ //
+
+Shader::Shader(const char* vertPath, const char* fragPath) {
+    shaderProgram = Renderer::createShader(vertPath, fragPath);
+}
+
+Shader::Shader(const char* vertPath, const char* geomPath, const char* fragPath) {
+    shaderProgram = Renderer::createShader2(vertPath, geomPath, fragPath);
+}
+
+void Shader::use() const {
+    glUseProgram(shaderProgram);
+}
+
+void Shader::destroy() {
+    
+    glDeleteProgram(shaderProgram);
+    shaderProgram = 0;
+}
+
+void Texture2D::load(const char* path){
 
     std::string path_str(path);
     std::string base_str = base.string();
@@ -50,8 +64,10 @@ void texture2D::load(const char* path){
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void texture2D::destroy() {
+void Texture2D::destroy() {
 
+    glDeleteTextures(1, &textureID);
+    textureID = 0;
 }
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //

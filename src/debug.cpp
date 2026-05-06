@@ -1,6 +1,6 @@
 #include <debug.h>
 
-void debug_menu::init(GLFWwindow* window) {
+void Debug_menu::init(GLFWwindow* window) {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -10,7 +10,7 @@ void debug_menu::init(GLFWwindow* window) {
     ImGui_ImplOpenGL3_Init("#version 450");
 }
 
-void debug_menu::update() {
+void Debug_menu::update() {
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -21,13 +21,13 @@ void debug_menu::update() {
     ImGui::End();
 }
 
-void debug_menu::render() const {
+void Debug_menu::render() const {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void debug_menu::destroy() {
+void Debug_menu::destroy() {
     
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

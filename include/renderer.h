@@ -38,6 +38,10 @@ public:
     void render() const;
     void terminate();
 
+    // void renderScene(Scene* currentScene) const { currentScene->render(); }
+
+    // ------------------------------ Global Render Functions ---------------------------- //
+
     static const unsigned int createShader (const char* vertPath, const char* fragPath);
     static const unsigned int createShader2(const char* vertPath, const char* geomPath, const char* fragPath);
 
