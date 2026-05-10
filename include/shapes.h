@@ -1,18 +1,21 @@
 #pragma once
 
-#include <shader.h>
-#include <renderer.h>
 #include <entity.h>
+#include <renderer.h>
 
 #include <vector>
 
 // Hardcoded Model
-struct Shape : public Entity {
+class Shape : public Entity {
+
+protected:
 
     unsigned int VBO, VAO, EBO;
     unsigned int indicesCount;
 
     Texture2D shapeDiffuseTexture;
+
+public:
 
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
@@ -24,22 +27,29 @@ struct Shape : public Entity {
         const unsigned int* indices, const size_t& size_i
     );
 
+    const unsigned int get_VAO() const { return VAO; }
+
     void bindTexture(const unsigned int textureUnit) const;
     void loadTexture(const char* diffusePath);
     void draw() const;
 };
 
 // Model with Specular Texture
-struct SpecShape : public Shape {
+class SpecShape : public Shape {
 
+protected:
     Texture2D shapeSpecularTexture;
+
+public:
     void loadTexture(const char* diffusePath, const char* specularPath);
 };
 
-struct ShapeInstanced : SpecShape {
+class ShapeInstanced : public SpecShape {
 
     unsigned int instanceModelVBO, instanceNormalVBO;
     unsigned int instanceCounts;
+
+public:
 
     void bindVertices(
         const float* vertices, const size_t& size_v,

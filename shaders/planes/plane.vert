@@ -16,5 +16,4 @@ void main(){
 
     vPos = vec3(model * vec4(aPos, 0.0, 1.0));
     vTexCords = aTexCords;
-    
 }

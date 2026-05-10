@@ -4,7 +4,6 @@
 out vec4 FragColor;
 
 in vec3 vPos;
-in vec3 vNormal;
 in vec2 vTexCords;
 
 struct pointLight{
@@ -19,6 +18,7 @@ struct pointLight{
 
 uniform sampler2D texture0;
 
+uniform vec3       vNormal;
 uniform vec3       camPos;
 uniform int        light_count;
 uniform pointLight pl[MAX_LIGHTS];

@@ -25,6 +25,8 @@ add_executable(${TARGET_NAME}
     src/debug.cpp
     src/input.cpp
     src/scenes.cpp
+    src/entity.cpp
+    src/lights.cpp
     ${IMGUI_SRC}
 )
 

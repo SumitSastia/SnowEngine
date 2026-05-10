@@ -1,6 +1,5 @@
 #include <shapes.h>
 #include <camera.h>
-#include <renderer.h>
 
 #include <iostream>
 #include <stb_image.h>
@@ -272,7 +271,7 @@ DefaultShapes::DefaultShapes(){
 
     cube.bindVertices3D(vertices, sizeof(vertices), indices, sizeof(indices));
     cube.loadTexture(
-        "/assets/textures/wood_box.png"
+        "assets/textures/wood_box.png"
     );
 
     // Instanced
@@ -316,6 +315,8 @@ DefaultShapes::DefaultShapes(){
         "/assets/textures/metal_frame.png"
     );
 
+    // Plane
+
     float vertices2[] = {
 
         // Front
@@ -334,7 +335,7 @@ DefaultShapes::DefaultShapes(){
 
     square.bindVertices2D(vertices2, sizeof(vertices2), indices2, sizeof(indices2));
     square.loadTexture(
-        "/assets/textures/window_tint.png"
+        "assets/textures/brickwall.jpg"
     );
 }
 

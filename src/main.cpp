@@ -31,6 +31,7 @@ int main() {
     // ---------- CallBack Functions ---------- //
 
     glfwSetKeyCallback(window, input_key_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // ---------- Testing --------------------- //
 
@@ -54,10 +55,13 @@ int main() {
         // Inputs //
         mainCamera.input_handler(window, deltaTime);
         mainCamera.mouse_handler(window);
+        mainCamera.scroll_handler(scrollOffset);
+
+        mainScene->input(window, deltaTime);
         
         // Updates // 
         mainCamera.update(deltaTime);
-        Debug_menu::instance().update();
+        // Debug_menu::instance().update();
 
         // Rendering //
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -66,14 +70,14 @@ int main() {
         mainScene->render();
 
         // Debug Menu
-        Debug_menu::instance().render();
+        // Debug_menu::instance().render();
 
         glfwSwapBuffers(window);
     }
 
     // ---------- Termination ----------------- //
 
-    // mainScene->destroy();
+    mainScene->destroy();
 
     Debug_menu::instance().destroy();
 
