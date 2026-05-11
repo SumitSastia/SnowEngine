@@ -208,7 +208,7 @@ void Texture2D::destroy() {
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //
 
-void Shader::setBool(const char* target, const bool& value) {
+void Shader::setBool(const char* target, const bool& value) const {
 
     glUniform1i(
         glGetUniformLocation(shaderProgram, target),
@@ -216,7 +216,7 @@ void Shader::setBool(const char* target, const bool& value) {
     );
 }
 
-void Shader::setInt(const char* target, const int &value){
+void Shader::setInt(const char* target, const int &value) const {
 
     glUniform1i(
         glGetUniformLocation(shaderProgram, target),
@@ -224,7 +224,7 @@ void Shader::setInt(const char* target, const int &value){
     );
 }
 
-void Shader::setFloat(const char* target, const float &value){
+void Shader::setFloat(const char* target, const float &value) const {
 
     glUniform1f(
         glGetUniformLocation(shaderProgram, target),
@@ -232,7 +232,7 @@ void Shader::setFloat(const char* target, const float &value){
     );
 }
 
-void Shader::setVec3(const char* target, const glm::vec3 &vector){
+void Shader::setVec3(const char* target, const glm::vec3 &vector) const {
 
     glUniform3fv(
         glGetUniformLocation(shaderProgram, target),
@@ -241,7 +241,7 @@ void Shader::setVec3(const char* target, const glm::vec3 &vector){
     );
 }
 
-void Shader::setMat3(const char* target, const glm::mat3 &matrix){
+void Shader::setMat3(const char* target, const glm::mat3 &matrix) const {
 
     glUniformMatrix3fv(
         glGetUniformLocation(shaderProgram, target),
@@ -251,7 +251,7 @@ void Shader::setMat3(const char* target, const glm::mat3 &matrix){
     );
 }
 
-void Shader::setMat4(const char* target, const glm::mat4 &matrix){
+void Shader::setMat4(const char* target, const glm::mat4 &matrix) const {
 
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, target),
@@ -261,7 +261,7 @@ void Shader::setMat4(const char* target, const glm::mat4 &matrix){
     );
 }
 
-void Shader::setPointLight(const std::string& target, const lights::PointLight& pl) {
+void Shader::setPointLight(const std::string& target, const lights::PointLight& pl) const {
 
     this->setVec3((target + ".position").c_str(), pl.position);
     this->setVec3((target + ".color"   ).c_str(), pl.color);
@@ -271,7 +271,7 @@ void Shader::setPointLight(const std::string& target, const lights::PointLight& 
     this->setFloat((target + ".quadratic").c_str(), pl.quadratic);
 }
 
-void Shader::setSpotLight(const std::string& target, const lights::SpotLight& sl) {
+void Shader::setSpotLight(const std::string& target, const lights::SpotLight& sl) const {
 
     this->setVec3((target + ".position" ).c_str(), sl.position);
     this->setVec3((target + ".direction").c_str(), sl.direction);
@@ -287,9 +287,8 @@ void Shader::setSpotLight(const std::string& target, const lights::SpotLight& sl
     this->setFloat((target + ".quadratic").c_str(), sl.quadratic);
 }
 
-void Shader::setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl) {
+void Shader::setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl) const {
 
     this->setVec3((target + ".direction").c_str(), dl.direction);
     this->setVec3((target + ".color"    ).c_str(), dl.color);
 }
-

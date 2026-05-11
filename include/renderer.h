@@ -8,6 +8,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <vector>
+
+#include <entity.h>
 
 const unsigned int WIN_W = 1120;
 const unsigned int WIN_H = 700;
@@ -16,6 +19,8 @@ class Renderer {
 
     GLFWmonitor* monitor;
     GLFWwindow*  window;
+
+    int MAX_TEXTURES;
 
     Renderer() { 
         
@@ -40,9 +45,6 @@ public:
 
     static void enableCulling();
     static void disableCulling();
-
-    static void renderShadow(const u_int& VAO, const u_int& indicesCount);
-    static void renderShadowInstanced(const u_int& VAO, const u_int& indicesCount, const u_int& instanceCounts);
 
     GLFWwindow* getWindow() const { return window; }
 

@@ -28,6 +28,7 @@ public:
     );
 
     const unsigned int get_VAO() const { return VAO; }
+    const unsigned int get_indices() const { return indicesCount; }
 
     void bindTexture(const unsigned int textureUnit) const;
     void loadTexture(const char* diffusePath);

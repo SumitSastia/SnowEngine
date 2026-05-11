@@ -49,20 +49,37 @@ namespace gfx::internal {
 	};
 }
 
+namespace frameBuffers {
+
+	const uint16_t shadowSize = 1024;
+	const unsigned int get_defaultVAO();
+}
+
 class FrameBuffer {
+
+protected:
 
     unsigned int fbo, rbo;
     unsigned int texture_id;
-    unsigned int shader;
 
 public:
+
+	const unsigned int getFBO() const { return fbo; }
+	const unsigned int getTex() const { return texture_id; }
 
     virtual void init() = 0;
     virtual void render() const = 0;
     virtual void destroy() = 0;
 };
 
-namespace frameBuffers {
+class PointShadowFrame : public FrameBuffer {
 
-    const unsigned int get_defaultVAO();
-}
+public:
+
+	PointShadowFrame(const uint16_t& shadow_size);
+	PointShadowFrame() : PointShadowFrame(frameBuffers::shadowSize) {}
+
+	void init() override {}
+	void render() const override {}
+	void destroy() override {}
+};

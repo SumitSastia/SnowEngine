@@ -65,6 +65,9 @@ bool Renderer::init() {
     glCullFace(GL_FRONT);
     glFrontFace(GL_CCW);
 
+    // Max Textures that can be Loaded by GPU
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_TEXTURES);
+
     return true;
 }
 
@@ -85,27 +88,4 @@ void Renderer::enableCulling() {
 
 void Renderer::disableCulling() {
     glDisable(GL_CULL_FACE);
-}
-
-/*
-Renders the Object (vertices & indices).
-NOTE: This method is used in rendering the shadow of the object.
-*/
-void Renderer::renderShadow(const u_int& VAO, const u_int& indicesCount) {
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
-    glBindVertexArray(0);
-}
-
-/*
-Renders the Object (vertices & indices),
-instanceCounts = No. of instances of the object to render.
-NOTE: This method is used in rendering the shadow of the object.
-*/
-void Renderer::renderShadowInstanced(const u_int& VAO, const u_int& indicesCount, const u_int& instanceCounts){
-
-    glBindVertexArray(VAO);
-    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCounts);
-    glBindVertexArray(0);
 }

@@ -33,16 +33,16 @@ public:
 
     // ------------------------------ Shader Uniform Setter ------------------------------ //
 
-    void setBool (const char* target, const bool&  value);
-    void setInt  (const char* target, const int&   value);
-    void setFloat(const char* target, const float& value);
-    void setVec3 (const char* target, const glm::vec3& vector);
-    void setMat3 (const char* target, const glm::mat3& matrix);
-    void setMat4 (const char* target, const glm::mat4& matrix);
+    void setBool (const char* target, const bool&  value) const;
+    void setInt  (const char* target, const int&   value) const;
+    void setFloat(const char* target, const float& value) const;
+    void setVec3 (const char* target, const glm::vec3& vector) const;
+    void setMat3 (const char* target, const glm::mat3& matrix) const;
+    void setMat4 (const char* target, const glm::mat4& matrix) const;
 
-    void setPointLight      (const std::string& target, const lights::PointLight& pl);
-    void setSpotLight       (const std::string& target, const lights::SpotLight& sl);
-    void setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl);
+    void setPointLight      (const std::string& target, const lights::PointLight& pl) const;
+    void setSpotLight       (const std::string& target, const lights::SpotLight& sl) const;
+    void setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl) const;
 };
 
 // ------------------------------ Colors --------------------------------------------- //

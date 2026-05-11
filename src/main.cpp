@@ -65,8 +65,11 @@ int main() {
 
         // Rendering //
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        
         Renderer::instance().render();
+        mainScene->renderShadow();
 
+        glViewport(0, 0, WIN_W, WIN_H);
         mainScene->render();
 
         // Debug Menu

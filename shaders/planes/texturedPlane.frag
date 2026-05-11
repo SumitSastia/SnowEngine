@@ -23,7 +23,11 @@ uniform vec3       camPos;
 uniform int        light_count;
 uniform pointLight pl[MAX_LIGHTS];
 
-vec3 calcPointLight(pointLight light, vec3 tex);
+uniform float       far_plane;
+uniform samplerCube depthMap[MAX_LIGHTS];
+
+vec3  calcPointLight(pointLight light, vec3 tex);
+float calcShadow(pointLight light, samplerCube map);
 
 void main() {
 
@@ -32,6 +36,7 @@ void main() {
 
     for (int i = 0; i < light_count; i++) {
         color += calcPointLight(pl[i], tex);
+        color *= (1.0 - calcShadow(pl[i], depthMap[i]));
     }
 
     FragColor = vec4(color, 1.0);
@@ -56,4 +61,33 @@ vec3 calcPointLight(pointLight light, vec3 tex) {
     float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
 
     return (attenuation * vec3(diffuseLight + specularLight));
+}
+
+float calcShadow(pointLight light, samplerCube map) {
+
+    vec3  fragToLight = vPos - light.position;
+    float currentDepth = length(fragToLight);
+
+    float shadow = 0.0;
+    float bias = 0.05;
+    float samples = 4.0;
+    float offset = 0.1;
+
+    for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
+        for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
+            for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
+
+                float closestDepth = texture(map, fragToLight + vec3(x,y,z)).r;
+                closestDepth *= far_plane;
+
+                if (currentDepth - bias > closestDepth) {
+                    shadow += 1.0;
+                }
+            }
+        }
+    }
+
+    shadow /= (samples * samples * samples);
+
+    return shadow;
 }

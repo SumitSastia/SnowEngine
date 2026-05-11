@@ -3,6 +3,7 @@
 #include <shapes.h>
 #include <lights.h>
 #include <shader.h>
+#include <frame.h>
 
 class Scene {
 
@@ -21,6 +22,7 @@ public:
     virtual void init() = 0;
     virtual void input(GLFWwindow* window, const float& delta_time) = 0;
     virtual void render() const = 0;
+    virtual void renderShadow() const = 0;
     virtual void destroy() = 0;
 };
 
@@ -31,9 +33,17 @@ class Scene1 : public Scene {
     Shape myFloor;
     Shape myCube;
     ShapeInstanced cubes;
-    LightSource light1;
 
+    std::vector <Entity>    entities;
     std::vector <glm::mat4> entityModels;
+
+    // Light
+    uint8_t light_count;
+    std::vector <LightSource*> lights;
+
+    // Shadow
+    glm::mat4 shadowProj;
+    std::vector <PointShadowFrame*> shadowFrames;
 
 public:
 
@@ -44,5 +54,6 @@ public:
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
     void render() const override;
+    void renderShadow() const override;
     void destroy() override;
 };
