@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <regex>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -14,8 +15,8 @@ std::filesystem::path base = std::filesystem::current_path();
 // ------------------------------ Class Functions ------------------------------------ //
 
 /*
-Returns content of a Shader file in string format.
-NOTE: This was created as a part of createShader, suggested to be not used externally.
+@return Content of a Shader file in string format.
+@note This was created as a part of createShader, suggested not to be used externally.
 */
 std::string Shader::loadShaderFile(const char* path) {
 
@@ -32,12 +33,51 @@ std::string Shader::loadShaderFile(const char* path) {
     return ss.str();
 }
 
-Shader::Shader(const char* vertPath, const char* fragPath) {
+/*
+EXPERIMENTAL: 
+Replaces "#include" inside file content with header file data.
+@param path Directory in which headers are present.
+@return Content of a Shader file in string format.
+@note This was created as a part of createShader, suggested not to be used externally.
+*/
+std::string Shader::preprocessFile(const char* path) {
+
+    std::string src_str = loadShaderFile(path);
+
+    std::stringstream input(src_str);
+    std::stringstream output;
+
+    std::string line;
+
+    // Replacing #include
+    while (std::getline(input, line)) {
+
+        if (line.find("#include") != std::string::npos) {
+
+            size_t temp1 = line.find("<");
+            size_t temp2 = line.find(">");
+
+            // Extracting header name
+            std::string headerName = line.substr(temp1 + 1, temp2 - temp1 - 1);
+
+            // Header filePath
+            std::filesystem::path headerPath = std::filesystem::path(path).parent_path() / ".." / headerName;
+
+            std::string header_str = loadShaderFile(headerPath.c_str());
+
+            output << header_str << '\n';
+        }
+        else {
+            output << line << '\n';
+        }
+    }
+
+    return output.str();
+}
+
+Shader::Shader(const std::string vertexStr, const std::string fragmentStr) {
 
     // Vertex & Fragment Shader //
-
-    std::string vertexStr = loadShaderFile(vertPath);
-    std::string fragmentStr = loadShaderFile(fragPath);
 
     const char* vertexShaderSource = vertexStr.c_str();
     const char* fragmentShaderSource = fragmentStr.c_str();

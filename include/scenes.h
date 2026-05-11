@@ -29,7 +29,6 @@ public:
 class Scene1 : public Scene {
 
     // Entities
-
     Shape myFloor;
     Shape myCube;
     ShapeInstanced cubes;

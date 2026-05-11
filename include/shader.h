@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <string>
+#include <unordered_set>
 
 #include <lights.h>
 
@@ -19,11 +20,21 @@ const uint8_t MAX_SHADERS = 8;
 class Shader {
 
     unsigned int shaderProgram;
-    std::string loadShaderFile(const char* path);
+    static std::string loadShaderFile(const char* path);
+    static std::string preprocessFile(const char* path);
 
 public:
 
-    Shader(const char* vertPath, const char* fragPath);
+    Shader(const std::string vertexStr, const std::string fragmentStr);
+
+    Shader(const char* vertPath, const char* fragPath): 
+        Shader(loadShaderFile(vertPath), loadShaderFile(fragPath)) {
+    }
+
+    Shader(const char* vertPath, const char* fragPath, const bool preprocess):
+        Shader(loadShaderFile(vertPath), preprocessFile(fragPath)) {
+    }
+
     Shader(const char* vertPath, const char* geomPath, const char* fragPath);
 
     const unsigned int getShader() const { return shaderProgram; }

@@ -44,18 +44,18 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
 
 void Scene1::init() {
 
-    total_shaders  = 3;
+    total_shaders  = 5;
     total_entities = 3;
 
     loaded_shaders = {
 
         Shader(
             "../shaders/normalCube/cube.vert",
-            "../shaders/normalCube/texturedCube.frag"
+            "../shaders/normalCube/texturedCube.frag", true
         ),
         Shader(
             "../shaders/planes/plane.vert",
-            "../shaders/planes/texturedPlane.frag"
+            "../shaders/planes/texturedPlane.frag", true
         ),
         Shader(
             "../shaders/instancedCubes/texture.vert",
@@ -144,6 +144,9 @@ void Scene1::render() const {
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
     currentShader.setInt ("light_count", light_count);
     currentShader.setPointLight("pl[0]", lights[0]->getPointLight());
+    
+    currentShader.setFloat("far_plane"   , 25.0f);
+    currentShader.setInt  ("depthMap[0]" , 0);
 
     currentShader.setInt("texture0", loadedTextures);
     myCube.bindTexture(GL_TEXTURE0 + loadedTextures++);
