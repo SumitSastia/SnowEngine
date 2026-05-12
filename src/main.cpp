@@ -61,13 +61,15 @@ int main() {
         
         // Updates // 
         mainCamera.update(deltaTime);
+        mainScene->update(deltaTime);
         // Debug_menu::instance().update();
 
         // Rendering //
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        
         Renderer::instance().render();
-        mainScene->renderShadow();
+        
+        mainScene->renderDirectShadow();
+        mainScene->renderPointShadow();
 
         glViewport(0, 0, WIN_W, WIN_H);
         mainScene->render();

@@ -19,6 +19,7 @@ class Camera{
     glm::mat4 viewMatrix;
     glm::mat4 projection;
 
+    float camSlow;
     float camSpeed;
     float camSensitivity;
 

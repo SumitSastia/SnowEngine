@@ -1,9 +1,10 @@
 #include <lights.h>
+#include <shapes.h>
 #include <camera.h>
 
 DefaultLights::DefaultLights() {
 
-    cubelight.position = glm::vec3(3.0f, 1.5f, -3.0f);
+    cubelight.position = glm::vec3(3.0f, 1.5f,-3.0f);
     cubelight.color    = glm::vec3(1.0f, 1.0f, 1.0f);
 
     cubelight.constant  = 1.0f;
@@ -38,7 +39,7 @@ void DefaultLights::update() {
 LightSource::LightSource() {
 
     src      = DefaultLights::instance().cubelight;
-    srcShape = DefaultShapes::instance().cube;
+    srcShape = new Shape(DefaultShapes::instance().cube);
 }
 
 void LightSource::setX(const float& x) {
@@ -51,4 +52,8 @@ void LightSource::setY(const float& y) {
 
 void LightSource::setZ(const float& z) {
     src.position.z = src.position.z + z; 
+}
+
+void LightSource::draw() const {
+    srcShape->draw();
 }

@@ -1,5 +1,11 @@
 #define MAX_LIGHTS 4
 
+struct directionalLight {
+
+    vec3 direction;
+    vec3 color;
+};
+
 struct pointLight{
 
     vec3 position;
@@ -10,12 +16,45 @@ struct pointLight{
     float quadratic;
 };
 
-uniform vec3       camPos;
-uniform int        light_count;
+uniform vec3 camPos;
+uniform int  light_count;
 uniform pointLight pl[MAX_LIGHTS];
 
-uniform float       far_plane;
+uniform float far_plane;
 uniform samplerCube depthMap[MAX_LIGHTS];
+
+uniform directionalLight dl;
+uniform sampler2D dl_depthMap;
+
+vec3 calcDirectionalLight(vec3 tex) {
+
+    vec3 light_dir = normalize(dl.direction);
+
+    // Diffuse
+    float diffuse      = max(dot(vNormal, light_dir), 0.0);
+    vec3  diffuseLight = diffuse * tex * dl.color;
+
+    // Specular
+    vec3 view_dir    = normalize(camPos - vPos);
+    vec3 reflect_dir = reflect(-light_dir, vNormal);
+
+    float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+    vec3  specularLight = spec * tex * dl.color;
+
+    return (diffuseLight + specularLight);
+}
+
+float calcDirectShadow() {
+
+    vec3 projCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
+    projCords      = projCords * 0.5 + 0.5;
+
+    float closestDepth = texture(dl_depthMap, projCords.xy).r; 
+    float currentDepth = projCords.z;
+
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    return shadow;
+}
 
 vec3 calcPointLight(pointLight light, vec3 tex) {
 

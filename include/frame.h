@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+class Shader;
+
 namespace gfx::internal {
 
 	class Screen {
@@ -69,7 +71,30 @@ public:
 
     virtual void init() = 0;
     virtual void render() const = 0;
-    virtual void destroy() = 0;
+    virtual void destroy();
+};
+
+class DebugFrame : public FrameBuffer {
+
+public:
+
+	DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
+
+	void init() override;
+	void render() const override {}
+};
+
+class DirectShadowFrame : public FrameBuffer {
+
+	unsigned int shader;
+
+public:
+
+	DirectShadowFrame(const uint16_t& shadow_size);
+	DirectShadowFrame() : DirectShadowFrame(frameBuffers::shadowSize) {}
+
+	void init() override {}
+	void render() const override {}
 };
 
 class PointShadowFrame : public FrameBuffer {
@@ -81,5 +106,4 @@ public:
 
 	void init() override {}
 	void render() const override {}
-	void destroy() override {}
 };

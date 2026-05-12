@@ -5,15 +5,17 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <string>
-#include <unordered_set>
-
-#include <lights.h>
 
 const uint8_t MAX_SHADERS = 8;
 
-// ------------------------------ Function Delcarations ------------------------------ //
+// ------------------------------ Function Declarations ------------------------------ //
 
+namespace lights {
 
+    struct DirectionalLight;
+    struct PointLight;
+    struct SpotLight;
+}
 
 // ------------------------------ Classes -------------------------------------------- //
 

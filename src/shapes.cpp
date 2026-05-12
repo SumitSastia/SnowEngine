@@ -1,10 +1,15 @@
 #include <shapes.h>
 #include <camera.h>
+#include <renderer.h>
 
 #include <iostream>
 #include <stb_image.h>
 
 //-------------------------------------------------------------------------------------//
+
+Shape::Shape() {
+    shapeDiffuseTexture = new Texture2D();
+}
 
 /*
 Allocates vertices & indices into Memory.
@@ -81,11 +86,11 @@ void Shape::bindVertices3D(
 void Shape::bindTexture(const unsigned int textureUnit) const {
 
     glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture.getID());
+    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture->getID());
 }
 
 void Shape::loadTexture(const char* diffusePath) {
-    shapeDiffuseTexture.load(diffusePath);
+    shapeDiffuseTexture->load(diffusePath);
 }
 
 void Shape::draw() const {
@@ -97,10 +102,14 @@ void Shape::draw() const {
 
 //-------------------------------------------------------------------------------------//
 
+SpecShape::SpecShape() {
+    shapeSpecularTexture = new Texture2D();
+}
+
 void SpecShape::loadTexture(const char* diffusePath, const char* specularPath) {
 
-    shapeDiffuseTexture.load(diffusePath);
-    shapeSpecularTexture.load(specularPath);
+    shapeDiffuseTexture->load(diffusePath);
+    shapeSpecularTexture->load(specularPath);
 }
 
 //-------------------------------------------------------------------------------------//

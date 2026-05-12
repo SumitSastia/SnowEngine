@@ -5,24 +5,26 @@
 
 Camera::Camera() {
 
-    position = glm::vec3(0.0f, 0.0f, 3.0f);
-    target = glm::vec3(0.0f, 0.0f, -1.0f);
+    position  = glm::vec3(0.0f, 0.0f, 3.0f);
+    target    = glm::vec3(0.0f, 0.0f, -1.0f);
     direction = glm::normalize(position - target);
 
+    camSlow  = 0.5f;
     camSpeed = 1.0f;
     camSensitivity = 0.1f;
+
     glm::vec3 up(0.0f, 1.0f, 0.0f);
 
     right_axis = glm::normalize(glm::cross(up, direction));
-    up_axis = glm::cross(direction, right_axis);
+    up_axis    = glm::cross(direction, right_axis);
+    fov        = 45.0f;
 
-    fov = 45.0f;
     aspectRatio = (float)WIN_W / (float)WIN_H;
 
-    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    projection  = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
     mouseEnabled = true;
 
-    yaw = -90.0f;
+    yaw   = -90.0f;
     pitch = 0.0f;
 
     // Player Movements

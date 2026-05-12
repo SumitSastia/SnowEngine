@@ -1,5 +1,6 @@
 #include <shader.h>
 #include <renderer.h>
+#include <lights.h>
 
 #include <iostream>
 #include <filesystem>

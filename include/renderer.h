@@ -9,8 +9,7 @@
 
 #include <iostream>
 #include <vector>
-
-#include <entity.h>
+#include <string>
 
 const unsigned int WIN_W = 1120;
 const unsigned int WIN_H = 700;

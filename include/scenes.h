@@ -21,8 +21,10 @@ public:
 
     virtual void init() = 0;
     virtual void input(GLFWwindow* window, const float& delta_time) = 0;
+    virtual void update(const float& delta_time) = 0;
     virtual void render() const = 0;
-    virtual void renderShadow() const = 0;
+    virtual void renderDirectShadow() const = 0;
+    virtual void renderPointShadow() const = 0;
     virtual void destroy() = 0;
 };
 
@@ -44,6 +46,12 @@ class Scene1 : public Scene {
     glm::mat4 shadowProj;
     std::vector <PointShadowFrame*> shadowFrames;
 
+    // Light Space - Directional Light
+    glm::mat4 lightSpace;
+    glm::mat4 lightProjection;
+
+    DirectShadowFrame* directFrame;
+
 public:
 
     Scene1() {
@@ -52,7 +60,9 @@ public:
 
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
+    void update(const float& delta_time) override;
     void render() const override;
-    void renderShadow() const override;
+    void renderDirectShadow() const override;
+    void renderPointShadow() const override;
     void destroy() override;
 };

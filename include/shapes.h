@@ -1,9 +1,15 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <entity.h>
-#include <renderer.h>
 
 #include <vector>
+#include <string>
+
+class Texture2D;
 
 // Hardcoded Model
 class Shape : public Entity {
@@ -13,9 +19,11 @@ protected:
     unsigned int VBO, VAO, EBO;
     unsigned int indicesCount;
 
-    Texture2D shapeDiffuseTexture;
+    Texture2D* shapeDiffuseTexture;
 
 public:
+
+    Shape();
 
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
@@ -39,9 +47,11 @@ public:
 class SpecShape : public Shape {
 
 protected:
-    Texture2D shapeSpecularTexture;
+    Texture2D* shapeSpecularTexture;
 
 public:
+
+    SpecShape();
     void loadTexture(const char* diffusePath, const char* specularPath);
 };
 

@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <shapes.h>
+class Shape;
 
 namespace lights {
 
@@ -60,7 +60,7 @@ struct DefaultLights {
 class LightSource {
 
     lights::PointLight src;
-    Shape srcShape;
+    Shape* srcShape;
 
 public:
 
@@ -79,5 +79,5 @@ public:
     glm::mat4 getModel() const { return glm::translate(glm::mat4(1.0f), src.position); }
     const lights::PointLight& getPointLight() const { return src; }
 
-    void draw() const { srcShape.draw(); }
+    void draw() const;
 };

@@ -4,6 +4,7 @@ out vec4 FragColor;
 
 in vec3 vPos;
 in vec2 vTexCords;
+in vec4 lightSpace_vPos;
 
 uniform vec3      vNormal;
 uniform sampler2D texture0;
@@ -15,15 +16,20 @@ void main() {
     vec3 tex   = texture(texture0, vTexCords).rgb;
     vec3 color = 0.4 * tex; // Ambient
 
-    for (int i = 0; i < light_count; i++) {
+    // for (int i = 0; i < light_count; i++) {
 
-        vec3 lightColor = vec3(0.0);
+    //     vec3 lightColor = vec3(0.0);
 
-        lightColor += calcPointLight(pl[i], tex);
-        lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
+    //     lightColor += calcPointLight(pl[i], tex);
+    //     // lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
-        color += lightColor;
-    }
+    //     color += lightColor;
+    // }
+
+    color += calcDirectionalLight(tex);
+
+    float shadow = calcDirectShadow();
+    // color *= (1.0 - shadow);
 
     FragColor = vec4(color, 1.0);
 }

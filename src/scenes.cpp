@@ -8,37 +8,68 @@ enum scene1_shaders {
     TEXTURED_PLANE,
     INSTANCED_CUBES,
     LIGHT,
-    POINTSHADOW
+    POINT_SHADOW,
+    DIRECT_SHADOW
 };
 
 namespace scene_var {
-    const uint8_t speed = 3;
+    const float speed = 3.0f;
 };
 
 void Scene1::input(GLFWwindow* window, const float& delta_time) {
 
+    static uint8_t model_counter = 0;
+    const  float   move_speed    = scene_var::speed * delta_time;
+
+    // Toggle Keys
+    static bool KEP_1_PRESSED = false;
+
+
+    // Model of the Object to move
+    glm::mat4& movableModel = entityModels[model_counter];
+
     if (glfwGetKey(window, GLFW_KEY_KP_8)) {
-        lights[0]->setZ(-1 * delta_time * scene_var::speed);
+        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
     }
 
-    if (glfwGetKey(window, GLFW_KEY_KP_5)) {
-        lights[0]->setZ(1 * delta_time * scene_var::speed);
+    if (glfwGetKey(window, GLFW_KEY_KP_2)) {
+        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f, 0.0f, 1.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_4)) {
-        lights[0]->setX(-1 * delta_time * scene_var::speed);
+        movableModel = glm::translate(movableModel, move_speed * glm::vec3(-1.0f, 0.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_6)) {
-        lights[0]->setX(1 * delta_time * scene_var::speed);
+        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 1.0f, 0.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_9)) {
-        lights[0]->setY(1 * delta_time * scene_var::speed);
+        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f, 1.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_7)) {
-        lights[0]->setY(-1 * delta_time * scene_var::speed);
+        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_KP_1)) {
+
+        if (!KEP_1_PRESSED) {
+            model_counter = (model_counter + 1) % entityModels.size();
+        }
+        KEP_1_PRESSED = true;
+    }
+    else KEP_1_PRESSED = false;
+
+    if (glfwGetKey(window, GLFW_KEY_KP_5)) {
+
+        const float rotation_speed = 2.0f;
+        entityModels[2] = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_speed), glm::vec3(0.0f, 1.0f, 0.0f)) * entityModels[2];
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_V)) {
+        Camera::instance().set_position(glm::vec3(1.0f));
+        Camera::instance().set_target(glm::vec3(-0.1f, -0.1f, -0.1f));
     }
 }
 
@@ -69,6 +100,10 @@ void Scene1::init() {
             "../shaders/pointShadow/shadow.vert",
             "../shaders/pointShadow/shadow.geom",
             "../shaders/pointShadow/shadow.frag"
+        ),
+        Shader(
+            "../shaders/directShadow/directShadow.vert",
+            "../shaders/directShadow/directShadow.frag"
         )
     };
 
@@ -89,7 +124,6 @@ void Scene1::init() {
     };
 
     // Lights
-
     light_count = 1;
 
     for (uint8_t i = 0; i < light_count; i++) {
@@ -98,13 +132,33 @@ void Scene1::init() {
         shadowFrames.push_back(new PointShadowFrame());
     }
 
+    lights[0]->setLightColor(colors::YELLOW);
+    lights[0]->setPosition(glm::vec3(3.0f, 1.5f, 2.0f));
+    entityModels.push_back(lights[0]->getModel());
+
+    // Shadow Mapping
     float near = 1.0f;
     float far  = 25.0f;
 
     shadowProj = glm::perspective(glm::radians(90.0f), 1.0f, near, far);
+    directFrame = new DirectShadowFrame();
 
-    lights[0]->setLightColor(colors::YELLOW);
-    lights[0]->setPosition(glm::vec3(3.0f, 1.5f, 2.0f));
+    // Directional Light
+    float near_plane = 1.0f, far_plane = 20.0f, size = 5.0f;
+    lightProjection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
+
+    glm::mat4 lightView = glm::lookAt(
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    lightSpace = lightProjection * lightView;
+}
+
+void Scene1::update(const float& delta_time) {
+
+    lights[0]->setPosition(entityModels[2][3]);
 }
 
 void Scene1::render() const {
@@ -116,22 +170,24 @@ void Scene1::render() const {
 
     Renderer::enableCulling();
 
-    // Light
+    // Light & Shadow
     Shader currentShader = loaded_shaders[LIGHT];
     currentShader.use();
 
     for (uint8_t i = 0; i < light_count; i++) {
-    
-        glm::mat4 lightModel = lights[i]->getModel();
-        lightModel = glm::scale(lightModel, glm::vec3(0.5));
         
-        currentShader.setMat4("finalMatrix", projection * view * lightModel);
+        currentShader.setMat4("finalMatrix", projection * view * glm::scale(entityModels[2], glm::vec3(0.5f)));
         currentShader.setVec3("lightColor" , lights[i]->getLightColor());
         lights[i]->draw();
 
         glActiveTexture(GL_TEXTURE0 + loadedTextures++);
         glBindTexture(GL_TEXTURE_CUBE_MAP, shadowFrames[i]->getTex());
     }
+
+    const unsigned int dl_depthMap = loadedTextures++;
+
+    glActiveTexture(GL_TEXTURE0 + dl_depthMap);
+    glBindTexture(GL_TEXTURE_2D, directFrame->getTex());
 
     // Cube
     currentShader = loaded_shaders[TEXTURED_CUBE];
@@ -143,10 +199,13 @@ void Scene1::render() const {
 
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
     currentShader.setInt ("light_count", light_count);
-    currentShader.setPointLight("pl[0]", lights[0]->getPointLight());
-    
-    currentShader.setFloat("far_plane"   , 25.0f);
-    currentShader.setInt  ("depthMap[0]" , 0);
+    currentShader.setFloat("far_plane" , 25.0f);
+
+    for (uint8_t i = 0; i < light_count; i++) {
+
+        currentShader.setPointLight(("pl[" + std::to_string(i) + "]"), lights[i]->getPointLight());
+        currentShader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), i);
+    }
 
     currentShader.setInt("texture0", loadedTextures);
     myCube.bindTexture(GL_TEXTURE0 + loadedTextures++);
@@ -161,23 +220,50 @@ void Scene1::render() const {
     currentShader.setMat4("projection", projection);
     currentShader.setMat4("view"      , view);
     currentShader.setMat4("model"     , entityModels[1]);
-
+    currentShader.setMat4("lightSpace", lightSpace);
+    
     currentShader.setVec3("vNormal"    , glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
     currentShader.setInt ("light_count", light_count);
-    currentShader.setPointLight("pl[0]", lights[0]->getPointLight());
-
     currentShader.setFloat("far_plane"   , 25.0f);
-    currentShader.setInt  ("depthMap[0]" , 0);
+
+    for (uint8_t i = 0; i < light_count; i++) {
+
+        currentShader.setPointLight(("pl[" + std::to_string(i) + "]"), lights[i]->getPointLight());
+        currentShader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), i);
+    }
+
+    currentShader.setDirectionalLight("dl", DefaultLights::instance().sunlight);
+    currentShader.setInt("dl_depthMap", dl_depthMap);
 
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindTexture(GL_TEXTURE0 + loadedTextures++);
     myFloor.draw();
 }
 
-void Scene1::renderShadow() const {
+void Scene1::renderDirectShadow() const {
+    
+    const Shader currentShader = loaded_shaders[DIRECT_SHADOW];
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, directFrame->getFBO());
+    glClear(GL_DEPTH_BUFFER_BIT);
 
-    const Shader currentShader = loaded_shaders[POINTSHADOW];
+    currentShader.use();
+    currentShader.setMat4("lightSpace", lightSpace);
+
+    // Entities to cast their Shadow
+
+    currentShader.setMat4("model", entityModels[0]);
+    myCube.draw();
+
+    // -----------------------------
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Scene1::renderPointShadow() const {
+
+    const Shader currentShader = loaded_shaders[POINT_SHADOW];
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
