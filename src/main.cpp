@@ -40,6 +40,8 @@ int main() {
 
     Scene* mainScene = new Scene1();
 
+    DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
+
     // ---------- Loop ------------------------ //
 
     while (!glfwWindowShouldClose(window) && isRunning) {
@@ -65,17 +67,23 @@ int main() {
         // Debug_menu::instance().update();
 
         // Rendering //
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        Renderer::instance().render();
-        
         mainScene->renderDirectShadow();
         mainScene->renderPointShadow();
-
+        
         glViewport(0, 0, WIN_W, WIN_H);
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        // glBindFramebuffer(GL_FRAMEBUFFER, debugFrame->getFBO());
+
+        Renderer::instance().render();
+
         mainScene->render();
+        // mainScene->renderDebug();
 
         // Debug Menu
         // Debug_menu::instance().render();
+
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // debugFrame->render();
 
         glfwSwapBuffers(window);
     }
@@ -85,8 +93,8 @@ int main() {
     mainScene->destroy();
 
     Debug_menu::instance().destroy();
+    Renderer::instance().terminate();
 
-    glfwDestroyWindow(window);
     glfwTerminate();
 
     return 0;

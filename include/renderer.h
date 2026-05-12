@@ -45,6 +45,9 @@ public:
     static void enableCulling();
     static void disableCulling();
 
+    static void enableDepth();
+    static void disableDepth();
+
     GLFWwindow* getWindow() const { return window; }
 
 };

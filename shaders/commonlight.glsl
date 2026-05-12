@@ -46,13 +46,36 @@ vec3 calcDirectionalLight(vec3 tex) {
 
 float calcDirectShadow() {
 
-    vec3 projCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
-    projCords      = projCords * 0.5 + 0.5;
+    if (lightSpace_vPos.w <= 0.0) {
+        return 0.0;
+    }
 
-    float closestDepth = texture(dl_depthMap, projCords.xy).r; 
-    float currentDepth = projCords.z;
+    vec3 shadowCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
+    shadowCords      = shadowCords * 0.5 + 0.5;
 
-    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    if (shadowCords.x < 0.0 || shadowCords.x > 1.0 ||
+        shadowCords.y < 0.0 || shadowCords.y > 1.0 ||
+        shadowCords.z > 1.0 || shadowCords.z < 0.0) {
+        return 0.0;
+    }
+
+    float shadow = 0.0;
+    float bias   = 0.0025;
+
+    // Filtering
+    shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(dl_depthMap, 0);
+
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+
+            float PCFdepth = texture(dl_depthMap, shadowCords.xy + vec2(x,y) * texelSize).r;
+            shadow += shadowCords.z - bias > PCFdepth ? 1.0 : 0.0;
+        }
+    }
+
+    shadow /= 9.0;
+
     return shadow;
 }
 

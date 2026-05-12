@@ -29,7 +29,7 @@ void main() {
     color += calcDirectionalLight(tex);
 
     float shadow = calcDirectShadow();
-    // color *= (1.0 - shadow);
+    color *= (1.0 - shadow);
 
     FragColor = vec4(color, 1.0);
 }

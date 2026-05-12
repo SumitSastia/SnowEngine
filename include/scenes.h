@@ -25,6 +25,7 @@ public:
     virtual void render() const = 0;
     virtual void renderDirectShadow() const = 0;
     virtual void renderPointShadow() const = 0;
+    virtual void renderDebug() const = 0;
     virtual void destroy() = 0;
 };
 
@@ -48,9 +49,10 @@ class Scene1 : public Scene {
 
     // Light Space - Directional Light
     glm::mat4 lightSpace;
-    glm::mat4 lightProjection;
-
     DirectShadowFrame* directFrame;
+
+    // Debug
+    DebugFrame* debugFrame;
 
 public:
 
@@ -64,5 +66,6 @@ public:
     void render() const override;
     void renderDirectShadow() const override;
     void renderPointShadow() const override;
+    void renderDebug() const override;
     void destroy() override;
 };

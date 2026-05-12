@@ -76,17 +76,18 @@ public:
 
 class DebugFrame : public FrameBuffer {
 
+	Shader* shader;
+
 public:
 
 	DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
 
 	void init() override;
-	void render() const override {}
+	void render() const override;
+	void render(const unsigned int& textureID) const;
 };
 
 class DirectShadowFrame : public FrameBuffer {
-
-	unsigned int shader;
 
 public:
 

@@ -144,21 +144,28 @@ void Scene1::init() {
     directFrame = new DirectShadowFrame();
 
     // Directional Light
-    float near_plane = 1.0f, far_plane = 20.0f, size = 5.0f;
-    lightProjection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
+    float near_plane = 1.0f, far_plane = 10.0f, size = 10.0f;
+    glm::mat4 lightProjection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
 
     glm::mat4 lightView = glm::lookAt(
-        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(2.0f, 4.0f, 1.0f),
         glm::vec3(0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
     lightSpace = lightProjection * lightView;
+
+    debugFrame = new DebugFrame(WIN_W, WIN_H);
 }
 
 void Scene1::update(const float& delta_time) {
 
     lights[0]->setPosition(entityModels[2][3]);
+}
+
+void Scene1::renderDebug() const {
+
+    debugFrame->render(directFrame->getTex());
 }
 
 void Scene1::render() const {
@@ -225,7 +232,7 @@ void Scene1::render() const {
     currentShader.setVec3("vNormal"    , glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
     currentShader.setInt ("light_count", light_count);
-    currentShader.setFloat("far_plane"   , 25.0f);
+    currentShader.setFloat("far_plane" , 25.0f);
 
     for (uint8_t i = 0; i < light_count; i++) {
 
@@ -242,10 +249,13 @@ void Scene1::render() const {
 }
 
 void Scene1::renderDirectShadow() const {
-    
+
+    Renderer::disableCulling();
     const Shader currentShader = loaded_shaders[DIRECT_SHADOW];
     
     glBindFramebuffer(GL_FRAMEBUFFER, directFrame->getFBO());
+    glViewport(0,0, frameBuffers::shadowSize, frameBuffers::shadowSize);
+
     glClear(GL_DEPTH_BUFFER_BIT);
 
     currentShader.use();
@@ -259,6 +269,7 @@ void Scene1::renderDirectShadow() const {
     // -----------------------------
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    Renderer::enableCulling();
 }
 
 void Scene1::renderPointShadow() const {

@@ -79,7 +79,7 @@ void Renderer::render() const {
 }
 
 void Renderer::terminate() {
-
+    glfwDestroyWindow(window);
 }
 
 void Renderer::enableCulling() {
@@ -88,4 +88,12 @@ void Renderer::enableCulling() {
 
 void Renderer::disableCulling() {
     glDisable(GL_CULL_FACE);
+}
+
+void Renderer::enableDepth() {
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::disableDepth() {
+    glDisable(GL_DEPTH_TEST);
 }
