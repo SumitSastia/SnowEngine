@@ -249,11 +249,11 @@ void Texture2D::destroy() {
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //
 
-void Shader::setBool(const char* target, const bool& value) const {
+void Shader::setBool(const char* target, const bool value) const {
 
     glUniform1i(
         glGetUniformLocation(shaderProgram, target),
-        value
+        (int)value
     );
 }
 

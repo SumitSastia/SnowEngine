@@ -17,7 +17,7 @@ void main() {
     vec3 color = 0.4 * tex; // Ambient
 
     // Directional Lighting
-    color += calcDirectionalLight(tex);
+    color += calcDirectionalLight(tex, vNormal);
 
     float shadow = calcDirectShadow();
     color *= (1.0 - shadow);
@@ -27,7 +27,7 @@ void main() {
 
         vec3 lightColor = vec3(0.0);
 
-        lightColor += calcPointLight(pl[i], tex);
+        lightColor += calcPointLight(pl[i], tex, vNormal);
         lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
         color += lightColor;

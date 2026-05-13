@@ -60,6 +60,13 @@ class Texture2D {
     
 public:
 
+    Texture2D() :
+        width(0),
+        height(0),
+        nrChannels(0),
+        textureID(0) {
+    }
+
     /*
     Loads the image and allocate it into the Memory.
     NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).

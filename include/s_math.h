@@ -19,5 +19,6 @@ public:
     void scale(const glm::vec3& scale);
 
     const glm::mat4 getMatrix() const { return matrix_4x4; }
+    const glm::mat3 getNormal() const { return glm::transpose(glm::inverse(glm::mat3(matrix_4x4))); }
     const glm::vec3 getPos() const { return matrix_4x4[3]; }
 };

@@ -9,7 +9,8 @@ enum scene1_shaders {
     INSTANCED_CUBES,
     LIGHT,
     POINT_SHADOW,
-    DIRECT_SHADOW
+    DIRECT_SHADOW,
+    NORMAL_MAPPED_2D
 };
 
 namespace scene_var {
@@ -107,6 +108,10 @@ void Scene1::init() {
         Shader(
             "../shaders/directShadow/directShadow.vert",
             "../shaders/directShadow/directShadow.frag"
+        ),
+        Shader(
+            "../shaders/planes/normalTexPlane.vert",
+            "../shaders/planes/normalTexPlane.frag", true
         )
     };
 
@@ -123,15 +128,14 @@ void Scene1::init() {
 
     Matrix4 cubeModel {};
     Matrix4 floorModel {};
+    Matrix4 groundModel {};
 
     floorModel.translate(glm::vec3(-2.0f, 0.0f, -3.0f));
     floorModel.scale(glm::vec3(5.0f));
 
-    entityModels = {
-
-        cubeModel,
-        floorModel
-    };
+    groundModel.translate(glm::vec3(0.0f, -2.0f, 0.0f));
+    groundModel.rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    groundModel.scale(glm::vec3(5.0f));
 
     // Lights
     light_count = 1;
@@ -148,7 +152,10 @@ void Scene1::init() {
     lights[0]->setLightColor(colors::PINK);
     lights[0]->setPosition(lightModel.getPos());
 
+    entityModels.push_back(cubeModel);
+    entityModels.push_back(floorModel);
     entityModels.push_back(lightModel);
+    entityModels.push_back(groundModel);
 
     // Shadow Mapping
     float near = 1.0f;
@@ -239,13 +246,15 @@ void Scene1::render() const {
     Renderer::disableCulling();
 
     // Floor
-    currentShader = loaded_shaders[TEXTURED_PLANE];
+    currentShader = loaded_shaders[NORMAL_MAPPED_2D];
     currentShader.use();
 
     currentShader.setMat4("projection", projection);
     currentShader.setMat4("view"      , view);
     currentShader.setMat4("model"     , entityModels[1].getMatrix());
     currentShader.setMat4("lightSpace", lightSpace);
+
+    currentShader.setMat3("normalMatrix", entityModels[1].getNormal());
     
     currentShader.setVec3("vNormal"    , glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
@@ -263,7 +272,14 @@ void Scene1::render() const {
 
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindTexture(GL_TEXTURE0 + loadedTextures++);
+
+    currentShader.setInt("texture1", loadedTextures);
+    myFloor.bindNormalTex(GL_TEXTURE0 + loadedTextures++);
     myFloor.draw();
+
+    currentShader.setMat4("model", entityModels[3].getMatrix());
+    currentShader.setMat3("normalMatrix", entityModels[3].getNormal());
+    myGround.draw();
 }
 
 void Scene1::renderDirectShadow() const {

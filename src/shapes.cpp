@@ -7,10 +7,6 @@
 
 //-------------------------------------------------------------------------------------//
 
-Shape::Shape() {
-    shapeDiffuseTexture = new Texture2D();
-}
-
 /*
 Allocates vertices & indices into Memory.
 Initializes the VBO, VAO, EBO
@@ -85,12 +81,36 @@ void Shape::bindVertices3D(
 
 void Shape::bindTexture(const unsigned int textureUnit) const {
 
-    glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture->getID());
+    if (!shapeDiffuseTexture) {
+        std::cerr << "Shape DiffuseTexture not Loaded!" << std::endl;
+    }
+    else {
+        glActiveTexture(textureUnit);
+        glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture->getID());
+    }
+}
+
+void Shape::bindNormalTex(const unsigned int textureUnit) const {
+
+    if (!shapeNormalTexture) {
+        std::cerr << "Shape NormalTexture not Loaded!" << std::endl;
+    }
+    else {
+        glActiveTexture(textureUnit);
+        glBindTexture(GL_TEXTURE_2D, shapeNormalTexture->getID());
+    }
 }
 
 void Shape::loadTexture(const char* diffusePath) {
+
+    shapeDiffuseTexture = (!shapeDiffuseTexture)? new Texture2D() : shapeDiffuseTexture;
     shapeDiffuseTexture->load(diffusePath);
+}
+
+void Shape::loadNormalTex(const char* normalTexPath) {
+
+    shapeNormalTexture = new Texture2D();
+    shapeNormalTexture->load(normalTexPath);
 }
 
 void Shape::draw() const {
@@ -107,6 +127,9 @@ SpecShape::SpecShape() {
 }
 
 void SpecShape::loadTexture(const char* diffusePath, const char* specularPath) {
+
+    shapeDiffuseTexture = new Texture2D();
+    shapeSpecularTexture = new Texture2D();
 
     shapeDiffuseTexture->load(diffusePath);
     shapeSpecularTexture->load(specularPath);
@@ -328,7 +351,6 @@ DefaultShapes::DefaultShapes(){
 
     float vertices2[] = {
 
-        // Front
         -0.5f, 0.5f, 0.0f,0.0f,
          0.5f, 0.5f, 1.0f,0.0f,
         -0.5f,-0.5f, 0.0f,1.0f,
@@ -337,7 +359,6 @@ DefaultShapes::DefaultShapes(){
 
     unsigned int indices2[] = {
 
-        // Front
         0,1,2,
         1,3,2
     };
@@ -345,6 +366,10 @@ DefaultShapes::DefaultShapes(){
     square.bindVertices2D(vertices2, sizeof(vertices2), indices2, sizeof(indices2));
     square.loadTexture(
         "assets/textures/brickwall.jpg"
+    );
+
+    square.loadNormalTex(
+        "assets/textures/brickwall_normal.png"
     );
 }
 

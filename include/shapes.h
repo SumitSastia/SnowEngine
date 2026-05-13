@@ -17,10 +17,14 @@ protected:
     unsigned int indicesCount;
 
     Texture2D* shapeDiffuseTexture;
+    Texture2D* shapeNormalTexture;
 
 public:
 
-    Shape();
+    Shape(): 
+        shapeDiffuseTexture(nullptr),
+        shapeNormalTexture(nullptr) {
+    }
 
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
@@ -35,8 +39,12 @@ public:
     const unsigned int get_VAO() const { return VAO; }
     const unsigned int get_indices() const { return indicesCount; }
 
-    void bindTexture(const unsigned int textureUnit) const;
     void loadTexture(const char* diffusePath);
+    void loadNormalTex(const char* normalTexPath);
+
+    void bindTexture(const unsigned int textureUnit) const;
+    void bindNormalTex(const unsigned int textureUnit) const;
+    
     void draw() const;
 };
 

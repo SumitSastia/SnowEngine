@@ -26,17 +26,17 @@ uniform samplerCube depthMap[MAX_LIGHTS];
 uniform directionalLight dl;
 uniform sampler2D dl_depthMap;
 
-vec3 calcDirectionalLight(vec3 tex) {
+vec3 calcDirectionalLight(vec3 tex, vec3 normal) {
 
     vec3 light_dir = normalize(dl.direction);
 
     // Diffuse
-    float diffuse      = max(dot(vNormal, light_dir), 0.0);
+    float diffuse      = max(dot(normal, light_dir), 0.0);
     vec3  diffuseLight = diffuse * tex * dl.color;
 
     // Specular
     vec3 view_dir    = normalize(camPos - vPos);
-    vec3 reflect_dir = reflect(-light_dir, vNormal);
+    vec3 reflect_dir = reflect(-light_dir, normal);
 
     float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
     vec3  specularLight = spec * tex * dl.color;
@@ -79,16 +79,16 @@ float calcDirectShadow() {
     return shadow;
 }
 
-vec3 calcPointLight(pointLight light, vec3 tex) {
+vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
 
     // Diffuse
     vec3  light_dir    = normalize(light.position - vPos);
-    float diffuse      = max(dot(vNormal, light_dir), 0.0);
+    float diffuse      = max(dot(normal, light_dir), 0.0);
     vec3  diffuseLight = diffuse * tex * light.color;
 
     // Specular
     vec3 view_dir    = normalize(camPos - vPos);
-    vec3 reflect_dir = reflect(-light_dir, vNormal);
+    vec3 reflect_dir = reflect(-light_dir, normal);
 
     float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
     vec3  specularLight = spec * tex * light.color;

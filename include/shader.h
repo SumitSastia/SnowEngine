@@ -44,7 +44,7 @@ public:
 
     // ------------------------------ Shader Uniform Setter ------------------------------ //
 
-    void setBool (const char* target, const bool&  value) const;
+    void setBool (const char* target, const bool   value) const;
     void setInt  (const char* target, const int&   value) const;
     void setFloat(const char* target, const float& value) const;
     void setVec3 (const char* target, const glm::vec3& vector) const;
