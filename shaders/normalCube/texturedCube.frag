@@ -16,6 +16,13 @@ void main() {
     vec3 tex   = texture(texture0, vTexCords).rgb;
     vec3 color = 0.4 * tex; // Ambient
 
+    // Directional Lighting
+    color += calcDirectionalLight(tex);
+
+    float shadow = calcDirectShadow();
+    color *= (1.0 - shadow);
+
+    // Point Shadow
     for (int i = 0; i < light_count; i++) {
 
         vec3 lightColor = vec3(0.0);

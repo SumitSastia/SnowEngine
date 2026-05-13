@@ -24,32 +24,31 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
     // Toggle Keys
     static bool KEP_1_PRESSED = false;
 
-
     // Model of the Object to move
-    glm::mat4& movableModel = entityModels[model_counter];
+    Matrix4& movableModel = entityModels[model_counter];
 
     if (glfwGetKey(window, GLFW_KEY_KP_8)) {
-        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
+        movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_2)) {
-        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f, 0.0f, 1.0f));
+        movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f, 1.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_4)) {
-        movableModel = glm::translate(movableModel, move_speed * glm::vec3(-1.0f, 0.0f, 0.0f));
+        movableModel.translate(move_speed * glm::vec3(-1.0f, 0.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_6)) {
-        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 1.0f, 0.0f, 0.0f));
+        movableModel.translate(move_speed * glm::vec3( 1.0f, 0.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_9)) {
-        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f, 1.0f, 0.0f));
+        movableModel.translate(move_speed * glm::vec3( 0.0f, 1.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_7)) {
-        movableModel = glm::translate(movableModel, move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
+        movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
     }
 
     if (glfwGetKey(window, GLFW_KEY_KP_1)) {
@@ -64,7 +63,11 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
     if (glfwGetKey(window, GLFW_KEY_KP_5)) {
 
         const float rotation_speed = 2.0f;
-        entityModels[2] = glm::rotate(glm::mat4(1.0f), glm::radians(rotation_speed), glm::vec3(0.0f, 1.0f, 0.0f)) * entityModels[2];
+        
+        Matrix4 _matrix {};
+        _matrix.rotate(rotation_speed, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        entityModels[2].setMatrix(_matrix.getMatrix() * entityModels[2].getMatrix());
     }
 
     if (glfwGetKey(window, GLFW_KEY_V)) {
@@ -75,7 +78,7 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
 
 void Scene1::init() {
 
-    total_shaders  = 5;
+    total_shaders  = 6;
     total_entities = 3;
 
     loaded_shaders = {
@@ -109,18 +112,25 @@ void Scene1::init() {
 
     // Entities
 
-    myCube  = DefaultShapes::instance().cube;
-    myFloor = DefaultShapes::instance().square;
-    cubes   = DefaultShapes::instance().cubeInstanced;
+    myCube   = DefaultShapes::instance().cube;
+    myFloor  = DefaultShapes::instance().square;
+    cubes    = DefaultShapes::instance().cubeInstanced;
+    myGround = DefaultShapes::instance().square;
 
     entities = {
         myCube
     };
 
+    Matrix4 cubeModel {};
+    Matrix4 floorModel {};
+
+    floorModel.translate(glm::vec3(-2.0f, 0.0f, -3.0f));
+    floorModel.scale(glm::vec3(5.0f));
+
     entityModels = {
 
-        glm::mat4(1.0f),
-        glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, -3.0f)), glm::vec3(5.0f))
+        cubeModel,
+        floorModel
     };
 
     // Lights
@@ -132,9 +142,13 @@ void Scene1::init() {
         shadowFrames.push_back(new PointShadowFrame());
     }
 
-    lights[0]->setLightColor(colors::YELLOW);
-    lights[0]->setPosition(glm::vec3(3.0f, 1.5f, 2.0f));
-    entityModels.push_back(lights[0]->getModel());
+    Matrix4 lightModel {};
+    lightModel.translate(glm::vec3(3.0f, 1.5f, 2.0f));
+
+    lights[0]->setLightColor(colors::PINK);
+    lights[0]->setPosition(lightModel.getPos());
+
+    entityModels.push_back(lightModel);
 
     // Shadow Mapping
     float near = 1.0f;
@@ -155,12 +169,13 @@ void Scene1::init() {
 
     lightSpace = lightProjection * lightView;
 
+    // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
 }
 
 void Scene1::update(const float& delta_time) {
 
-    lights[0]->setPosition(entityModels[2][3]);
+    lights[0]->setPosition(entityModels[2].getPos());
 }
 
 void Scene1::renderDebug() const {
@@ -183,7 +198,7 @@ void Scene1::render() const {
 
     for (uint8_t i = 0; i < light_count; i++) {
         
-        currentShader.setMat4("finalMatrix", projection * view * glm::scale(entityModels[2], glm::vec3(0.5f)));
+        currentShader.setMat4("finalMatrix", projection * view * glm::scale(entityModels[2].getMatrix(), glm::vec3(0.5f)));
         currentShader.setVec3("lightColor" , lights[i]->getLightColor());
         lights[i]->draw();
 
@@ -202,7 +217,7 @@ void Scene1::render() const {
 
     currentShader.setMat4("projection", projection);
     currentShader.setMat4("view"      , view);
-    currentShader.setMat4("model"     , entityModels[0]);
+    currentShader.setMat4("model"     , entityModels[0].getMatrix());
 
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
     currentShader.setInt ("light_count", light_count);
@@ -213,6 +228,9 @@ void Scene1::render() const {
         currentShader.setPointLight(("pl[" + std::to_string(i) + "]"), lights[i]->getPointLight());
         currentShader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), i);
     }
+
+    currentShader.setDirectionalLight("dl", DefaultLights::instance().sunlight);
+    currentShader.setInt("dl_depthMap", dl_depthMap);
 
     currentShader.setInt("texture0", loadedTextures);
     myCube.bindTexture(GL_TEXTURE0 + loadedTextures++);
@@ -226,7 +244,7 @@ void Scene1::render() const {
 
     currentShader.setMat4("projection", projection);
     currentShader.setMat4("view"      , view);
-    currentShader.setMat4("model"     , entityModels[1]);
+    currentShader.setMat4("model"     , entityModels[1].getMatrix());
     currentShader.setMat4("lightSpace", lightSpace);
     
     currentShader.setVec3("vNormal"    , glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
@@ -263,7 +281,7 @@ void Scene1::renderDirectShadow() const {
 
     // Entities to cast their Shadow
 
-    currentShader.setMat4("model", entityModels[0]);
+    currentShader.setMat4("model", entityModels[0].getMatrix());
     myCube.draw();
 
     // -----------------------------
@@ -310,8 +328,11 @@ void Scene1::renderPointShadow() const {
 
         // Entities to cast their Shadow
 
-        currentShader.setMat4("model", entityModels[0]);
+        currentShader.setMat4("model", entityModels[0].getMatrix());
         myCube.draw();
+
+        currentShader.setMat4("model", entityModels[1].getMatrix());
+        myFloor.draw();
 
         // -----------------------------
     }

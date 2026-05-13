@@ -18,6 +18,7 @@ set(IMGUI_SRC
 add_executable(${TARGET_NAME}
 
     src/glad.c
+    src/s_math.cpp
     src/main.cpp
     src/shader.cpp
     src/camera.cpp

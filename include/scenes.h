@@ -4,6 +4,7 @@
 #include <lights.h>
 #include <shader.h>
 #include <frame.h>
+#include <s_math.h>
 
 class Scene {
 
@@ -33,11 +34,12 @@ class Scene1 : public Scene {
 
     // Entities
     Shape myFloor;
+    Shape myGround;
     Shape myCube;
     ShapeInstanced cubes;
 
     std::vector <Entity>    entities;
-    std::vector <glm::mat4> entityModels;
+    std::vector <Matrix4> entityModels;
 
     // Light
     uint8_t light_count;
