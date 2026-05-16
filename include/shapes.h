@@ -18,12 +18,14 @@ protected:
 
     Texture2D* shapeDiffuseTexture;
     Texture2D* shapeNormalTexture;
+    Texture2D* shapeSpecularTexture;
 
 public:
 
     Shape(): 
         shapeDiffuseTexture(nullptr),
-        shapeNormalTexture(nullptr) {
+        shapeNormalTexture(nullptr),
+        shapeSpecularTexture(nullptr) {
     }
 
     void bindVertices2D(
@@ -36,31 +38,26 @@ public:
         const unsigned int* indices, const size_t& size_i
     );
 
+    void bindVertices3D_Mapped(
+        const float* vertices, const size_t& size_v,
+        const unsigned int* indices, const size_t& size_i
+    );
+
     const unsigned int get_VAO() const { return VAO; }
     const unsigned int get_indices() const { return indicesCount; }
 
-    void loadTexture(const char* diffusePath);
-    void loadNormalTex(const char* normalTexPath);
+    void loadDiffuseTex (const char* path);
+    void loadNormalTex  (const char* path);
+    void loadSpecularTex(const char* path);
 
-    void bindTexture(const unsigned int textureUnit) const;
+    void bindDiffuseTex(const unsigned int textureUnit) const;
     void bindNormalTex(const unsigned int textureUnit) const;
+    void bindSpecularTex(const unsigned int textureUnit) const;
     
     void draw() const;
 };
 
-// Model with Specular Texture
-class SpecShape : public Shape {
-
-protected:
-    Texture2D* shapeSpecularTexture;
-
-public:
-
-    SpecShape();
-    void loadTexture(const char* diffusePath, const char* specularPath);
-};
-
-class ShapeInstanced : public SpecShape {
+class ShapeInstanced : public Shape {
 
     unsigned int instanceModelVBO, instanceNormalVBO;
     unsigned int instanceCounts;
@@ -86,6 +83,7 @@ struct DefaultShapes {
     Shape square;
     Shape cube;
     ShapeInstanced cubeInstanced;
+    Shape advancedCube;
 
     DefaultShapes();
     static DefaultShapes& instance();

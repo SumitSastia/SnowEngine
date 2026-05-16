@@ -79,7 +79,45 @@ void Shape::bindVertices3D(
     glBindVertexArray(0);
 }
 
-void Shape::bindTexture(const unsigned int textureUnit) const {
+void Shape::bindVertices3D_Mapped(
+    const float* vertices, const size_t& size_v,
+    const unsigned int* indices, const size_t& size_i
+) {
+    indicesCount = size_i / sizeof(u_int);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // TextureCords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Tangent
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void Shape::bindDiffuseTex(const unsigned int textureUnit) const {
 
     if (!shapeDiffuseTexture) {
         std::cerr << "Shape DiffuseTexture not Loaded!" << std::endl;
@@ -101,16 +139,33 @@ void Shape::bindNormalTex(const unsigned int textureUnit) const {
     }
 }
 
-void Shape::loadTexture(const char* diffusePath) {
+void Shape::bindSpecularTex(const unsigned int textureUnit) const {
 
-    shapeDiffuseTexture = (!shapeDiffuseTexture)? new Texture2D() : shapeDiffuseTexture;
-    shapeDiffuseTexture->load(diffusePath);
+    if (!shapeSpecularTexture) {
+        std::cerr << "Shape SpecularTexture not Loaded!" << std::endl;
+    }
+    else {
+        glActiveTexture(textureUnit);
+        glBindTexture(GL_TEXTURE_2D, shapeSpecularTexture->getID());
+    }
 }
 
-void Shape::loadNormalTex(const char* normalTexPath) {
+void Shape::loadDiffuseTex(const char* path) {
 
-    shapeNormalTexture = new Texture2D();
-    shapeNormalTexture->load(normalTexPath);
+    shapeDiffuseTexture = (!shapeDiffuseTexture)? new Texture2D() : shapeDiffuseTexture;
+    shapeDiffuseTexture->load(path);
+}
+
+void Shape::loadNormalTex(const char* path) {
+
+    shapeNormalTexture = (!shapeNormalTexture)? new Texture2D() : shapeNormalTexture;
+    shapeNormalTexture->load(path);
+}
+
+void Shape::loadSpecularTex(const char* path) {
+
+    shapeSpecularTexture = (!shapeSpecularTexture)? new Texture2D() : shapeSpecularTexture;
+    shapeSpecularTexture->load(path);
 }
 
 void Shape::draw() const {
@@ -120,20 +175,6 @@ void Shape::draw() const {
     glBindVertexArray(0);
 }
 
-//-------------------------------------------------------------------------------------//
-
-SpecShape::SpecShape() {
-    shapeSpecularTexture = new Texture2D();
-}
-
-void SpecShape::loadTexture(const char* diffusePath, const char* specularPath) {
-
-    shapeDiffuseTexture = new Texture2D();
-    shapeSpecularTexture = new Texture2D();
-
-    shapeDiffuseTexture->load(diffusePath);
-    shapeSpecularTexture->load(specularPath);
-}
 
 //-------------------------------------------------------------------------------------//
 
@@ -229,7 +270,7 @@ void ShapeInstanced::draw() const {
 //-------------------------------------------------------------------------------------//
 
 DefaultShapes& DefaultShapes::instance() {
-    static DefaultShapes instance;
+    static DefaultShapes instance {};
     return instance;
 }
 
@@ -274,6 +315,45 @@ DefaultShapes::DefaultShapes(){
         -0.5,-0.5, 0.5,  0.0,-1.0,0.0, 1.0,1.0
     };
 
+    const float vertices1[] = {
+
+        // Front         // Normals     // UV     // Tangents
+        -0.5, 0.5, 0.5,  0.0,0.0, 1.0,  0.0,0.0,  1.0,0.0,0.0,
+         0.5, 0.5, 0.5,  0.0,0.0, 1.0,  1.0,0.0,  1.0,0.0,0.0,
+        -0.5,-0.5, 0.5,  0.0,0.0, 1.0,  0.0,1.0,  1.0,0.0,0.0,
+         0.5,-0.5, 0.5,  0.0,0.0, 1.0,  1.0,1.0,  1.0,0.0,0.0,
+         
+        // Back
+         0.5, 0.5,-0.5,  0.0,0.0,-1.0,  0.0,0.0, -1.0,0.0,0.0,
+        -0.5, 0.5,-0.5,  0.0,0.0,-1.0,  1.0,0.0, -1.0,0.0,0.0,
+         0.5,-0.5,-0.5,  0.0,0.0,-1.0,  0.0,1.0, -1.0,0.0,0.0,
+        -0.5,-0.5,-0.5,  0.0,0.0,-1.0,  1.0,1.0, -1.0,0.0,0.0,
+
+        // Left
+        -0.5, 0.5,-0.5,  -1.0,0.0,0.0,  0.0,0.0,  0.0,0.0,1.0,
+        -0.5, 0.5, 0.5,  -1.0,0.0,0.0,  1.0,0.0,  0.0,0.0,1.0,
+        -0.5,-0.5,-0.5,  -1.0,0.0,0.0,  0.0,1.0,  0.0,0.0,1.0,
+        -0.5,-0.5, 0.5,  -1.0,0.0,0.0,  1.0,1.0,  0.0,0.0,1.0,
+
+        // Right
+         0.5, 0.5, 0.5,  1.0,0.0,0.0,   0.0,0.0, 0.0,0.0,-1.0,
+         0.5, 0.5,-0.5,  1.0,0.0,0.0,   1.0,0.0, 0.0,0.0,-1.0,
+         0.5,-0.5, 0.5,  1.0,0.0,0.0,   0.0,1.0, 0.0,0.0,-1.0,
+         0.5,-0.5,-0.5,  1.0,0.0,0.0,   1.0,1.0, 0.0,0.0,-1.0,
+
+        // Top
+        -0.5, 0.5,-0.5,  0.0, 1.0,0.0,  0.0,0.0,  1.0,0.0,0.0,
+         0.5, 0.5,-0.5,  0.0, 1.0,0.0,  1.0,0.0,  1.0,0.0,0.0,
+        -0.5, 0.5, 0.5,  0.0, 1.0,0.0,  0.0,1.0,  1.0,0.0,0.0,
+         0.5, 0.5, 0.5,  0.0, 1.0,0.0,  1.0,1.0,  1.0,0.0,0.0,
+
+        // Bottom
+         0.5,-0.5,-0.5,  0.0,-1.0,0.0,  0.0,0.0,  1.0,0.0,0.0,
+        -0.5,-0.5,-0.5,  0.0,-1.0,0.0,  1.0,0.0,  1.0,0.0,0.0,
+         0.5,-0.5, 0.5,  0.0,-1.0,0.0,  0.0,1.0,  1.0,0.0,0.0,
+        -0.5,-0.5, 0.5,  0.0,-1.0,0.0,  1.0,1.0,  1.0,0.0,0.0
+    };
+
     unsigned int indices[] = {
 
         // Front
@@ -302,9 +382,12 @@ DefaultShapes::DefaultShapes(){
     };
 
     cube.bindVertices3D(vertices, sizeof(vertices), indices, sizeof(indices));
-    cube.loadTexture(
-        "assets/textures/wood_box.png"
-    );
+    cube.loadDiffuseTex("assets/textures/wood_box.png");
+
+    advancedCube.bindVertices3D_Mapped(vertices1, sizeof(vertices1), indices, sizeof(indices));
+    advancedCube.loadDiffuseTex("assets/textures/wood_box.png");
+    advancedCube.loadSpecularTex("assets/textures/metal_frame.png");
+    advancedCube.loadNormalTex("assets/textures/wood_box_normal.png");
 
     // Instanced
 
@@ -342,10 +425,7 @@ DefaultShapes::DefaultShapes(){
         objNormals, sizeof(objNormals)
     );
 
-    cubeInstanced.loadTexture(
-        "/assets/textures/wood_box.png",
-        "/assets/textures/metal_frame.png"
-    );
+    cubeInstanced.loadDiffuseTex("assets/textures/wood_box.png");
 
     // Plane
 
@@ -364,13 +444,8 @@ DefaultShapes::DefaultShapes(){
     };
 
     square.bindVertices2D(vertices2, sizeof(vertices2), indices2, sizeof(indices2));
-    square.loadTexture(
-        "assets/textures/brickwall.jpg"
-    );
-
-    square.loadNormalTex(
-        "assets/textures/brickwall_normal.png"
-    );
+    square.loadDiffuseTex("assets/textures/brickwall.jpg");
+    square.loadNormalTex("assets/textures/brickwall_normal.png");
 }
 
 //-------------------------------------------------------------------------------------//

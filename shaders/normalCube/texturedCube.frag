@@ -17,10 +17,10 @@ void main() {
     vec3 color = 0.4 * tex; // Ambient
 
     // Directional Lighting
-    color += calcDirectionalLight(tex, vNormal);
+    // color += calcDirectionalLight(tex, vNormal);
 
-    float shadow = calcDirectShadow();
-    color *= (1.0 - shadow);
+    // float shadow = calcDirectShadow();
+    // color *= (1.0 - shadow);
 
     // Point Shadow
     for (int i = 0; i < light_count; i++) {

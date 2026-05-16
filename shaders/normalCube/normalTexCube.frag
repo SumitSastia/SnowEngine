@@ -22,14 +22,14 @@ void main() {
     normal = (normal * 2.0 - 1.0);
 
     normal = normalize(TBN * normal);
-
-    normal = normal;
-
+    
     // Directional Lighting
-    // color += calcDirectionalLight(tex, normal);
+    vec3 dirColor = calcDirectionalLight(tex, normal);
 
-    // float shadow = calcDirectShadow();
-    // color *= (1.0 - shadow);
+    float shadow = calcDirectShadow();
+    dirColor *= (1.0 - shadow);
+
+    color += dirColor;
 
     // Point Shadow
     for (int i = 0; i < light_count; i++) {

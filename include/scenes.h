@@ -37,6 +37,7 @@ class Scene1 : public Scene {
     Shape myGround;
     Shape myCube;
     ShapeInstanced cubes;
+    Shape advCube;
 
     std::vector <Entity>    entities;
     std::vector <Matrix4> entityModels;

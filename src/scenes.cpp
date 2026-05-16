@@ -10,7 +10,8 @@ enum scene1_shaders {
     LIGHT,
     POINT_SHADOW,
     DIRECT_SHADOW,
-    NORMAL_MAPPED_2D
+    NORMAL_MAPPED_2D,
+    NORMAL_MAPPED_3D
 };
 
 namespace scene_var {
@@ -112,6 +113,10 @@ void Scene1::init() {
         Shader(
             "../shaders/planes/normalTexPlane.vert",
             "../shaders/planes/normalTexPlane.frag", true
+        ),
+        Shader(
+            "../shaders/normalCube/normalTexCube.vert",
+            "../shaders/normalCube/normalTexCube.frag", true
         )
     };
 
@@ -121,9 +126,11 @@ void Scene1::init() {
     myFloor  = DefaultShapes::instance().square;
     cubes    = DefaultShapes::instance().cubeInstanced;
     myGround = DefaultShapes::instance().square;
+    advCube  = DefaultShapes::instance().advancedCube;
 
     entities = {
-        myCube
+        myCube,
+        advCube
     };
 
     Matrix4 cubeModel {};
@@ -149,7 +156,7 @@ void Scene1::init() {
     Matrix4 lightModel {};
     lightModel.translate(glm::vec3(3.0f, 1.5f, 2.0f));
 
-    lights[0]->setLightColor(colors::PINK);
+    lights[0]->setLightColor(colors::YELLOW);
     lights[0]->setPosition(lightModel.getPos());
 
     entityModels.push_back(cubeModel);
@@ -219,13 +226,16 @@ void Scene1::render() const {
     glBindTexture(GL_TEXTURE_2D, directFrame->getTex());
 
     // Cube
-    currentShader = loaded_shaders[TEXTURED_CUBE];
+    currentShader = loaded_shaders[NORMAL_MAPPED_3D];
     currentShader.use();
 
     currentShader.setMat4("projection", projection);
     currentShader.setMat4("view"      , view);
     currentShader.setMat4("model"     , entityModels[0].getMatrix());
+    currentShader.setMat4("lightSpace", lightSpace);
 
+    currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
+    
     currentShader.setVec3("camPos"     , Camera::instance().getPos());
     currentShader.setInt ("light_count", light_count);
     currentShader.setFloat("far_plane" , 25.0f);
@@ -240,8 +250,11 @@ void Scene1::render() const {
     currentShader.setInt("dl_depthMap", dl_depthMap);
 
     currentShader.setInt("texture0", loadedTextures);
-    myCube.bindTexture(GL_TEXTURE0 + loadedTextures++);
-    myCube.draw();
+    advCube.bindDiffuseTex(GL_TEXTURE0 + loadedTextures++);
+
+    currentShader.setInt("texture1", loadedTextures);
+    advCube.bindNormalTex(GL_TEXTURE0 + loadedTextures++);
+    advCube.draw();
 
     Renderer::disableCulling();
 
@@ -271,7 +284,7 @@ void Scene1::render() const {
     currentShader.setInt("dl_depthMap", dl_depthMap);
 
     currentShader.setInt("texture0", loadedTextures);
-    myFloor.bindTexture(GL_TEXTURE0 + loadedTextures++);
+    myFloor.bindDiffuseTex(GL_TEXTURE0 + loadedTextures++);
 
     currentShader.setInt("texture1", loadedTextures);
     myFloor.bindNormalTex(GL_TEXTURE0 + loadedTextures++);
