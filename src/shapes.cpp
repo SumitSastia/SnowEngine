@@ -123,7 +123,7 @@ void Shape::bindDiffuseTex(const unsigned int textureUnit) const {
         std::cerr << "Shape DiffuseTexture not Loaded!" << std::endl;
     }
     else {
-        glActiveTexture(textureUnit);
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, shapeDiffuseTexture->getID());
     }
 }
@@ -134,7 +134,7 @@ void Shape::bindNormalTex(const unsigned int textureUnit) const {
         std::cerr << "Shape NormalTexture not Loaded!" << std::endl;
     }
     else {
-        glActiveTexture(textureUnit);
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, shapeNormalTexture->getID());
     }
 }
@@ -145,7 +145,7 @@ void Shape::bindSpecularTex(const unsigned int textureUnit) const {
         std::cerr << "Shape SpecularTexture not Loaded!" << std::endl;
     }
     else {
-        glActiveTexture(textureUnit);
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, shapeSpecularTexture->getID());
     }
 }

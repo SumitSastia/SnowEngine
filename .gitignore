@@ -43,3 +43,7 @@
 # folders
 build
 .vscode
+
+# zip files
+*.zip
+*.rar

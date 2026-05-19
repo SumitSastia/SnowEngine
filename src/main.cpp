@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <input.h>
 #include <scenes.h>
+#include <model.h>
 
 // ------------------------------ Global Variables ----------------------------------- //
 

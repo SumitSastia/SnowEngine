@@ -3,7 +3,6 @@
 #include <lights.h>
 
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <regex>

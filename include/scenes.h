@@ -5,6 +5,7 @@
 #include <shader.h>
 #include <frame.h>
 #include <s_math.h>
+#include <model.h>
 
 class Scene {
 
@@ -38,6 +39,7 @@ class Scene1 : public Scene {
     Shape myCube;
     ShapeInstanced cubes;
     Shape advCube;
+    Model3D* mySphere;
 
     std::vector <Entity>    entities;
     std::vector <Matrix4> entityModels;

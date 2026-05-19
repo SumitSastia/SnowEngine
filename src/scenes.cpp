@@ -11,7 +11,8 @@ enum scene1_shaders {
     POINT_SHADOW,
     DIRECT_SHADOW,
     NORMAL_MAPPED_2D,
-    NORMAL_MAPPED_3D
+    NORMAL_MAPPED_3D,
+    MODEL_3D
 };
 
 namespace scene_var {
@@ -117,6 +118,10 @@ void Scene1::init() {
         Shader(
             "../shaders/normalCube/normalTexCube.vert",
             "../shaders/normalCube/normalTexCube.frag", true
+        ),
+        Shader(
+            "../shaders/models/model.vert",
+            "../shaders/models/texturedModel.frag", true
         )
     };
 
@@ -128,14 +133,17 @@ void Scene1::init() {
     myGround = DefaultShapes::instance().square;
     advCube  = DefaultShapes::instance().advancedCube;
 
+    mySphere = new Model3D("../assets/models/test_cube/sphere.obj");
+
     entities = {
         myCube,
         advCube
     };
 
-    Matrix4 cubeModel {};
-    Matrix4 floorModel {};
+    Matrix4 cubeModel   {};
+    Matrix4 floorModel  {};
     Matrix4 groundModel {};
+    Matrix4 sphereModel {};
 
     floorModel.translate(glm::vec3(-2.0f, 0.0f, -3.0f));
     floorModel.scale(glm::vec3(5.0f));
@@ -143,6 +151,8 @@ void Scene1::init() {
     groundModel.translate(glm::vec3(0.0f, -2.0f, 0.0f));
     groundModel.rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     groundModel.scale(glm::vec3(5.0f));
+
+    sphereModel.translate(glm::vec3(6.0, 0.0, 3.0));
 
     // Lights
     light_count = 1;
@@ -159,10 +169,11 @@ void Scene1::init() {
     lights[0]->setLightColor(colors::YELLOW);
     lights[0]->setPosition(lightModel.getPos());
 
-    entityModels.push_back(cubeModel);
-    entityModels.push_back(floorModel);
-    entityModels.push_back(lightModel);
-    entityModels.push_back(groundModel);
+    entityModels.push_back(cubeModel);    // 0
+    entityModels.push_back(floorModel);   // 1
+    entityModels.push_back(lightModel);   // 2
+    entityModels.push_back(groundModel);  // 3
+    entityModels.push_back(sphereModel);  // 4
 
     // Shadow Mapping
     float near = 1.0f;
@@ -250,15 +261,15 @@ void Scene1::render() const {
     currentShader.setInt("dl_depthMap", dl_depthMap);
 
     currentShader.setInt("texture0", loadedTextures);
-    advCube.bindDiffuseTex(GL_TEXTURE0 + loadedTextures++);
+    advCube.bindDiffuseTex(loadedTextures++);
 
     currentShader.setInt("texture1", loadedTextures);
-    advCube.bindNormalTex(GL_TEXTURE0 + loadedTextures++);
+    advCube.bindNormalTex(loadedTextures++);
     advCube.draw();
 
     Renderer::disableCulling();
 
-    // Floor
+    // Floor & Ground
     currentShader = loaded_shaders[NORMAL_MAPPED_2D];
     currentShader.use();
 
@@ -284,15 +295,43 @@ void Scene1::render() const {
     currentShader.setInt("dl_depthMap", dl_depthMap);
 
     currentShader.setInt("texture0", loadedTextures);
-    myFloor.bindDiffuseTex(GL_TEXTURE0 + loadedTextures++);
+    myFloor.bindDiffuseTex(loadedTextures++);
 
     currentShader.setInt("texture1", loadedTextures);
-    myFloor.bindNormalTex(GL_TEXTURE0 + loadedTextures++);
+    myFloor.bindNormalTex(loadedTextures++);
     myFloor.draw();
 
     currentShader.setMat4("model", entityModels[3].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[3].getNormal());
     myGround.draw();
+
+    // Models
+    currentShader = loaded_shaders[MODEL_3D];
+    currentShader.use();
+
+    currentShader.setMat4("projection", projection);
+    currentShader.setMat4("view"      , view);
+    currentShader.setMat4("model"     , entityModels[4].getMatrix());
+
+    currentShader.setMat3("normalMatrix", entityModels[4].getNormal());
+    
+    currentShader.setVec3("vNormal"    , glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
+    currentShader.setVec3("camPos"     , Camera::instance().getPos());
+    currentShader.setInt ("light_count", light_count);
+    currentShader.setFloat("far_plane" , 25.0f);
+
+    for (uint8_t i = 0; i < light_count; i++) {
+
+        currentShader.setPointLight(("pl[" + std::to_string(i) + "]"), lights[i]->getPointLight());
+        currentShader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), i);
+    }
+
+    currentShader.setDirectionalLight("dl", DefaultLights::instance().sunlight);
+    currentShader.setInt("dl_depthMap", dl_depthMap);
+
+    currentShader.setInt("texture0", loadedTextures);
+    mySphere->bindTextures(loadedTextures++);
+    mySphere->draw();
 }
 
 void Scene1::renderDirectShadow() const {
@@ -362,6 +401,9 @@ void Scene1::renderPointShadow() const {
 
         currentShader.setMat4("model", entityModels[1].getMatrix());
         myFloor.draw();
+
+        currentShader.setMat4("model", entityModels[4].getMatrix());
+        mySphere->draw();
 
         // -----------------------------
     }

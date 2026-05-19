@@ -30,8 +30,9 @@ add_executable(${TARGET_NAME}
     src/entity.cpp
     src/lights.cpp
     src/frame.cpp
+    src/model.cpp
     ${IMGUI_SRC}
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)
-target_link_libraries(${TARGET_NAME} PRIVATE glfw)
+target_link_libraries(${TARGET_NAME} PRIVATE glfw assimp)

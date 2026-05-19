@@ -86,6 +86,8 @@ vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
     float diffuse      = max(dot(normal, light_dir), 0.0);
     vec3  diffuseLight = diffuse * tex * light.color;
 
+    // diffuseLight = vec3(0.0);
+
     // Specular
     vec3 view_dir    = normalize(camPos - vPos);
     vec3 reflect_dir = reflect(-light_dir, normal);

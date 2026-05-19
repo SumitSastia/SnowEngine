@@ -10,17 +10,19 @@ in mat3 TBN;
 
 uniform sampler2D texture0;
 uniform sampler2D texture1;
+uniform sampler2D texture2;
 
 #include <commonlight.glsl>
 
 void main() {
 
     vec3 tex    = texture(texture0, vTexCords).rgb;
-    vec3 color  = 0.4 * tex; // Ambient
-        
     vec3 normal = texture(texture1, vTexCords).xyz;
-    normal = (normal * 2.0 - 1.0);
+    vec3 tex2   = texture(texture2, vTexCords).rgb;
+        
+    vec3 color  = 0.4 * tex; // Ambient
 
+    normal = (normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);
     
     // Directional Lighting
@@ -29,7 +31,7 @@ void main() {
     float shadow = calcDirectShadow();
     dirColor *= (1.0 - shadow);
 
-    color += dirColor;
+    // color += dirColor;
 
     // Point Shadow
     for (int i = 0; i < light_count; i++) {

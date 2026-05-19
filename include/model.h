@@ -1,0 +1,119 @@
+#pragma once
+#include <string>
+#include <vector>
+
+#include <s_math.h>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
+struct Vertex {
+
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 textureCords;
+
+    Vertex(
+        const glm::vec3& position     = glm::vec3(0.0f),
+        const glm::vec3& normal       = glm::vec3(0.0f),
+        const glm::vec2& textureCords = glm::vec3(0.0f)
+    ) :
+        position(position),
+        normal(normal),
+        textureCords(textureCords) {
+    }
+};
+
+struct MeshTexture {
+
+    unsigned int id;
+    std::string type;
+    std::string checkPath;
+
+    void loadTexture(const char* path, const std::string& directory);
+};
+
+class Mesh {
+
+    unsigned int VBO, VAO, EBO;
+    void setupMesh();
+
+public:
+
+    std::vector <Vertex> vertices;
+    std::vector <unsigned int> indices;
+    std::vector <MeshTexture> textures;
+
+    Mesh(
+        const std::vector <Vertex>& vertices,
+        const std::vector <unsigned int>& indices,
+        const std::vector <MeshTexture>& textures
+    ) :
+        vertices(vertices),
+        indices(indices),
+        textures(textures),
+        VBO(0), VAO(0), EBO(0) {
+
+        setupMesh();
+    }
+
+    // Disable Copying
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+
+    // Move
+    Mesh(Mesh&& other) noexcept {
+        *this = std::move(other);
+    }
+
+    Mesh& operator=(Mesh&& other) noexcept {
+
+        VBO = other.VBO;
+        VAO = other.VAO;
+        EBO = other.EBO;
+
+        vertices = other.vertices;
+        indices = other.indices;
+        textures = other.textures;
+
+        other.VBO = other.VAO = other.EBO = 0;
+        return *this;
+    }
+
+    // ~Mesh();
+
+    void bindTextures(const unsigned int textureUnit) const;
+    void draw() const;
+};
+
+class Model3D {
+
+    glm::mat4 projection;
+    glm::mat4 view;
+    glm::mat4 model;
+
+    uint16_t total_mesh;
+    std::string directory;
+    
+    std::vector <Mesh> meshes;
+    std::vector <MeshTexture> loadedTextures;
+
+    void loadModel(const std::string& path);
+
+    void processNode(aiNode* node, const aiScene* scene);
+    Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+
+    std::vector<MeshTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& type_str) const;
+
+public:
+
+    Model3D(const char* path) : directory(""), total_mesh(0) {
+        loadModel(path);
+    }
+
+    void draw() const;
+
+    // Binds Textures of the Model into the Memory GL_TEXTURE0 and so on
+    void bindTextures(const unsigned int firstTextureUnit) const;
+};
