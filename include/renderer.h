@@ -8,8 +8,8 @@
 #include <string>
 #include <filesystem>
 
-const unsigned int WIN_W = 1120;
-const unsigned int WIN_H = 700;
+const unsigned int WIN_W = 1280;
+const unsigned int WIN_H = 720;
 
 extern std::filesystem::path base;
 
@@ -49,35 +49,4 @@ public:
 
     GLFWwindow* getWindow() const { return window; }
 
-};
-
-class Texture2D {
-
-    int width;
-    int height;
-    int nrChannels;
-    
-    std::string type;
-    unsigned int textureID;
-    unsigned char* pixelData;
-    
-public:
-
-    Texture2D() :
-        width(0),
-        height(0),
-        nrChannels(0),
-        textureID(0) {
-    }
-
-    /*
-    Loads the image and allocate it into the Memory.
-    NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
-    */
-    void load(const char* path);
-
-    void destroy();
-
-    const unsigned int& getID()  const { return textureID; }
-    const std::string& getType() const { return type; }
 };

@@ -18,7 +18,7 @@ DefaultLights::DefaultLights() {
     flashlight.direction = glm::vec3(0.0f, 0.0f, 0.0f);
     flashlight.color     = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    flashlight.isVisible = true;
+    flashlight.isVisible = false;
 
     flashlight.cutOffangle = glm::cos(glm::radians(12.5f));
     flashlight.outerCutOff = glm::cos(glm::radians(17.5f));
@@ -30,7 +30,7 @@ DefaultLights::DefaultLights() {
 
 void DefaultLights::update() {
 
-    flashlight.position = Camera::instance().getPos();
+    flashlight.position  = Camera::instance().getPos();
     flashlight.direction = Camera::instance().getTarget();
 }
 

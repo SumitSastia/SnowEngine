@@ -50,8 +50,8 @@ public:
     void loadNormalTex  (const char* path);
     void loadSpecularTex(const char* path);
 
-    void bindDiffuseTex(const unsigned int textureUnit) const;
-    void bindNormalTex(const unsigned int textureUnit) const;
+    void bindDiffuseTex (const unsigned int textureUnit) const;
+    void bindNormalTex  (const unsigned int textureUnit) const;
     void bindSpecularTex(const unsigned int textureUnit) const;
     
     void draw() const;
@@ -87,16 +87,4 @@ struct DefaultShapes {
 
     DefaultShapes();
     static DefaultShapes& instance();
-};
-
-class CubeMap {
-    
-    unsigned int VBO, VAO, textureID;
-
-public:
-
-    CubeMap(const std::vector <std::string>& textureFaces);
-
-    const unsigned int& get_VAO() const { return VAO; }
-    const unsigned int& get_ID() const { return textureID; }
 };

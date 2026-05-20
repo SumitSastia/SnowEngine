@@ -14,7 +14,7 @@ uniform sampler2D texture0;
 void main() {
 
     vec3 tex   = texture(texture0, vTexCords).rgb;
-    vec3 color = 0.4 * tex; // Ambient
+    vec3 color = 0.4 * tex * (skyboxIntensity + 1); // Ambient
 
     // Directional Lighting
     // color += calcDirectionalLight(tex, vNormal);
@@ -31,6 +31,10 @@ void main() {
         lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
         color += lightColor;
+    }
+
+    if (useSpotLight) {
+        color += calcSpotLight(tex, vNormal);
     }
 
     FragColor = vec4(color, 1.0);

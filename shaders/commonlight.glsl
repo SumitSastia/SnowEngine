@@ -16,15 +16,36 @@ struct pointLight{
     float quadratic;
 };
 
-uniform vec3 camPos;
-uniform int  light_count;
-uniform pointLight pl[MAX_LIGHTS];
+struct SpotLight {
 
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+
+    bool isVisible;
+
+    float cutOffangle;
+    float outerCutOff;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+uniform vec3  camPos;
 uniform float far_plane;
+uniform int   light_count;
+
+uniform pointLight pl[MAX_LIGHTS];
 uniform samplerCube depthMap[MAX_LIGHTS];
 
 uniform directionalLight dl;
 uniform sampler2D dl_depthMap;
+
+uniform bool useSpotLight;
+uniform SpotLight sl;
+
+uniform float skyboxIntensity;
 
 vec3 calcDirectionalLight(vec3 tex, vec3 normal) {
 
@@ -99,6 +120,8 @@ vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
     float frag_dist   = length(light.position - vPos);
     float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
 
+    attenuation = 1.0;
+
     return (attenuation * vec3(diffuseLight + specularLight));
 }
 
@@ -107,10 +130,10 @@ float calcShadow(pointLight light, samplerCube map) {
     vec3  fragToLight = vPos - light.position;
     float currentDepth = length(fragToLight);
 
-    float shadow = 0.0;
-    float bias = 0.05;
+    float shadow  = 0.0;
+    float bias    = 0.05;
     float samples = 4.0;
-    float offset = 0.1;
+    float offset  = 0.1;
 
     for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
         for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
@@ -129,4 +152,32 @@ float calcShadow(pointLight light, samplerCube map) {
     shadow /= (samples * samples * samples);
 
     return shadow;
+}
+
+vec3 calcSpotLight(vec3 tex, vec3 normal) {
+
+    vec3 light_dir = normalize(sl.position - vPos);
+
+    float theta = dot(light_dir, normalize(-sl.direction));
+
+    // Diffuse
+    float diffuse      = max(dot(normal, light_dir), 0.0);
+    vec3  diffuseLight = diffuse * tex * sl.color;
+
+    // Specular
+    vec3 view_dir    = normalize(camPos - vPos);
+    vec3 reflect_dir = reflect(-light_dir, normal);
+
+    float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+    vec3  specularLight = spec * tex * sl.color;
+
+    // Attenuation
+    float frag_dist   = length(sl.position - vPos);
+    float attenuation = 1.0 / (sl.constant + sl.linear*frag_dist + sl.quadratic*frag_dist*frag_dist);
+
+    // Smooth-Edge
+    float epsilon   = sl.cutOffangle - sl.outerCutOff;
+    float intensity = clamp((theta - sl.outerCutOff) / epsilon, 0.0, 1.0);
+
+    return (attenuation * intensity * vec3(diffuseLight + specularLight));
 }

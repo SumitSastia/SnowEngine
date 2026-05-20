@@ -99,6 +99,7 @@ Shader::Shader(const std::string vertexStr, const std::string fragmentStr) {
     if (!success) {
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cout << "ERROR: VERTEX-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
+        std::cout << "File: " << vertexStr << std::endl;
     }
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -106,6 +107,7 @@ Shader::Shader(const std::string vertexStr, const std::string fragmentStr) {
     if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cout << "ERROR: FRAGMENT-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
+        std::cout << "File: " << fragmentStr << std::endl;
     }
 
     // Shader Program //
@@ -244,6 +246,135 @@ void Texture2D::destroy() {
 
     glDeleteTextures(1, &textureID);
     textureID = 0;
+}
+
+CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
+
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    unsigned char* pixelData;
+    int width, height, nrChannels;
+
+    const unsigned int size = textureFaces.size();
+
+    std::string base_str = base.string();
+    base_str.erase(base_str.size() - 5);
+
+    for (unsigned int i = 0; i < size; i++) {
+
+        std::string finalPath = base_str + textureFaces[i];
+
+        pixelData = stbi_load(
+            finalPath.c_str(),
+            &width, &height,
+            &nrChannels, 0
+        );
+
+        if (pixelData) {
+
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height,
+                0, GL_RGB, GL_UNSIGNED_BYTE, pixelData
+            );
+        }
+        else {
+            std::cerr << "ERROR::FAILED TO LOAD CUBEMAP!" << std::endl;
+        }
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    stbi_image_free(pixelData);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    const float skyboxVertices[] = {
+                  
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
+
+    glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+}
+
+Skybox::Skybox(const std::vector <std::string>& textureFaces) {
+
+    _cubemap  = new CubeMap(textureFaces);
+    isVisible = true;
+
+    lightIntensity = 0.8f;
+}
+
+void Skybox::bindTexture(const unsigned int textureUnit) const {
+
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _cubemap->get_ID());
+}
+
+void Skybox::draw() const {
+
+    glBindVertexArray(_cubemap->get_VAO());
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
+
+void Skybox::destroy() {
+    delete _cubemap;
 }
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //

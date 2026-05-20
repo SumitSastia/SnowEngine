@@ -37,16 +37,18 @@ class Scene1 : public Scene {
     Shape myFloor;
     Shape myGround;
     Shape myCube;
-    ShapeInstanced cubes;
     Shape advCube;
-    Model3D* mySphere;
 
-    std::vector <Entity>    entities;
+    Model3D* mySphere;
+    ShapeInstanced cubes;
+
+    std::vector <Entity>  entities;
     std::vector <Matrix4> entityModels;
 
     // Light
     uint8_t light_count;
     std::vector <LightSource*> lights;
+    std::vector <Matrix4*> lightModels;
 
     // Shadow
     glm::mat4 shadowProj;
@@ -55,6 +57,9 @@ class Scene1 : public Scene {
     // Light Space - Directional Light
     glm::mat4 lightSpace;
     DirectShadowFrame* directFrame;
+
+    // Skybox
+    Skybox* _skybox;
 
     // Debug
     DebugFrame* debugFrame;
@@ -71,6 +76,7 @@ public:
     void render() const override;
     void renderDirectShadow() const override;
     void renderPointShadow() const override;
+    void renderSkybox(const unsigned int loadedTextures) const;
     void renderDebug() const override;
     void destroy() override;
 };

@@ -16,30 +16,31 @@ uniform sampler2D texture1;
 void main() {
 
     vec3 tex    = texture(texture0, vTexCords).rgb;
-    vec3 color  = 0.4 * tex; // Ambient
-        
     vec3 normal = texture(texture1, vTexCords).xyz;
-    normal = (normal * 2.0 - 1.0);
 
+    vec3 color = 0.4 * tex * (skyboxIntensity + 1); // Ambient
+        
+    normal = (normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);
 
-    normal = normal;
-
     // Directional Lighting
-    // color += calcDirectionalLight(tex, normal);
+    // vec3 dirColor = calcDirectionalLight(tex, normal);
+    // float shadow  = calcDirectShadow();
 
-    // float shadow = calcDirectShadow();
-    // color *= (1.0 - shadow);
+    // dirColor *= (1.0 - shadow);
+    // color += dirColor;
 
     // Point Shadow
     for (int i = 0; i < light_count; i++) {
 
-        vec3 lightColor = vec3(0.0);
-
-        lightColor += calcPointLight(pl[i], tex, normal);
+        vec3 lightColor = calcPointLight(pl[i], tex, normal);
         lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
         color += lightColor;
+    }
+
+    if (useSpotLight) {
+        color += calcSpotLight(tex, normal);
     }
 
     FragColor = vec4(color, 1.0);

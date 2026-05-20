@@ -3,6 +3,7 @@
 #include <s_math.h>
 
 #include <string>
+#include <vector>
 
 const uint8_t MAX_SHADERS = 8;
 
@@ -54,6 +55,72 @@ public:
     void setPointLight      (const std::string& target, const lights::PointLight& pl) const;
     void setSpotLight       (const std::string& target, const lights::SpotLight& sl) const;
     void setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl) const;
+};
+
+class Texture2D {
+
+    int width;
+    int height;
+    int nrChannels;
+    
+    std::string type;
+    unsigned int textureID;
+    unsigned char* pixelData;
+    
+public:
+
+    Texture2D() :
+        width(0),
+        height(0),
+        nrChannels(0),
+        textureID(0) {
+    }
+
+    /*
+    Loads the image and allocate it into the Memory.
+    NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
+    */
+    void load(const char* path);
+
+    void destroy();
+
+    const unsigned int& getID()  const { return textureID; }
+    const std::string& getType() const { return type; }
+};
+
+class CubeMap {
+    
+    unsigned int VBO, VAO, textureID;
+
+public:
+
+    CubeMap(const std::vector <std::string>& textureFaces);
+
+    const unsigned int& get_VAO() const { return VAO; }
+    const unsigned int& get_ID() const { return textureID; }
+};
+
+class Skybox {
+
+    CubeMap* _cubemap;
+    
+    bool  isVisible;
+    float lightIntensity;
+
+public:
+
+    Skybox(const std::vector <std::string>& textureFaces);
+
+    void setVisibility(const bool visible) { isVisible = visible; }
+    bool getVisibility() const { return isVisible; }
+
+    void  setIntensity(const float intensity) { lightIntensity = intensity; }
+    float getIntensity() const { return lightIntensity; }
+
+    void bindTexture(const unsigned int textureUnit) const;
+
+    void draw() const;
+    void destroy();
 };
 
 // ------------------------------ Colors --------------------------------------------- //

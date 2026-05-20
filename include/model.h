@@ -81,10 +81,9 @@ public:
         return *this;
     }
 
-    // ~Mesh();
-
     void bindTextures(const unsigned int textureUnit) const;
     void draw() const;
+    void destroy();
 };
 
 class Model3D {
@@ -112,8 +111,9 @@ public:
         loadModel(path);
     }
 
-    void draw() const;
-
     // Binds Textures of the Model into the Memory GL_TEXTURE0 and so on
     void bindTextures(const unsigned int firstTextureUnit) const;
+
+    void draw() const;
+    void destroy();
 };

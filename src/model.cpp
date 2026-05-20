@@ -44,13 +44,6 @@ void MeshTexture::loadTexture(const char* path, const std::string& directory) {
 
 //-------------------------------------------------------------------------------------//
 
-// Mesh::~Mesh() {
-
-//     glDeleteBuffers(1, &VBO);
-//     glDeleteBuffers(1, &EBO);
-//     glDeleteVertexArrays(1, &VAO);
-// }
-
 void Mesh::setupMesh() {
 
     size_t size_v = sizeof(Vertex) * vertices.size();
@@ -92,6 +85,13 @@ void Mesh::draw() const {
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+
+void Mesh::destroy() {
+
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
 }
 
 //-------------------------------------------------------------------------------------//
@@ -228,5 +228,12 @@ void Model3D::bindTextures(const unsigned int firstTextureUnit) const {
 
     for (unsigned int i = 0; i < total_mesh; i++) {
         meshes[i].bindTextures(firstTextureUnit + i);
+    }
+}
+
+void Model3D::destroy() {
+
+    for (unsigned int i = 0; i < total_mesh; i++) {
+        meshes[i].destroy();
     }
 }
