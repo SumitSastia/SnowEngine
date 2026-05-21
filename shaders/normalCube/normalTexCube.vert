@@ -32,7 +32,7 @@ void main(){
     
     T = normalize(T - dot(T,N) * N);
 
-    vec3 B = cross(N,T);
+    vec3 B = -cross(N,T);
     
     TBN = mat3(T,B,N);
 }

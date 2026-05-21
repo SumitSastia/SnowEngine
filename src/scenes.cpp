@@ -198,7 +198,7 @@ void Scene1::init() {
     sphereModel.translate(glm::vec3(6.0, 0.0, 3.0));
 
     wallModel.translate(glm::vec3(2.5f, 0.5f, -5.0f));
-    wallModel.scale(glm::vec3(5.0f));
+    wallModel.scale(glm::vec3(2.0f));
 
     // Lights
     light_count = 2;
