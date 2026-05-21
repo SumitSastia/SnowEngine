@@ -21,16 +21,39 @@ uniform float height_scale;
 
 vec2 parallax_mapping(vec3 view_dir) {
     
-    float height = texture(texture2, vTexCords).r;
-    vec2 p = view_dir.xy / view_dir.z * (height * height_scale);
+    // float height = texture(texture2, vTexCords).r;
+    // vec2 p = view_dir.xy / view_dir.z * (height * height_scale);
     
-    return vTexCords - p;
+    // return vTexCords - p;
+
+    const float numLayers = 10;
+
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+
+    vec2 P = view_dir.xy * height_scale;
+    vec2 deltaTexCords = P / numLayers;
+
+    vec2  currentTexCords   = vTexCords;
+    float currentDepthValue = texture(texture2, vTexCords).r;
+
+    while (currentLayerDepth < currentDepthValue) {
+
+        currentTexCords   -= deltaTexCords;
+        currentDepthValue  = texture(texture2, currentTexCords).r;
+        currentLayerDepth += layerDepth;
+    }
+
+    return currentTexCords;
 }
 
 void main() {
 
-    vec3 view_dir   = normalize(tangentViewPos - tangentViewPos);
+    vec3 view_dir   = normalize(tangentViewPos - tangentFragPos);
     vec2 vTexCords2 = parallax_mapping(view_dir);
+
+    if (vTexCords2.x > 1.0 || vTexCords2.y > 1.0 || vTexCords2.x < 0.0 || vTexCords2.y < 0.0)
+        discard;
 
     vec3 tex    = texture(texture0, vTexCords2).rgb;
     vec3 normal = texture(texture1, vTexCords2).xyz;
@@ -62,4 +85,5 @@ void main() {
 
     FragColor = vec4(color, 1.0);
     // FragColor = vec4(normal * 0.5 + 0.5, 1.0);
+    // FragColor = vec4(texture(texture2, vTexCords).rgb, 1.0);
 }

@@ -392,6 +392,7 @@ void Scene1::render() const {
 
     // Parallax Wall
     currentShader = loaded_shaders[PARALLAX_PLANE];
+    currentShader.use();
 
     currentShader.setVec3("lightPos", lights[0]->getPosition());
     currentShader.setVec3("viewPos", Camera::instance().getPos());
