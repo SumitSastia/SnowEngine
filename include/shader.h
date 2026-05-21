@@ -61,18 +61,15 @@ class Texture2D {
 
     int width;
     int height;
-    int nrChannels;
     
     std::string type;
     unsigned int textureID;
-    unsigned char* pixelData;
     
 public:
 
     Texture2D() :
         width(0),
         height(0),
-        nrChannels(0),
         textureID(0) {
     }
 

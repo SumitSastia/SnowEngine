@@ -38,11 +38,11 @@ class Scene1 : public Scene {
     Shape myGround;
     Shape myCube;
     Shape advCube;
+    Shape myWall;
 
     Model3D* mySphere;
     ShapeInstanced cubes;
 
-    std::vector <Entity>  entities;
     std::vector <Matrix4> entityModels;
 
     // Light

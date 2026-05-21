@@ -16,7 +16,8 @@ enum scene1_shaders {
     NORMAL_MAPPED_3D,
     MODEL_3D,
     POINT_SHADOW_INST,
-    CUBEMAP
+    CUBEMAP,
+    PARALLAX_PLANE
 };
 
 namespace scene_var {
@@ -153,6 +154,10 @@ void Scene1::init() {
         Shader(
             "../shaders/cubeMap/skybox.vert",
             "../shaders/cubeMap/skybox.frag"
+        ),
+        Shader(
+            "../shaders/planes/parallaxPlane.vert",
+            "../shaders/planes/parallaxPlane.frag", true
         )
     };
 
@@ -163,20 +168,27 @@ void Scene1::init() {
     cubes    = DefaultShapes::instance().cubeInstanced;
     myGround = DefaultShapes::instance().square;
     advCube  = DefaultShapes::instance().advancedCube;
+    myWall   = DefaultShapes::instance().square.copy();
 
     mySphere = new Model3D("../assets/models/test_cube/sphere.obj");
 
-    entities = {
-        myCube,
-        advCube
-    };
+    myWall.loadDiffuseTex("assets/textures/parallex_maps/bricks2.jpg");
+    myWall.loadNormalTex("assets/textures/parallex_maps/bricks2_normal.jpg");
+    myWall.loadSpecularTex("assets/textures/parallex_maps/bricks2_disp.jpg");
+
+    loaded_entities.push_back(myCube);
+    loaded_entities.push_back(myFloor);
+    loaded_entities.push_back(myGround);
+    loaded_entities.push_back(advCube);
+    loaded_entities.push_back(*mySphere);
 
     Matrix4 cubeModel   {};
     Matrix4 floorModel  {};
     Matrix4 groundModel {};
     Matrix4 sphereModel {};
+    Matrix4 wallModel   {};
 
-    floorModel.translate(glm::vec3(-2.0f, 0.0f, -5.0f));
+    floorModel.translate(glm::vec3(-2.5f, 0.5f, -5.0f));
     floorModel.scale(glm::vec3(5.0f));
 
     groundModel.translate(glm::vec3(0.0f, -2.0f, 0.0f));
@@ -184,6 +196,9 @@ void Scene1::init() {
     groundModel.scale(glm::vec3(10.0f));
 
     sphereModel.translate(glm::vec3(6.0, 0.0, 3.0));
+
+    wallModel.translate(glm::vec3(2.5f, 0.5f, -5.0f));
+    wallModel.scale(glm::vec3(5.0f));
 
     // Lights
     light_count = 2;
@@ -212,6 +227,7 @@ void Scene1::init() {
     entityModels.push_back(groundModel);  // 3
     entityModels.push_back(sphereModel);  // 4
     entityModels.push_back(lightModel1);  // 5
+    entityModels.push_back(wallModel);    // 6
 
     lightModels.push_back(&entityModels[2]);
     lightModels.push_back(&entityModels[5]);
@@ -234,13 +250,9 @@ void Scene1::init() {
     );
 
     lightSpace = lightProjection * lightView;
-
-    // Debug
-    debugFrame = new DebugFrame(WIN_W, WIN_H);
-
+    
     // Skybox
 
-    // Skybox
     std::vector <std::string> skyboxFaces = {
         "assets/textures/skybox/Daylight_Box_Right.bmp",
         "assets/textures/skybox/Daylight_Box_Left.bmp",
@@ -249,8 +261,14 @@ void Scene1::init() {
         "assets/textures/skybox/Daylight_Box_Front.bmp",
         "assets/textures/skybox/Daylight_Box_Back.bmp"
     };
-
+    
     _skybox = new Skybox(skyboxFaces);
+
+    // Debug
+    debugFrame = new DebugFrame(WIN_W, WIN_H);
+
+    std::cout << "Scene1 - Loaded Shaders: " << loaded_shaders.size() << std::endl;
+    std::cout << "Scene1 - Loaded Entities: " << loaded_entities.size() + cubes.getCount() << std::endl;
 }
 
 void Scene1::update(const float& delta_time) {
@@ -295,7 +313,7 @@ void Scene1::render() const {
     glActiveTexture(GL_TEXTURE0 + dl_depthMap);
     glBindTexture(GL_TEXTURE_2D, directFrame->getTex());
 
-    std::vector <uint8_t> commonShaders = {2,6,7,8};
+    std::vector <uint8_t> commonShaders = {2,6,7,8,11};
     const uint8_t _length = commonShaders.size();
 
     const bool showSkybox = _skybox->getVisibility();
@@ -371,6 +389,28 @@ void Scene1::render() const {
     currentShader.setMat4("model",        entityModels[3].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[3].getNormal());
     myGround.draw();
+
+    // Parallax Wall
+    currentShader = loaded_shaders[PARALLAX_PLANE];
+
+    currentShader.setVec3("lightPos", lights[0]->getPosition());
+    currentShader.setVec3("viewPos", Camera::instance().getPos());
+
+    currentShader.setMat4("model",        entityModels[6].getMatrix());
+    currentShader.setMat3("normalMatrix", entityModels[6].getNormal());
+
+    currentShader.setInt("texture0", loadedTextures);
+    myWall.bindDiffuseTex(loadedTextures++);
+
+    currentShader.setInt("texture1", loadedTextures);
+    myWall.bindNormalTex(loadedTextures++);
+
+    currentShader.setInt("texture2", loadedTextures);
+    myWall.bindSpecularTex(loadedTextures++);
+
+    currentShader.setFloat("height_scale", 0.1f);
+
+    myWall.draw();
 
     // Models
     currentShader = loaded_shaders[MODEL_3D];

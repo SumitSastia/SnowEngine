@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <s_math.h>
+#include <entity.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -86,7 +87,7 @@ public:
     void destroy();
 };
 
-class Model3D {
+class Model3D : public Entity {
 
     glm::mat4 projection;
     glm::mat4 view;

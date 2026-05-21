@@ -216,7 +216,7 @@ void Texture2D::load(const char* path){
 
     std::string finalPath = base_str + path_str;
 
-    pixelData = stbi_load(finalPath.c_str(), &width, &height, nullptr, 4);
+    unsigned char* pixelData = stbi_load(finalPath.c_str(), &width, &height, nullptr, 4);
 
     if(!pixelData){
         std::cerr << "Failed to Load Image!\n" << finalPath << std::endl;
@@ -245,7 +245,9 @@ void Texture2D::load(const char* path){
 void Texture2D::destroy() {
 
     glDeleteTextures(1, &textureID);
+
     textureID = 0;
+    width = 0; height = 0;
 }
 
 CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
@@ -355,7 +357,7 @@ CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
 Skybox::Skybox(const std::vector <std::string>& textureFaces) {
 
     _cubemap  = new CubeMap(textureFaces);
-    isVisible = true;
+    isVisible = false;
 
     lightIntensity = 0.8f;
 }

@@ -23,9 +23,32 @@ protected:
 public:
 
     Shape(): 
+
+        VBO(0),
+        VAO(0),
+        EBO(0),
+        indicesCount(0),
+
         shapeDiffuseTexture(nullptr),
         shapeNormalTexture(nullptr),
         shapeSpecularTexture(nullptr) {
+    }
+
+    Shape copy() const {
+
+        Shape _copy;
+        
+        _copy.VBO = this->VBO;
+        _copy.VAO = this->VAO;
+        _copy.EBO = this->EBO;
+
+        _copy.indicesCount = this->indicesCount;
+
+        _copy.shapeDiffuseTexture  = nullptr;
+        _copy.shapeNormalTexture   = nullptr;
+        _copy.shapeSpecularTexture = nullptr;
+
+        return _copy;
     }
 
     void bindVertices2D(
@@ -55,6 +78,7 @@ public:
     void bindSpecularTex(const unsigned int textureUnit) const;
     
     void draw() const;
+    void destroy();
 };
 
 class ShapeInstanced : public Shape {
@@ -71,6 +95,7 @@ public:
         const glm::mat3* normals, const size_t& size_n
     );
 
+    unsigned int getCount() const { return instanceCounts; }
     void draw() const;
 };
 

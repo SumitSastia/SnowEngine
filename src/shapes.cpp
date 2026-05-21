@@ -152,7 +152,13 @@ void Shape::bindSpecularTex(const unsigned int textureUnit) const {
 
 void Shape::loadDiffuseTex(const char* path) {
 
-    shapeDiffuseTexture = (!shapeDiffuseTexture)? new Texture2D() : shapeDiffuseTexture;
+    if (!shapeDiffuseTexture) {
+        shapeDiffuseTexture = new Texture2D();
+    }
+    else {
+        shapeDiffuseTexture->destroy();
+    }
+
     shapeDiffuseTexture->load(path);
 }
 
@@ -175,6 +181,18 @@ void Shape::draw() const {
     glBindVertexArray(0);
 }
 
+void Shape::destroy() {
+
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
+
+    indicesCount = 0;
+
+    delete shapeDiffuseTexture;
+    delete shapeNormalTexture;
+    delete shapeSpecularTexture;
+}
 
 //-------------------------------------------------------------------------------------//
 
