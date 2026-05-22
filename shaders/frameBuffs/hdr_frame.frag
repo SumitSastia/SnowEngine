@@ -16,7 +16,6 @@ void main() {
     // tone-mapping
     vec3 mapped = tex;
 
-
 	if (toggle) 
         mapped = tex / (tex + vec3(1.0));          // Reinhard Mapping
         // mapped = vec3(1.0) - exp(-tex * exposure); // Tone Mapping

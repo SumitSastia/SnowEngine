@@ -28,6 +28,7 @@ public:
     virtual void renderLight() const = 0;
     virtual void renderDirectShadow() const = 0;
     virtual void renderPointShadow() const = 0;
+    virtual void renderSkybox() const = 0;
     virtual void renderDebug() const = 0;
     virtual void destroy() = 0;
 };
@@ -78,7 +79,7 @@ public:
     void renderLight() const override;
     void renderDirectShadow() const override;
     void renderPointShadow() const override;
-    void renderSkybox(const unsigned int loadedTextures) const;
+    void renderSkybox() const override;
     void renderDebug() const override;
     void destroy() override;
 };

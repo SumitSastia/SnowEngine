@@ -1,3 +1,4 @@
+#include <input.h>
 #include <scenes.h>
 #include <camera.h>
 #include <renderer.h>
@@ -29,11 +30,6 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
     static uint8_t model_counter = 0;
     const  float   move_speed    = scene_var::speed * delta_time;
 
-    // Toggle Keys
-    static bool KEP_1_PRESSED = false;
-    static bool KEY_T_PRESSED = false;
-    static bool KEY_G_PRESSED = false;
-
     // Model of the Object to move
     Matrix4& movableModel = entityModels[model_counter];
 
@@ -61,12 +57,9 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
         movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
     }
 
-    if (glfwGetKey(window, GLFW_KEY_KP_1)) {
-
-        if (!KEP_1_PRESSED) model_counter = (model_counter + 1) % entityModels.size();
-        KEP_1_PRESSED = true;
+    if (Input::isKeyDown(GLFW_KEY_KP_1)) {
+        model_counter = (model_counter + 1) % entityModels.size();
     }
-    else KEP_1_PRESSED = false;
 
     if (glfwGetKey(window, GLFW_KEY_KP_5)) {
 
@@ -85,21 +78,13 @@ void Scene1::input(GLFWwindow* window, const float& delta_time) {
         Camera::instance().set_target(glm::vec3(-0.1f, -0.1f, -0.1f));
     }
 
-    if (glfwGetKey(window, GLFW_KEY_T)) {
-
-        if (!KEY_T_PRESSED) {
-            DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
-        }
-        KEY_T_PRESSED = true;
+    if (Input::isKeyDown(GLFW_KEY_T)) {
+        DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
     }
-    else KEY_T_PRESSED = false;
 
-    if (glfwGetKey(window, GLFW_KEY_G)) {
-
-        if (!KEY_G_PRESSED) _skybox->setVisibility(!_skybox->getVisibility());
-        KEY_G_PRESSED = true;
+    if (Input::isKeyDown(GLFW_KEY_G)) {
+        _skybox->setVisibility(!_skybox->getVisibility());
     }
-    else KEY_G_PRESSED = false;
 }
 
 void Scene1::init() {
@@ -111,15 +96,15 @@ void Scene1::init() {
 
         Shader(
             "../shaders/normalCube/cube.vert",
-            "../shaders/normalCube/texturedCube.frag", true
+            "../shaders/commonFrag/texturedObj.frag", true
         ),
         Shader(
             "../shaders/planes/plane.vert",
-            "../shaders/planes/texturedPlane.frag", true
+            "../shaders/commonFrag/texturedObj.frag", true
         ),
         Shader(
             "../shaders/instancedCubes/texture.vert",
-            "../shaders/instancedCubes/texture.frag", true
+            "../shaders/commonFrag/texturedObj.frag", true
         ),
         Shader(
             "../shaders/lights/light.vert",
@@ -136,11 +121,11 @@ void Scene1::init() {
         ),
         Shader(
             "../shaders/planes/normalTexPlane.vert",
-            "../shaders/planes/normalTexPlane.frag", true
+            "../shaders/commonFrag/normalTex.frag", true
         ),
         Shader(
             "../shaders/normalCube/normalTexCube.vert",
-            "../shaders/normalCube/normalTexCube.frag", true
+            "../shaders/commonFrag/normalTex.frag", true
         ),
         Shader(
             "../shaders/models/model.vert",
@@ -216,7 +201,7 @@ void Scene1::init() {
     lightModel1.translate(glm::vec3(-3.0f, 1.5f, 3.0f));
 
     // lights[0]->setLightColor(100.0f * colors::YELLOW);
-    lights[0]->setLightColor(colors::YELLOW);
+    lights[0]->setLightColor(5.0f * colors::YELLOW);
     lights[0]->setPosition(lightModel0.getPos());
 
     lights[1]->setLightColor(colors::PINK);
@@ -425,6 +410,7 @@ void Scene1::render() const {
     mySphere->bindTextures(loadedTextures++);
     mySphere->draw();
 
+    this->renderLight();
 }
 
 void Scene1::renderLight() const {
@@ -444,7 +430,7 @@ void Scene1::renderLight() const {
     }
 
     // Skybox
-    if (_skybox->getVisibility()) this->renderSkybox(0);
+    // if (_skybox->getVisibility()) this->renderSkybox();
 }
 
 void Scene1::renderDirectShadow() const {
@@ -545,7 +531,9 @@ void Scene1::renderPointShadow() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Scene1::renderSkybox(const unsigned int loadedTextures) const {
+void Scene1::renderSkybox() const {
+
+    if (!_skybox->getVisibility()) return;
 
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_FALSE);
@@ -557,8 +545,8 @@ void Scene1::renderSkybox(const unsigned int loadedTextures) const {
     currentShader.setMat4("projection", Camera::instance().getPerspective());
     currentShader.setMat4("view", glm::mat4(glm::mat3(Camera::instance().getView())));
 
-    currentShader.setInt("cubeMap", loadedTextures);
-    _skybox->bindTexture(loadedTextures);
+    currentShader.setInt("cubeMap", 0);
+    _skybox->bindTexture(0);
 
     _skybox->draw();
 

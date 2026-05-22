@@ -6,5 +6,5 @@ out vec4 FragColor;
 uniform samplerCube cubeMap;
 
 void main() {
-	FragColor = texture(cubeMap, vTextureDir);
+	FragColor = vec4(texture(cubeMap, vTextureDir).rgb, 0.0);
 }

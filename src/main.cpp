@@ -45,6 +45,7 @@ int main() {
 
     DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
     HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
+    BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
 
     // ---------- Loop ------------------------ //
 
@@ -58,16 +59,16 @@ int main() {
         // Inputs //
         Input::update();
         
-        mainCamera.input_handler(window, deltaTime);
         mainCamera.mouse_handler(window);
         mainCamera.scroll_handler(scrollOffset);
         
-        mainScene->input(window, deltaTime);
-
         // Events //
         glfwPollEvents();
         
         // Updates // 
+        mainCamera.input_handler(window, deltaTime);
+        mainScene->input(window, deltaTime);
+        
         mainCamera.update(deltaTime);
         mainScene->update(deltaTime);
         // Debug_menu::instance().update();
@@ -77,7 +78,7 @@ int main() {
         mainScene->renderPointShadow();
         
         glViewport(0, 0, WIN_W, WIN_H);
-        glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
+        glBindFramebuffer(GL_FRAMEBUFFER, bloomFrame->getFBO());
 
         Renderer::instance().render();
 
@@ -87,12 +88,13 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        hdrFrame->render();
+        bloomFrame->render();
 
-        Renderer::copyDepth(hdrFrame->getFBO(), 0);
+        Renderer::copyDepth(bloomFrame->getFBO(), 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        mainScene->renderLight();
+        // mainScene->renderLight();
+        mainScene->renderSkybox();
 
         // Debug Menu
         // Debug_menu::instance().render();

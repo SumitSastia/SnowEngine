@@ -120,3 +120,30 @@ public:
 	void init() override;
 	void render() const override;
 };
+
+class BlurFrame {
+
+public:
+	
+	unsigned int pingpongFBO[2];
+	unsigned int pingpongTex[2];
+	
+	Shader* shader;
+	
+	BlurFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
+};
+
+class BloomFrame : public FrameBuffer {
+
+	Shader* shader;
+	unsigned int colorBuffers[2];
+
+	BlurFrame* _blur;
+
+public:
+
+	BloomFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
+
+	void init() override;
+	void render() const override;
+};
