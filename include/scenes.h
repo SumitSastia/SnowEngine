@@ -25,6 +25,7 @@ public:
     virtual void input(GLFWwindow* window, const float& delta_time) = 0;
     virtual void update(const float& delta_time) = 0;
     virtual void render() const = 0;
+    virtual void renderLight() const = 0;
     virtual void renderDirectShadow() const = 0;
     virtual void renderPointShadow() const = 0;
     virtual void renderDebug() const = 0;
@@ -74,6 +75,7 @@ public:
     void input(GLFWwindow* window, const float& delta_time) override;
     void update(const float& delta_time) override;
     void render() const override;
+    void renderLight() const override;
     void renderDirectShadow() const override;
     void renderPointShadow() const override;
     void renderSkybox(const unsigned int loadedTextures) const;

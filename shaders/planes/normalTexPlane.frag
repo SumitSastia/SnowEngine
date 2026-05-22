@@ -18,7 +18,7 @@ void main() {
     vec3 tex    = texture(texture0, vTexCords).rgb;
     vec3 normal = texture(texture1, vTexCords).xyz;
 
-    vec3 color = 0.4 * tex * (skyboxIntensity + 1); // Ambient
+    vec3 color = ambientStrength * tex; // Ambient
         
     normal = (normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);
@@ -45,4 +45,5 @@ void main() {
 
     FragColor = vec4(color, 1.0);
     // FragColor = vec4(normal * 0.5 + 0.5, 1.0);
+    // FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

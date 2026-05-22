@@ -47,6 +47,8 @@ public:
     static void enableDepth();
     static void disableDepth();
 
+    static void copyDepth(unsigned int fbo1, unsigned int fbo2);
+
     GLFWwindow* getWindow() const { return window; }
 
 };

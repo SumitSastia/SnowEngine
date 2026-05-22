@@ -215,6 +215,7 @@ void Scene1::init() {
     lightModel0.translate(glm::vec3(3.0f, 1.5f, -3.0f));
     lightModel1.translate(glm::vec3(-3.0f, 1.5f, 3.0f));
 
+    // lights[0]->setLightColor(100.0f * colors::YELLOW);
     lights[0]->setLightColor(colors::YELLOW);
     lights[0]->setPosition(lightModel0.getPos());
 
@@ -300,9 +301,9 @@ void Scene1::render() const {
 
     for (uint8_t i = 0; i < light_count; i++) {
         
-        currentShader.setMat4("finalMatrix", projection * view * glm::scale(lightModels[i]->getMatrix(), glm::vec3(0.5f)));
-        currentShader.setVec3("lightColor" , lights[i]->getLightColor());
-        lights[i]->draw();
+        // currentShader.setMat4("finalMatrix", projection * view * glm::scale(lightModels[i]->getMatrix(), glm::vec3(0.5f)));
+        // currentShader.setVec3("lightColor" , lights[i]->getLightColor());
+        // lights[i]->draw();
 
         glActiveTexture(GL_TEXTURE0 + loadedTextures++);
         glBindTexture(GL_TEXTURE_CUBE_MAP, shadowFrames[i]->getTex());
@@ -424,8 +425,26 @@ void Scene1::render() const {
     mySphere->bindTextures(loadedTextures++);
     mySphere->draw();
 
+}
+
+void Scene1::renderLight() const {
+
+    const glm::mat4 projection = Camera::instance().getPerspective();
+    const glm::mat4 view       = Camera::instance().getView();
+
+    // Light
+    Shader currentShader = loaded_shaders[LIGHT];
+    currentShader.use();
+
+    for (uint8_t i = 0; i < light_count; i++) {
+
+        currentShader.setMat4("finalMatrix", projection * view * glm::scale(lightModels[i]->getMatrix(), glm::vec3(0.5f)));
+        currentShader.setVec3("lightColor" , lights[i]->getLightColor());
+        lights[i]->draw();
+    }
+
     // Skybox
-    if (showSkybox) this->renderSkybox(loadedTextures);
+    if (_skybox->getVisibility()) this->renderSkybox(0);
 }
 
 void Scene1::renderDirectShadow() const {
@@ -496,6 +515,12 @@ void Scene1::renderPointShadow() const {
 
         currentShader.setMat4("model", entityModels[1].getMatrix());
         myFloor.draw();
+
+        currentShader.setMat4("model", entityModels[3].getMatrix());
+        myGround.draw();
+
+        currentShader.setMat4("model", entityModels[6].getMatrix());
+        myWall.draw();
 
         currentShader.setMat4("model", entityModels[4].getMatrix());
         mySphere->draw();

@@ -47,6 +47,8 @@ uniform SpotLight sl;
 
 uniform float skyboxIntensity;
 
+float ambientStrength = (0.1 + skyboxIntensity / 2);
+
 vec3 calcDirectionalLight(vec3 tex, vec3 normal) {
 
     vec3 light_dir = normalize(dl.direction);

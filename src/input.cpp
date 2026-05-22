@@ -1,17 +1,39 @@
 #include <input.h>
 
-void input_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+#include <iostream>
+#include <algorithm>
+
+bool* Input::currentState  = nullptr;
+bool* Input::previousState = nullptr;
+
+void Input::init() {
+
+    currentState  = new bool[GLFW_KEY_LAST + 1]();
+    previousState = new bool[GLFW_KEY_LAST + 1]();
+}
+
+void Input::update() {
+    
+    std::copy(
+        currentState,
+        currentState + GLFW_KEY_LAST + 1,
+        previousState
+    );
+}
+
+void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
-    if (glfwGetKey(window, GLFW_KEY_E)) {
+    if (key < 0 || key >= GLFW_KEY_LAST) return;
 
-        if(!mouseInCamera) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else               glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-        mouseInCamera = !mouseInCamera;
+    if (action == GLFW_PRESS) {
+        currentState[key] = true;
+    }
+    else if (action == GLFW_RELEASE) {
+        currentState[key] = false;
     }
 }
 

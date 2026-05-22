@@ -1,6 +1,7 @@
 #include <frame.h>
 #include <shader.h>
 #include <renderer.h>
+#include <input.h>
 
 #include <iostream>
 
@@ -161,4 +162,77 @@ PointShadowFrame::PointShadowFrame(const uint16_t& shadow_size) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+HDRFrame::HDRFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    // Texture Attachment
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, frameWidth, frameHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, drawBuffers);
+
+    // Render Object
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameWidth, frameHeight);
+    
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cerr << "ERROR :: UNABLE TO COMPLETE DEBUG-FRAME-BUFFER!" << std::endl;
+    }
+    
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    this->init();
+}
+
+void HDRFrame::init() {
+
+    shader = new Shader(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/hdr_frame.frag"
+    );
+}
+
+void HDRFrame::render() const {
+
+    // Renderer::disableDepth();
+
+    shader->use();
+    shader->setInt("screen", 0);
+    
+    static bool toggle = true;
+    
+    if (Input::isKeyDown(GLFW_KEY_M)) {
+        
+        toggle = !toggle;
+        if (toggle) std::cout << "ENABLED  :: Tone Mapping" << std::endl;
+        else        std::cout << "DISABLED :: Tone Mapping" << std::endl;
+    }
+
+    shader->setBool("toggle", toggle);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glBindVertexArray(frameBuffers::get_defaultVAO());
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // Renderer::enableDepth();
 }

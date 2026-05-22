@@ -108,3 +108,15 @@ public:
 	void init() override {}
 	void render() const override {}
 };
+
+class HDRFrame : public FrameBuffer {
+
+	Shader* shader;
+	
+public:
+
+	HDRFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
+
+	void init() override;
+	void render() const override;
+};

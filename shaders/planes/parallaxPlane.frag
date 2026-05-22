@@ -45,6 +45,16 @@ vec2 parallax_mapping(vec3 view_dir) {
     }
 
     return currentTexCords;
+
+    vec2 prevTexCords = currentTexCords + deltaTexCords;
+
+    float afterDepth  = currentDepthValue - currentLayerDepth;
+    float beforeDepth = texture(texture2, prevTexCords).r - currentLayerDepth + layerDepth;
+
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCords = prevTexCords * weight + currentTexCords * (1.0 - weight);
+
+    return finalTexCords;
 }
 
 void main() {
@@ -58,7 +68,7 @@ void main() {
     vec3 tex    = texture(texture0, vTexCords2).rgb;
     vec3 normal = texture(texture1, vTexCords2).xyz;
 
-    vec3 color = 0.4 * tex * (skyboxIntensity + 1); // Ambient
+    vec3 color = ambientStrength * tex; // Ambient
         
     normal = (normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);

@@ -11,8 +11,6 @@
 
 // ------------------------------ Global Variables ----------------------------------- //
 
-const bool defaultFBO = 0;
-
 bool isRunning = true;
 
 float deltaTime = 0.0f;
@@ -29,9 +27,13 @@ int main() {
     // Hides the cursor at the Startup
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    Input::init();
+
+    glDisable(GL_FRAMEBUFFER_SRGB);
+
     // ---------- CallBack Functions ---------- //
 
-    glfwSetKeyCallback(window, input_key_callback);
+    glfwSetKeyCallback(window, Input::key_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
     // ---------- Testing --------------------- //
@@ -42,6 +44,7 @@ int main() {
     Scene* mainScene = new Scene1();
 
     DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
+    HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
 
     // ---------- Loop ------------------------ //
 
@@ -51,16 +54,18 @@ int main() {
         float currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
-
-        // Events //
-        glfwPollEvents();
         
         // Inputs //
+        Input::update();
+        
         mainCamera.input_handler(window, deltaTime);
         mainCamera.mouse_handler(window);
         mainCamera.scroll_handler(scrollOffset);
-
+        
         mainScene->input(window, deltaTime);
+
+        // Events //
+        glfwPollEvents();
         
         // Updates // 
         mainCamera.update(deltaTime);
@@ -72,18 +77,25 @@ int main() {
         mainScene->renderPointShadow();
         
         glViewport(0, 0, WIN_W, WIN_H);
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        // glBindFramebuffer(GL_FRAMEBUFFER, debugFrame->getFBO());
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
 
         Renderer::instance().render();
 
         mainScene->render();
         // mainScene->renderDebug();
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        hdrFrame->render();
+
+        Renderer::copyDepth(hdrFrame->getFBO(), 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        mainScene->renderLight();
+
         // Debug Menu
         // Debug_menu::instance().render();
-
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // debugFrame->render();
 
         glfwSwapBuffers(window);
