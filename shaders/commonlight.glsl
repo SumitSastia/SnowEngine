@@ -127,6 +127,31 @@ vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
     return (attenuation * vec3(diffuseLight + specularLight));
 }
 
+vec3 calcSpecPointLight(pointLight light, vec3 tex, vec3 tex2, vec3 normal) {
+
+    // Diffuse
+    vec3  light_dir    = normalize(light.position - vPos);
+    float diffuse      = max(dot(normal, light_dir), 0.0);
+    vec3  diffuseLight = diffuse * tex * light.color;
+
+    // diffuseLight = vec3(0.0);
+
+    // Specular
+    vec3 view_dir    = normalize(camPos - vPos);
+    vec3 reflect_dir = reflect(-light_dir, normal);
+
+    float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+    vec3  specularLight = spec * tex2 * light.color;
+
+    // Attenuation
+    float frag_dist   = length(light.position - vPos);
+    float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
+
+    attenuation = 1.0;
+
+    return (attenuation * vec3(diffuseLight + specularLight));
+}
+
 float calcShadow(pointLight light, samplerCube map) {
 
     vec3  fragToLight = vPos - light.position;

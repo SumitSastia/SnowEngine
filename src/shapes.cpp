@@ -401,6 +401,7 @@ DefaultShapes::DefaultShapes(){
 
     cube.bindVertices3D(vertices, sizeof(vertices), indices, sizeof(indices));
     cube.loadDiffuseTex("assets/textures/wood_box.png");
+    cube.loadSpecularTex("assets/textures/metal_frame.png");
 
     advancedCube.bindVertices3D_Mapped(vertices1, sizeof(vertices1), indices, sizeof(indices));
     advancedCube.loadDiffuseTex("assets/textures/wood_box.png");
@@ -442,6 +443,7 @@ DefaultShapes::DefaultShapes(){
     );
 
     cubeInstanced.loadDiffuseTex("assets/textures/wood_box.png");
+    cubeInstanced.loadSpecularTex("assets/textures/metal_frame.png");
 
     // Plane
 

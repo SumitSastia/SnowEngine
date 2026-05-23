@@ -18,7 +18,9 @@ enum scene1_shaders {
     MODEL_3D,
     POINT_SHADOW_INST,
     CUBEMAP,
-    PARALLAX_PLANE
+    PARALLAX_PLANE,
+    SPECULAR_CUBE,
+    INSTANCED_SPEC,
 };
 
 namespace scene_var {
@@ -143,6 +145,14 @@ void Scene1::init() {
         Shader(
             "../shaders/planes/parallaxPlane.vert",
             "../shaders/planes/parallaxPlane.frag", true
+        ),
+        Shader(
+            "../shaders/normalCube/cube.vert",
+            "../shaders/commonFrag/specularTex.frag", true
+        ),
+        Shader(
+            "../shaders/instancedCubes/texture.vert",
+            "../shaders/commonFrag/specularTex.frag", true
         )
     };
 
@@ -298,7 +308,7 @@ void Scene1::render() const {
     glActiveTexture(GL_TEXTURE0 + dl_depthMap);
     glBindTexture(GL_TEXTURE_2D, directFrame->getTex());
 
-    std::vector <uint8_t> commonShaders = {2,6,7,8,11};
+    std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13};
     const uint8_t _length = commonShaders.size();
 
     const bool showSkybox = _skybox->getVisibility();
@@ -333,25 +343,31 @@ void Scene1::render() const {
     }
 
     // Cube
-    currentShader = loaded_shaders[NORMAL_MAPPED_3D];
+    currentShader = loaded_shaders[SPECULAR_CUBE];
     currentShader.use();
 
     currentShader.setMat4("model",        entityModels[0].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
     
     currentShader.setInt("texture0", loadedTextures);
-    advCube.bindDiffuseTex(loadedTextures++);
+    myCube.bindDiffuseTex(loadedTextures++);
 
-    currentShader.setInt("texture1", loadedTextures);
-    advCube.bindNormalTex(loadedTextures++);
-    advCube.draw();
+    // currentShader.setInt("texture1", loadedTextures);
+    // advCube.bindNormalTex(loadedTextures++);
+
+    currentShader.setInt("texture2", loadedTextures);
+    myCube.bindSpecularTex(loadedTextures++);
+    myCube.draw();
 
     // Instanced Cubes
-    currentShader = loaded_shaders[INSTANCED_CUBES];
+    currentShader = loaded_shaders[INSTANCED_SPEC];
     currentShader.use();
 
     currentShader.setInt("texture0", loadedTextures);
     cubes.bindDiffuseTex(loadedTextures++);
+
+    currentShader.setInt("texture2", loadedTextures);
+    cubes.bindSpecularTex(loadedTextures++);
 
     cubes.draw();
 
