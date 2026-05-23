@@ -175,6 +175,7 @@ public:
 
 	Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight);
 
+	const Shader* getShader() const { return shader; }
 	void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
 
 	void init() override {}

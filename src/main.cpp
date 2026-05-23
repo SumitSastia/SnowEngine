@@ -49,7 +49,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = true;
+    bool deferredRender = 1;
 
     // ---------- Loop ------------------------ //
 
@@ -87,7 +87,7 @@ int main() {
             glViewport(0, 0, WIN_W, WIN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
 
-            Renderer::instance().render();
+            Renderer::clear();
 
             mainScene->render();
             // mainScene->renderDebug();
@@ -105,19 +105,29 @@ int main() {
         }
         else {
 
+            mainScene->renderDirectShadow();
+            mainScene->renderPointShadow();
+
             glViewport(0, 0, WIN_W, WIN_H);
             deferredFrame->bindFBO();
 
-            Renderer::instance().render();
+            glClearColor(0.0, 0.0, 0.0, 1.0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // Renderer::clear();
 
             mainScene->renderGbuffer();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Renderer::clear();
 
+            mainScene->renderDeferred(*deferredFrame->getShader());
             deferredFrame->render();
 
-            Renderer::copyDepth(hdrFrame->getFBO(), 0);
+            Renderer::copyDepth(deferredFrame);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            mainScene->renderLight();
         }
 
         // Debug Menu

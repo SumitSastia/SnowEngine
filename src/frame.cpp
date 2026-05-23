@@ -439,24 +439,26 @@ Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
     shader = new Shader(
         "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/frameBuffs/deferred.frag" 
+        "../shaders/frameBuffs/deferred.frag", true
     );
 }
 
 void Gbuffer::render() const {
 
+    const unsigned int textureUnit = 3;
+
     shader->use();
-    shader->setInt("gPosition", 0);
-    shader->setInt("gNormal", 1);
-    shader->setInt("gTexture", 2);
+    shader->setInt("gPosition", textureUnit);
+    shader->setInt("gNormal", textureUnit + 1);
+    shader->setInt("gTexture", textureUnit + 2);
     
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, gPosition);
     
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE1 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, gNormal);
     
-    glActiveTexture(GL_TEXTURE2);
+    glActiveTexture(GL_TEXTURE2 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, gTexture);
     
     glBindVertexArray(frameBuffers::get_defaultVAO());

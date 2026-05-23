@@ -43,17 +43,17 @@ Replaces "#include" inside file content with header file data.
 std::string Shader::preprocessFile(const char* path) {
 
     std::string src_str = loadShaderFile(path);
-
+    
     std::stringstream input(src_str);
     std::stringstream output;
-
+    
     std::string line;
-
+    
     // Replacing #include
     while (std::getline(input, line)) {
-
+        
         if (line.find("#include") != std::string::npos) {
-
+            
             size_t temp1 = line.find("<");
             size_t temp2 = line.find(">");
 
@@ -61,7 +61,10 @@ std::string Shader::preprocessFile(const char* path) {
             std::string headerName = line.substr(temp1 + 1, temp2 - temp1 - 1);
 
             // Header filePath
-            std::filesystem::path headerPath = std::filesystem::path(path).parent_path() / ".." / headerName;
+            std::filesystem::path headerPath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / ".." / headerName);
+
+            // std::cout << "Preprocessing: " << path << '\n';
+            // std::cout << "Header: " << headerPath << std::endl;
 
             std::string header_str = loadShaderFile(headerPath.c_str());
 
@@ -99,7 +102,7 @@ Shader::Shader(const std::string vertexStr, const std::string fragmentStr) {
     if (!success) {
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cout << "ERROR: VERTEX-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-        std::cout << "File: " << vertexStr << std::endl;
+        // std::cout << "File: " << vertexStr << std::endl;
     }
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -107,7 +110,7 @@ Shader::Shader(const std::string vertexStr, const std::string fragmentStr) {
     if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cout << "ERROR: FRAGMENT-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-        std::cout << "File: " << fragmentStr << std::endl;
+        // std::cout << "File: " << fragmentStr << std::endl;
     }
 
     // Shader Program //

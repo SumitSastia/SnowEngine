@@ -23,7 +23,8 @@ enum scene1_shaders {
     INSTANCED_SPEC,
     GBUFFER_3D,
     GBUFFER_2D,
-    GBUFFER_INST
+    GBUFFER_INST,
+    DEFERRED
 };
 
 namespace scene_var {
@@ -513,6 +514,40 @@ void Scene1::renderGbuffer() const {
     myWall.bindDiffuseTex(loadedTextures++);
     myWall.draw();
 
+}
+
+void Scene1::renderDeferred(const Shader& currentShader) const {
+
+    // 0 - gPosition
+    // 1 - gNormal
+    // 2 - gTexture
+
+    unsigned int loadedTextures = 0;
+
+    currentShader.use();
+
+    currentShader.setVec3("camPos"     , Camera::instance().getPos());
+    currentShader.setInt ("light_count", light_count);
+    currentShader.setFloat("far_plane" , 25.0f);
+
+    for (uint8_t i = 0; i < light_count; i++) {
+
+        currentShader.setPointLight(("pl[" + std::to_string(i) + "]"), lights[i]->getPointLight());
+        currentShader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), loadedTextures);
+
+        shadowFrames[i]->bindTexture(loadedTextures++);
+    }
+
+    const unsigned int dl_depthMap = loadedTextures++;
+    directFrame->bindTexture(dl_depthMap);
+
+    currentShader.setDirectionalLight("dl", DefaultLights::instance().sunlight);
+    currentShader.setInt("dl_depthMap", dl_depthMap);
+
+    currentShader.setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
+    currentShader.setSpotLight("sl", DefaultLights::instance().flashlight);
+
+    currentShader.setFloat("skyboxIntensity", _skybox->getVisibility()? _skybox->getIntensity() : 0.0f);
 }
 
 void Scene1::renderLight() const {

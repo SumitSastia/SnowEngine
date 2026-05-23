@@ -38,7 +38,7 @@ public:
     }
 
     bool init();
-    void render() const;
+    void render() const {}
     void terminate();
     
     // ------------------------------ Global Render Functions ---------------------------- //
@@ -49,7 +49,11 @@ public:
     static void enableDepth();
     static void disableDepth();
 
-    static void copyDepth(unsigned int fbo1, unsigned int fbo2);
+    static void clear();
+
+    static void copyDepth(const FrameBuffer* read_fbo);
+    static void copyDepth(unsigned int read_fbo, unsigned int write_fbo);
+    static void copyDepth(const FrameBuffer* read_fbo, const FrameBuffer* write_fbo);
 
     GLFWwindow* getWindow() const { return window; }
 

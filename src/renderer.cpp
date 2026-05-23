@@ -1,4 +1,5 @@
 #include <renderer.h>
+#include <frame.h>
 
 /*
 Returns true if Renderer is successfully initialized.
@@ -71,13 +72,6 @@ bool Renderer::init() {
     return true;
 }
 
-void Renderer::render() const {
-
-    // Background-Color
-    glClearColor(0.006f, 0.006f, 0.006f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
 void Renderer::terminate() {
     glfwDestroyWindow(window);
 }
@@ -98,10 +92,43 @@ void Renderer::disableDepth() {
     glDisable(GL_DEPTH_TEST);
 }
 
+void Renderer::clear() {
+
+    // Background-Color
+    glClearColor(0.006f, 0.006f, 0.006f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::copyDepth(const FrameBuffer* read_fbo) {
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, read_fbo->getFBO());  // source
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // destination
+    
+    glBlitFramebuffer(
+        0, 0, WIN_W, WIN_H,
+        0, 0, WIN_W, WIN_H,
+        GL_DEPTH_BUFFER_BIT,
+        GL_NEAREST
+    );
+}
+
 void Renderer::copyDepth(unsigned int read_fbo, unsigned int write_fbo) {
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, read_fbo);  // source
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, write_fbo); // destination
+    
+    glBlitFramebuffer(
+        0, 0, WIN_W, WIN_H,
+        0, 0, WIN_W, WIN_H,
+        GL_DEPTH_BUFFER_BIT,
+        GL_NEAREST
+    );
+}
+
+void Renderer::copyDepth(const FrameBuffer* read_fbo, const FrameBuffer* write_fbo) {
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, read_fbo->getFBO());  // source
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, write_fbo->getFBO()); // destination
     
     glBlitFramebuffer(
         0, 0, WIN_W, WIN_H,
