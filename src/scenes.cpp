@@ -200,11 +200,10 @@ void Scene1::init() {
     lightModel0.translate(glm::vec3(3.0f, 1.5f, -3.0f));
     lightModel1.translate(glm::vec3(-3.0f, 1.5f, 3.0f));
 
-    // lights[0]->setLightColor(100.0f * colors::YELLOW);
-    lights[0]->setLightColor(5.0f * colors::YELLOW);
+    lights[0]->setLightColor(2.0f * colors::YELLOW);
     lights[0]->setPosition(lightModel0.getPos());
 
-    lights[1]->setLightColor(colors::PINK);
+    lights[1]->setLightColor(2.0f * colors::PINK);
     lights[1]->setPosition(lightModel1.getPos());
 
     entityModels.push_back(cubeModel);    // 0

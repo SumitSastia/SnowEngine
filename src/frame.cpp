@@ -212,29 +212,43 @@ void HDRFrame::init() {
 
 void HDRFrame::render() const {
 
-    // Renderer::disableDepth();
-
     shader->use();
     shader->setInt("screen", 0);
     
-    static bool toggle = true;
+    static bool  toggle   = false;
+    static float gamma = 2.3f;
     
     if (Input::isKeyDown(GLFW_KEY_M)) {
         
         toggle = !toggle;
-        if (toggle) std::cout << "ENABLED  :: Tone Mapping" << std::endl;
-        else        std::cout << "DISABLED :: Tone Mapping" << std::endl;
+        // if (toggle) std::cout << "ENABLED  :: Tone Mapping" << std::endl;
+        // else        std::cout << "DISABLED :: Tone Mapping" << std::endl;
     }
 
+    if (Input::isKeyDown(GLFW_KEY_KP_SUBTRACT)) {
+        
+        if (gamma > 1.0f) {
+            gamma -= 0.1f;
+            std::cout << "exposure: " << gamma << std::endl;
+        }
+    }
+
+    if (Input::isKeyDown(GLFW_KEY_KP_ADD)) {
+        
+        if (gamma < 3.0f) {
+            gamma += 0.1f;
+            std::cout << "exposure: " << gamma << std::endl;
+        }
+    }
+    
     shader->setBool("toggle", toggle);
+    shader->setFloat("gamma", gamma);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
     glBindVertexArray(frameBuffers::get_defaultVAO());
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    // Renderer::enableDepth();
 }
 
 BloomFrame::BloomFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
@@ -292,20 +306,10 @@ void BloomFrame::init() {
 
 void BloomFrame::render() const {
 
-    // shader->use();
-    // shader->setInt("screen", 0);
-    // shader->setBool("toggle", 1);
-
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, tex[1]);
-
-    // glBindVertexArray(frameBuffers::get_defaultVAO());
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-
     bool horizontal = true;
     bool first_itr  = true;
 
-    int amount = 10;
+    int amount = 5;
 
     _blur->shader->use();
 

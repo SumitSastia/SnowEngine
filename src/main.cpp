@@ -45,7 +45,7 @@ int main() {
 
     DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
     HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
-    BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
+    // BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
 
     // ---------- Loop ------------------------ //
 
@@ -78,7 +78,7 @@ int main() {
         mainScene->renderPointShadow();
         
         glViewport(0, 0, WIN_W, WIN_H);
-        glBindFramebuffer(GL_FRAMEBUFFER, bloomFrame->getFBO());
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
 
         Renderer::instance().render();
 
@@ -88,9 +88,9 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        bloomFrame->render();
+        hdrFrame->render();
 
-        Renderer::copyDepth(bloomFrame->getFBO(), 0);
+        Renderer::copyDepth(hdrFrame->getFBO(), 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // mainScene->renderLight();
