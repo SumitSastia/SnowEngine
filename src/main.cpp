@@ -47,6 +47,10 @@ int main() {
     HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
     // BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
 
+    Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
+
+    bool deferredRender = true;
+
     // ---------- Loop ------------------------ //
 
     while (!glfwWindowShouldClose(window) && isRunning) {
@@ -74,27 +78,47 @@ int main() {
         // Debug_menu::instance().update();
 
         // Rendering //
-        mainScene->renderDirectShadow();
-        mainScene->renderPointShadow();
-        
-        glViewport(0, 0, WIN_W, WIN_H);
-        glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
 
-        Renderer::instance().render();
+        if (!deferredRender) {
 
-        mainScene->render();
-        // mainScene->renderDebug();
+            mainScene->renderDirectShadow();
+            mainScene->renderPointShadow();
+            
+            glViewport(0, 0, WIN_W, WIN_H);
+            glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Renderer::instance().render();
 
-        hdrFrame->render();
+            mainScene->render();
+            // mainScene->renderDebug();
 
-        Renderer::copyDepth(hdrFrame->getFBO(), 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // mainScene->renderLight();
-        mainScene->renderSkybox();
+            hdrFrame->render();
+
+            // Renderer::copyDepth(hdrFrame->getFBO(), 0);
+            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            // // mainScene->renderLight();
+            // mainScene->renderSkybox();
+        }
+        else {
+
+            glViewport(0, 0, WIN_W, WIN_H);
+            deferredFrame->bindFBO();
+
+            Renderer::instance().render();
+
+            mainScene->renderGbuffer();
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            deferredFrame->render();
+
+            Renderer::copyDepth(hdrFrame->getFBO(), 0);
+        }
 
         // Debug Menu
         // Debug_menu::instance().render();

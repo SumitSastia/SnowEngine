@@ -14,7 +14,7 @@ void main() {
 
 	gPosition = vPos;
 	gNormal   = vNormal;
-	gTexture  = texture(texture1, vTexCords).rgb;
+	gTexture  = texture(texture0, vTexCords).rgb;
 
-	gTexture = vec4(vec3(0.9), 1.0);
+	// gTexture = vec4(vec3(0.9), 1.0);
 }

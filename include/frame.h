@@ -55,19 +55,20 @@ namespace frameBuffers {
 
 	const uint16_t shadowSize = 1024;
 	const unsigned int get_defaultVAO();
+	void renderScreen();
 }
 
 class FrameBuffer {
 
 protected:
 
-    unsigned int fbo, rbo;
-    unsigned int texture_id;
+    unsigned int fbo;
 
 public:
 
+	void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
+
 	const unsigned int getFBO() const { return fbo; }
-	const unsigned int getTex() const { return texture_id; }
 
     virtual void init() = 0;
     virtual void render() const = 0;
@@ -77,6 +78,9 @@ public:
 class DebugFrame : public FrameBuffer {
 
 	Shader* shader;
+
+	unsigned int rbo;
+    unsigned int texture_id;
 
 public:
 
@@ -89,10 +93,14 @@ public:
 
 class DirectShadowFrame : public FrameBuffer {
 
+    unsigned int texture_id;
+
 public:
 
 	DirectShadowFrame(const uint16_t& shadow_size);
 	DirectShadowFrame() : DirectShadowFrame(frameBuffers::shadowSize) {}
+
+	void bindTexture(const unsigned int textureUnit) const;
 
 	void init() override {}
 	void render() const override {}
@@ -100,10 +108,14 @@ public:
 
 class PointShadowFrame : public FrameBuffer {
 
+    unsigned int texture_id;
+
 public:
 
 	PointShadowFrame(const uint16_t& shadow_size);
 	PointShadowFrame() : PointShadowFrame(frameBuffers::shadowSize) {}
+
+	void bindTexture(const unsigned int textureUnit) const;
 
 	void init() override {}
 	void render() const override {}
@@ -112,6 +124,9 @@ public:
 class HDRFrame : public FrameBuffer {
 
 	Shader* shader;
+
+	unsigned int rbo;
+    unsigned int texture_id;
 	
 public:
 
@@ -135,15 +150,33 @@ public:
 
 class BloomFrame : public FrameBuffer {
 
-	Shader* shader;
+	unsigned int rbo;
 	unsigned int colorBuffers[2];
-
+	
+	Shader* shader;
 	BlurFrame* _blur;
 
 public:
 
 	BloomFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
 
-	void init() override;
+	void init() override {}
+	void render() const;
+};
+
+class Gbuffer : public FrameBuffer {
+
+	unsigned int rbo;
+	unsigned int gPosition, gNormal, gTexture;
+
+	Shader* shader;
+
+public:
+
+	Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight);
+
+	void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
+
+	void init() override {}
 	void render() const override;
 };

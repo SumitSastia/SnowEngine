@@ -13,6 +13,8 @@ const unsigned int WIN_H = 720;
 
 extern std::filesystem::path base;
 
+class FrameBuffer;
+
 class Renderer {
 
     GLFWmonitor* monitor;

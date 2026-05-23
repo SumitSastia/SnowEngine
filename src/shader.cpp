@@ -277,7 +277,7 @@ CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
 
             glTexImage2D(
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                0, GL_SRGB8_ALPHA8, width, height,
+                0, GL_SRGB8, width, height,
                 0, GL_RGB, GL_UNSIGNED_BYTE, pixelData
             );
         }
