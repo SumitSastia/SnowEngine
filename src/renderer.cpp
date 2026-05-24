@@ -1,6 +1,8 @@
 #include <renderer.h>
 #include <frame.h>
 
+bool Renderer::culling = false;
+
 /*
 Returns true if Renderer is successfully initialized.
 */
@@ -77,11 +79,15 @@ void Renderer::terminate() {
 }
 
 void Renderer::enableCulling() {
+
     glEnable(GL_CULL_FACE);
+    culling = true;
 }
 
 void Renderer::disableCulling() {
+
     glDisable(GL_CULL_FACE);
+    culling = false;
 }
 
 void Renderer::enableDepth() {

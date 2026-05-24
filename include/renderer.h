@@ -21,6 +21,7 @@ class Renderer {
     GLFWwindow*  window;
 
     int MAX_TEXTURES;
+    static bool culling;
 
     Renderer() { 
         
@@ -45,6 +46,7 @@ public:
 
     static void enableCulling();
     static void disableCulling();
+    static bool getCullingState() { return culling; }
 
     static void enableDepth();
     static void disableDepth();

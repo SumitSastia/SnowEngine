@@ -1,4 +1,5 @@
 #include <camera.h>
+#include <debug.h>
 #include <renderer.h>
 
 #include <iostream>
@@ -59,6 +60,8 @@ void Camera::update(const float& delta_time) {
     target = glm::normalize(new_direction);
 
     look_at();
+
+    ImGui::Text("Camera FOV: %.1f", fov);
 }
 
 void Camera::set_position(const glm::vec3 position){

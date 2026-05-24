@@ -77,18 +77,19 @@ int main() {
         }
         
         // Updates // 
+        ImGui::Begin("Rendering Method");
+        ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
+
         mainCamera.input_handler(window, deltaTime);
         mainScene->input(window, deltaTime);
         
         mainCamera.update(deltaTime);
         mainScene->update(deltaTime);
 
+        ImGui::End();
+
         // Rendering //
 
-        // UI
-        ImGui::Begin("Rendering Method");
-        ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
-        ImGui::End();
 
         // Scene
         if (!deferredRender) {

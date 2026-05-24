@@ -28,7 +28,9 @@ enum scene1_shaders {
     GBUFFER_NORM2D,
     PBR_3D,
     PBR_2D,
-    PBR_INST
+    PBR_INST,
+    PBR_NORM3D,
+    PBR_NORM2D
 };
 
 namespace scene_var {
@@ -193,6 +195,14 @@ void Scene1::init() {
         Shader(
             "../shaders/instancedCubes/texture.vert",
             "../shaders/commonFrag/pbr.frag", true
+        ),
+        Shader(
+            "../shaders/normalCube/normalTexCube.vert",
+            "../shaders/commonFrag/pbr_normalTex.frag", true
+        ),
+        Shader(
+            "../shaders/planes/normalTexPlane.vert",
+            "../shaders/commonFrag/pbr_normalTex.frag", true
         )
     };
 
@@ -340,7 +350,7 @@ void Scene1::render() const {
     const unsigned int dl_depthMap = loadedTextures++;
     directFrame->bindTexture(dl_depthMap);
 
-    std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13,19,20,21};
+    std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13,19,20,21,22,23};
     const uint8_t _length = commonShaders.size();
 
     const bool showSkybox = _skybox->getVisibility();
@@ -377,10 +387,11 @@ void Scene1::render() const {
     // Cube
     // currentShader = loaded_shaders[SPECULAR_CUBE];
     currentShader = loaded_shaders[PBR_3D];
+    // currentShader = loaded_shaders[PBR_NORM3D];
     currentShader.use();
 
-    currentShader.setFloat("metallic", 0.3F);
-    currentShader.setFloat("roughness", 0.5F);
+    // currentShader.setFloat("metallic", 0.3F);
+    // currentShader.setFloat("roughness", 0.5F);
 
     currentShader.setMat4("model",        entityModels[0].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
@@ -391,7 +402,17 @@ void Scene1::render() const {
     // currentShader.setInt("texture1", loadedTextures);
     // advCube.bindNormalTex(loadedTextures++);
 
+    // currentShader.setInt("texture3", loadedTextures);
+    // advCube.bindNormalTex(loadedTextures++);
+
     myCube.draw();
+
+    currentShader.setMat4("model",        entityModels[4].getMatrix());
+    currentShader.setMat3("normalMatrix", entityModels[4].getNormal());
+
+    currentShader.setInt("texture0", loadedTextures);
+    mySphere->bindTextures(loadedTextures++);
+    mySphere->draw();
 
     // Instanced Cubes
     // currentShader = loaded_shaders[INSTANCED_SPEC];
@@ -413,7 +434,8 @@ void Scene1::render() const {
 
     // Floor & Ground
     // currentShader = loaded_shaders[NORMAL_MAPPED_2D];
-    currentShader = loaded_shaders[PBR_2D];
+    // currentShader = loaded_shaders[PBR_2D];
+    currentShader = loaded_shaders[PBR_NORM2D];
     currentShader.use();
 
     currentShader.setMat4("model",        entityModels[1].getMatrix());
@@ -422,8 +444,8 @@ void Scene1::render() const {
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindDiffuseTex(loadedTextures++);
 
-    // currentShader.setInt("texture1", loadedTextures);
-    // myFloor.bindNormalTex(loadedTextures++);
+    currentShader.setInt("texture3", loadedTextures);
+    myFloor.bindNormalTex(loadedTextures++);
     myFloor.draw();
 
     currentShader.setMat4("model",        entityModels[3].getMatrix());
@@ -454,15 +476,15 @@ void Scene1::render() const {
     myWall.draw();
 
     // Models
-    currentShader = loaded_shaders[MODEL_3D];
-    currentShader.use();
+    // currentShader = loaded_shaders[MODEL_3D];
+    // currentShader.use();
 
-    currentShader.setMat4("model",        entityModels[4].getMatrix());
-    currentShader.setMat3("normalMatrix", entityModels[4].getNormal());
+    // currentShader.setMat4("model",        entityModels[4].getMatrix());
+    // currentShader.setMat3("normalMatrix", entityModels[4].getNormal());
 
-    currentShader.setInt("texture0", loadedTextures);
-    mySphere->bindTextures(loadedTextures++);
-    mySphere->draw();
+    // currentShader.setInt("texture0", loadedTextures);
+    // mySphere->bindTextures(loadedTextures++);
+    // mySphere->draw();
 
     this->renderSkybox();
 }

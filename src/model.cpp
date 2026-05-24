@@ -82,9 +82,15 @@ void Mesh::bindTextures(const unsigned int textureUnit) const {
 
 void Mesh::draw() const {
 
+    const bool cullingState = Renderer::getCullingState();
+
+    Renderer::disableCulling();
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+
+    if (cullingState) Renderer::enableCulling();
 }
 
 void Mesh::destroy() {
