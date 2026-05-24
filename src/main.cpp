@@ -28,7 +28,9 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     Input::init();
+    DebugMenu::init(window);
 
+    glEnable(GL_MULTISAMPLE);
     glDisable(GL_FRAMEBUFFER_SRGB);
 
     // ---------- CallBack Functions ---------- //
@@ -39,7 +41,6 @@ int main() {
     // ---------- Testing --------------------- //
 
     Camera& mainCamera = Camera::instance();
-    Debug_menu::instance().init(window);
 
     Scene* mainScene = new Scene1();
 
@@ -49,17 +50,19 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = 1;
+    bool deferredRender = false;
 
     // ---------- Loop ------------------------ //
 
     while (!glfwWindowShouldClose(window) && isRunning) {
 
-        // Time //
+        // Time //DebugMenu::endBox();
         float currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
         
+        DebugMenu::beginUI();
+
         // Inputs //
         Input::update();
         
@@ -68,6 +71,10 @@ int main() {
         
         // Events //
         glfwPollEvents();
+
+        if (Input::isKeyDown(GLFW_KEY_P)) {
+            deferredRender = !deferredRender;
+        }
         
         // Updates // 
         mainCamera.input_handler(window, deltaTime);
@@ -75,10 +82,15 @@ int main() {
         
         mainCamera.update(deltaTime);
         mainScene->update(deltaTime);
-        // Debug_menu::instance().update();
 
         // Rendering //
 
+        // UI
+        ImGui::Begin("Rendering Method");
+        ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
+        ImGui::End();
+
+        // Scene
         if (!deferredRender) {
 
             mainScene->renderDirectShadow();
@@ -90,18 +102,16 @@ int main() {
             Renderer::clear();
 
             mainScene->render();
-            // mainScene->renderDebug();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             hdrFrame->render();
 
-            // Renderer::copyDepth(hdrFrame->getFBO(), 0);
-            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            Renderer::copyDepth(hdrFrame);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            // // mainScene->renderLight();
-            // mainScene->renderSkybox();
+            mainScene->renderLight();
         }
         else {
 
@@ -130,9 +140,8 @@ int main() {
             mainScene->renderLight();
         }
 
-        // Debug Menu
-        // Debug_menu::instance().render();
-        // debugFrame->render();
+        // Debug - UI
+        DebugMenu::endUI();
 
         glfwSwapBuffers(window);
     }
@@ -141,7 +150,7 @@ int main() {
 
     mainScene->destroy();
 
-    Debug_menu::instance().destroy();
+    DebugMenu::instance().destroy();
     Renderer::instance().terminate();
 
     glfwTerminate();

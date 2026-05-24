@@ -1,6 +1,6 @@
 #include <debug.h>
 
-void Debug_menu::init(GLFWwindow* window) {
+void DebugMenu::init(GLFWwindow* window) {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -8,26 +8,47 @@ void Debug_menu::init(GLFWwindow* window) {
     // ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 450");
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.Fonts->AddFontFromFileTTF("../assets/fonts/FiraSans-Regular.ttf", 18);
+    // io.Fonts->AddFontFromFileTTF("../assets/fonts/BlockBlueprint.ttf", 18);
+    // io.Fonts->AddFontFromFileTTF("../assets/fonts/BrixelaDEMO-Regular.ttf", 18);
+    // io.Fonts->AddFontFromFileTTF("../assets/fonts/NK57-Monospace-Cd-Rg.otf", 18);
 }
 
-void Debug_menu::update() {
+void DebugMenu::update() {
+
+    // ImGui_ImplOpenGL3_NewFrame();
+    // ImGui_ImplGlfw_NewFrame();
+    // ImGui::NewFrame();
+
+    // ImGui::Begin("Rendering Method");
+    // ImGui::Text("");
+    // ImGui::End();
+}
+
+void DebugMenu::beginUI() {
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+}
 
-    ImGui::Begin("It works!");
-    ImGui::Text("OPENGLRENDERRER ENANGIEN GAME");
+void DebugMenu::renderTextbox(const std::string title, const std::string desc) {
+
+    ImGui::Begin(title.c_str());
+    ImGui::Text("%s", desc.c_str());
     ImGui::End();
 }
 
-void Debug_menu::render() const {
+void DebugMenu::endUI() {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Debug_menu::destroy() {
+void DebugMenu::destroy() {
     
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

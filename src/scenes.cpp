@@ -25,7 +25,10 @@ enum scene1_shaders {
     GBUFFER_2D,
     GBUFFER_INST,
     GBUFFER_NORM3D,
-    GBUFFER_NORM2D
+    GBUFFER_NORM2D,
+    PBR_3D,
+    PBR_2D,
+    PBR_INST
 };
 
 namespace scene_var {
@@ -178,6 +181,18 @@ void Scene1::init() {
         Shader(
             "../shaders/deferred/gbuffer_normalTex2d.vert",
             "../shaders/deferred/gbuffer_normalTex.frag"
+        ),
+        Shader(
+            "../shaders/normalCube/cube.vert",
+            "../shaders/commonFrag/pbr.frag", true
+        ),
+        Shader(
+            "../shaders/planes/plane.vert",
+            "../shaders/commonFrag/pbr.frag", true
+        ),
+        Shader(
+            "../shaders/instancedCubes/texture.vert",
+            "../shaders/commonFrag/pbr.frag", true
         )
     };
 
@@ -316,21 +331,16 @@ void Scene1::render() const {
 
     // Light & Shadow
     Shader currentShader = loaded_shaders[LIGHT];
-    currentShader.use();
+    // currentShader.use();
 
     for (uint8_t i = 0; i < light_count; i++) {
-        
-        currentShader.setMat4("finalMatrix", projection * view * glm::scale(lightModels[i]->getMatrix(), glm::vec3(0.5f)));
-        currentShader.setVec3("lightColor" , lights[i]->getLightColor());
-        lights[i]->draw();
-
         shadowFrames[i]->bindTexture(loadedTextures++);
     }
 
     const unsigned int dl_depthMap = loadedTextures++;
     directFrame->bindTexture(dl_depthMap);
 
-    std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13};
+    std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13,19,20,21};
     const uint8_t _length = commonShaders.size();
 
     const bool showSkybox = _skybox->getVisibility();
@@ -365,8 +375,12 @@ void Scene1::render() const {
     }
 
     // Cube
-    currentShader = loaded_shaders[SPECULAR_CUBE];
+    // currentShader = loaded_shaders[SPECULAR_CUBE];
+    currentShader = loaded_shaders[PBR_3D];
     currentShader.use();
+
+    currentShader.setFloat("metallic", 0.3F);
+    currentShader.setFloat("roughness", 0.5F);
 
     currentShader.setMat4("model",        entityModels[0].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
@@ -377,26 +391,29 @@ void Scene1::render() const {
     // currentShader.setInt("texture1", loadedTextures);
     // advCube.bindNormalTex(loadedTextures++);
 
-    currentShader.setInt("texture2", loadedTextures);
-    myCube.bindSpecularTex(loadedTextures++);
     myCube.draw();
 
     // Instanced Cubes
-    currentShader = loaded_shaders[INSTANCED_SPEC];
+    // currentShader = loaded_shaders[INSTANCED_SPEC];
+    currentShader = loaded_shaders[PBR_INST];
     currentShader.use();
+
+    // currentShader.setFloat("metallic", 0.1F);
+    // currentShader.setFloat("roughness", 0.2F);
 
     currentShader.setInt("texture0", loadedTextures);
     cubes.bindDiffuseTex(loadedTextures++);
 
-    currentShader.setInt("texture2", loadedTextures);
-    cubes.bindSpecularTex(loadedTextures++);
+    // currentShader.setInt("texture2", loadedTextures);
+    // cubes.bindSpecularTex(loadedTextures++);
 
     cubes.draw();
 
     Renderer::disableCulling();
 
     // Floor & Ground
-    currentShader = loaded_shaders[NORMAL_MAPPED_2D];
+    // currentShader = loaded_shaders[NORMAL_MAPPED_2D];
+    currentShader = loaded_shaders[PBR_2D];
     currentShader.use();
 
     currentShader.setMat4("model",        entityModels[1].getMatrix());
@@ -405,8 +422,8 @@ void Scene1::render() const {
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindDiffuseTex(loadedTextures++);
 
-    currentShader.setInt("texture1", loadedTextures);
-    myFloor.bindNormalTex(loadedTextures++);
+    // currentShader.setInt("texture1", loadedTextures);
+    // myFloor.bindNormalTex(loadedTextures++);
     myFloor.draw();
 
     currentShader.setMat4("model",        entityModels[3].getMatrix());
@@ -533,17 +550,6 @@ void Scene1::renderGbuffer() const {
     currentShader.setMat4("model",        entityModels[3].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[3].getNormal());
     myGround.draw();
-
-    currentShader = loaded_shaders[GBUFFER_2D];
-    currentShader.use();
-
-    currentShader.setMat4("model",        entityModels[6].getMatrix());
-    currentShader.setMat3("normalMatrix", entityModels[6].getNormal());
-
-    currentShader.setInt("texture0", loadedTextures);
-    myWall.bindDiffuseTex(loadedTextures++);
-    myWall.draw();
-
 }
 
 void Scene1::renderDeferred(const Shader& currentShader) const {

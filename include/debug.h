@@ -7,18 +7,32 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-class Debug_menu {
+#include <string>
 
+struct TextBox {
+        
+    std::string title;
+    std::string desc;
+};
+
+class DebugMenu {
 
 public:
 
-    static Debug_menu& instance() {
-        static Debug_menu instance{};
+    static DebugMenu& instance() {
+        static DebugMenu instance{};
         return instance;
     }
 
-    void init(GLFWwindow* window);
-    void update();
-    void render() const;
-    void destroy();
+    static void beginUI();
+    static void endUI();
+
+    static void beginBox(const char* title) { ImGui::Begin(title); }
+    static void endBox() { ImGui::End(); }
+
+    static void init(GLFWwindow* window);
+    static void update();
+    static void render() {}
+    static void renderTextbox(const std::string title, const std::string desc);
+    static void destroy();
 };

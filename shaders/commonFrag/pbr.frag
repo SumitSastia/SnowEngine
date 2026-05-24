@@ -10,38 +10,27 @@ in vec3 vNormal;
 in vec2 vTexCords;
 in vec4 lightSpace_vPos;
 
-uniform sampler2D texture0;
-uniform sampler2D texture2;
+uniform sampler2D texture0; // albedo
+uniform sampler2D texture1; // metallic
+uniform sampler2D texture2; // roughness
 
 #include <commonlight.glsl>
 
-uniform float metallic;
-uniform float roughness;
-
 void main() {
 
-    vec3 tex   = texture(texture0, vTexCords).rgb;
-    vec3 tex2  = texture(texture2, vTexCords).rgb;
+    vec3 tex = texture(texture0, vTexCords).rgb;
+
+    float metallic  = texture(texture0, vTexCords).r;
+    float roughness = texture(texture0, vTexCords).r;
 
     // Ambient
-    vec3 color = ambientStrength * tex;
+    vec3 color = vec3(0.05) * tex;
 
     // Directional Lighting
     // color += calcDirectionalLight(tex, vNormal);
 
     // float shadow = calcDirectShadow();
     // color *= (1.0 - shadow);
-
-    // Point Shadow
-    for (int i = 0; i < light_count; i++) {
-
-        vec3 lightColor = vec3(0.0);
-
-        lightColor += calcSpecPointLight(pl[i], tex, tex2, vNormal);
-        lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
-
-        color += lightColor;
-    }
 
     // PBR Lighting
     vec3 V = normalize(camPos - vPos);
@@ -50,14 +39,15 @@ void main() {
     F0 = mix(F0, tex, metallic);
 
     // reflectance
-    vec3 Lo = vec3(0.0);
+    // vec3 Lo = vec3(0.0);
 
     for (int i = 0; i < light_count; i++) { 
-        Lo += calcPBR(pl[i], tex, vNormal, F0, metallic, roughness);
-	}
 
-    color  = vec3(0.05) * tex;
-	color += Lo;
+        vec3 Lo = calcPBR(pl[i], tex, vNormal, F0, metallic, roughness);
+        Lo *= (1.0 - calcShadow(pl[i], depthMap[i]));;
+        
+        color += Lo;
+	}
 
     if (useSpotLight) {
         color += calcSpotLight(tex, vNormal);
