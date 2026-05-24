@@ -24,7 +24,8 @@ enum scene1_shaders {
     GBUFFER_3D,
     GBUFFER_2D,
     GBUFFER_INST,
-    DEFERRED
+    GBUFFER_NORM3D,
+    GBUFFER_NORM2D
 };
 
 namespace scene_var {
@@ -169,6 +170,14 @@ void Scene1::init() {
         Shader(
             "../shaders/deferred/gbufferInst.vert",
             "../shaders/deferred/gbuffer.frag"
+        ),
+        Shader(
+            "../shaders/deferred/gbuffer_normalTex3d.vert",
+            "../shaders/deferred/gbuffer_normalTex.frag"
+        ),
+        Shader(
+            "../shaders/deferred/gbuffer_normalTex2d.vert",
+            "../shaders/deferred/gbuffer_normalTex.frag"
         )
     };
 
@@ -448,7 +457,7 @@ void Scene1::renderGbuffer() const {
     const glm::mat4 projection = Camera::instance().getPerspective();
     const glm::mat4 view       = Camera::instance().getView();
 
-    std::vector <uint8_t> commonShaders = {14,15,16};
+    std::vector <uint8_t> commonShaders = {14,15,16,17,18};
     const uint8_t _length = commonShaders.size();
 
     Shader currentShader = loaded_shaders[GBUFFER_3D];
@@ -468,12 +477,12 @@ void Scene1::renderGbuffer() const {
     currentShader = loaded_shaders[GBUFFER_3D];
     currentShader.use();
 
-    currentShader.setMat4("model",        entityModels[0].getMatrix());
-    currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
+    // currentShader.setMat4("model",        entityModels[0].getMatrix());
+    // currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
     
-    currentShader.setInt("texture0", loadedTextures);
-    myCube.bindDiffuseTex(loadedTextures++);
-    myCube.draw();
+    // currentShader.setInt("texture0", loadedTextures);
+    // myCube.bindDiffuseTex(loadedTextures++);
+    // myCube.draw();
 
     // Models
     currentShader.setMat4("model",        entityModels[4].getMatrix());
@@ -482,6 +491,20 @@ void Scene1::renderGbuffer() const {
     currentShader.setInt("texture0", loadedTextures);
     mySphere->bindTextures(loadedTextures++);
     mySphere->draw();
+
+    // Normal-Mapped Cube
+    currentShader = loaded_shaders[GBUFFER_NORM3D];
+    currentShader.use();
+
+    currentShader.setMat4("model",        entityModels[0].getMatrix());
+    currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
+    
+    currentShader.setInt("texture0", loadedTextures);
+    advCube.bindDiffuseTex(loadedTextures++);
+
+    currentShader.setInt("texture1", loadedTextures);
+    advCube.bindNormalTex(loadedTextures++);
+    advCube.draw();
 
     // Instanced
     currentShader = loaded_shaders[GBUFFER_INST];
@@ -493,7 +516,8 @@ void Scene1::renderGbuffer() const {
     cubes.draw();
 
     // Planes
-    currentShader = loaded_shaders[GBUFFER_2D];
+    // currentShader = loaded_shaders[GBUFFER_2D];
+    currentShader = loaded_shaders[GBUFFER_NORM2D];
     currentShader.use();
 
     currentShader.setMat4("model",        entityModels[1].getMatrix());
@@ -501,11 +525,17 @@ void Scene1::renderGbuffer() const {
 
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindDiffuseTex(loadedTextures++);
+
+    currentShader.setInt("texture1", loadedTextures);
+    myFloor.bindNormalTex(loadedTextures++);
     myFloor.draw();
 
     currentShader.setMat4("model",        entityModels[3].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[3].getNormal());
     myGround.draw();
+
+    currentShader = loaded_shaders[GBUFFER_2D];
+    currentShader.use();
 
     currentShader.setMat4("model",        entityModels[6].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[6].getNormal());

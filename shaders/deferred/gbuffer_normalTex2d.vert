@@ -1,0 +1,31 @@
+#version 450 core
+
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec2 aTexCords;
+
+out vec3 vPos;
+out vec2 vTexCords;
+
+out mat3 TBN;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+uniform mat3 normalMatrix;
+
+void main(){
+
+    gl_Position = projection * view * model * vec4(aPos, 0.0, 1.0);
+
+    vPos      = vec3(model * vec4(aPos, 0.0, 1.0));
+    vTexCords = aTexCords;
+
+    vec3 N = normalize(normalMatrix * vec3(0.0, 0.0, 1.0));
+    vec3 T = normalize(normalMatrix * vec3(1.0, 0.0, 0.0));
+    
+    T = normalize(T - dot(T,N) * N);
+
+    vec3 B = cross(N,T);
+    
+    TBN = mat3(T,B,N);
+}

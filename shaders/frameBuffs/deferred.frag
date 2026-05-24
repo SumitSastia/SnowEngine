@@ -26,9 +26,9 @@ void main() {
 
     vec3 tex = albedo.rgb;
 
-    if (albedo.a == 0.0) {
-        discard;
-    }
+    // if (albedo.a == 0.0) {
+    //     discard;
+    // }
 
     vec3 color = tex * ambientStrength;
     vec3 normal = normalize(vNormal);
@@ -39,14 +39,15 @@ void main() {
     // dirColor *= (1.0 - shadow);
     // color += dirColor;
 
+    // float shadow2;
 
     // Point Shadow
     for (int i = 0; i < light_count; i++) {
 
         vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
         const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
-        if (shadow >= 0.0 && shadow <= 1.0) lightColor *= shadow;
 
+        lightColor *= shadow;
         color += lightColor;
     }
 
@@ -54,6 +55,7 @@ void main() {
         color += calcSpotLight(vPos, tex, normal);
     }
 
+    // color = albedo.rgb;
     color = tone_mapping(color);
     color = pow(color, vec3(1.0 / 2.3));   // Gamma Correction
 

@@ -178,6 +178,7 @@ PointShadowFrame::PointShadowFrame(const uint16_t& shadow_size) {
 void PointShadowFrame::bindTexture(const unsigned int textureUnit) const {
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
 }
 
@@ -445,6 +446,8 @@ Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
 void Gbuffer::render() const {
 
+    Renderer::disableDepth();
+
     const unsigned int textureUnit = 3;
 
     shader->use();
@@ -453,14 +456,19 @@ void Gbuffer::render() const {
     shader->setInt("gTexture", textureUnit + 2);
     
     glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindTexture(GL_TEXTURE_2D, gPosition);
     
     glActiveTexture(GL_TEXTURE1 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindTexture(GL_TEXTURE_2D, gNormal);
     
     glActiveTexture(GL_TEXTURE2 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindTexture(GL_TEXTURE_2D, gTexture);
     
     glBindVertexArray(frameBuffers::get_defaultVAO());
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    Renderer::enableDepth();
 }
