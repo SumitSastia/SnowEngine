@@ -26,7 +26,7 @@ void main() {
     float metallic  = texture(texture0, vTexCords).r;
     float roughness = texture(texture0, vTexCords).r;
 
-    normal = (normal * 2.0 - 1.0);
+    normal = normalize(normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);
 
     // Ambient

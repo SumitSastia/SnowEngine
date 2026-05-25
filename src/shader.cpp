@@ -210,7 +210,7 @@ void Shader::destroy() {
     shaderProgram = 0;
 }
 
-void Texture2D::load(const char* path){
+void Texture2D::load(const char* path, const bool format) {
 
     std::string path_str(path);
     std::string base_str = base.string();
@@ -238,7 +238,7 @@ void Texture2D::load(const char* path){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+    glTexImage2D(GL_TEXTURE_2D, 0, (format)? GL_SRGB : GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(pixelData);

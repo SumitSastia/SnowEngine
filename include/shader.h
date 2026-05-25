@@ -76,8 +76,9 @@ public:
     /*
     Loads the image and allocate it into the Memory.
     NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
+    @param format 0 - GL_RGB, 1 - GL_SRGB
     */
-    void load(const char* path);
+    void load(const char* path, const bool format = 0);
 
     void destroy();
 

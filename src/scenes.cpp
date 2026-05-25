@@ -217,6 +217,8 @@ void Scene1::init() {
 
     mySphere = new Model3D("../assets/models/test_cube/sphere.obj");
 
+    // myFloor.loadNormalTex("assets/textures/texture_maps/wall_normal.png");
+
     myWall.loadDiffuseTex("assets/textures/parallex_maps/bricks2.jpg");
     myWall.loadNormalTex("assets/textures/parallex_maps/bricks2_normal.jpg");
     myWall.loadSpecularTex("assets/textures/parallex_maps/bricks2_disp.jpg");
@@ -386,26 +388,23 @@ void Scene1::render() const {
 
     // Cube
     // currentShader = loaded_shaders[SPECULAR_CUBE];
-    currentShader = loaded_shaders[PBR_3D];
-    // currentShader = loaded_shaders[PBR_NORM3D];
+    // currentShader = loaded_shaders[PBR_3D];
+    currentShader = loaded_shaders[PBR_NORM3D];
     currentShader.use();
-
-    // currentShader.setFloat("metallic", 0.3F);
-    // currentShader.setFloat("roughness", 0.5F);
 
     currentShader.setMat4("model",        entityModels[0].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[0].getNormal());
     
     currentShader.setInt("texture0", loadedTextures);
-    myCube.bindDiffuseTex(loadedTextures++);
+    advCube.bindDiffuseTex(loadedTextures++);
 
     // currentShader.setInt("texture1", loadedTextures);
     // advCube.bindNormalTex(loadedTextures++);
 
-    // currentShader.setInt("texture3", loadedTextures);
-    // advCube.bindNormalTex(loadedTextures++);
+    currentShader.setInt("texture3", loadedTextures);
+    advCube.bindNormalTex(loadedTextures++);
 
-    myCube.draw();
+    advCube.draw();
 
     currentShader.setMat4("model",        entityModels[4].getMatrix());
     currentShader.setMat3("normalMatrix", entityModels[4].getNormal());

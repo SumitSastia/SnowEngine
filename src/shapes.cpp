@@ -159,7 +159,7 @@ void Shape::loadDiffuseTex(const char* path) {
         shapeDiffuseTexture->destroy();
     }
 
-    shapeDiffuseTexture->load(path);
+    shapeDiffuseTexture->load(path, true);
 }
 
 void Shape::loadNormalTex(const char* path) {
