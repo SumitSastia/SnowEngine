@@ -11,7 +11,7 @@ void DebugMenu::init(GLFWwindow* window) {
 
     ImGuiIO& io = ImGui::GetIO();
 
-    io.Fonts->AddFontFromFileTTF("../assets/fonts/FiraSans-Regular.ttf", 18);
+    // io.Fonts->AddFontFromFileTTF("../assets/fonts/FiraSans-Regular.ttf", 18);
     // io.Fonts->AddFontFromFileTTF("../assets/fonts/BlockBlueprint.ttf", 18);
     // io.Fonts->AddFontFromFileTTF("../assets/fonts/BrixelaDEMO-Regular.ttf", 18);
     // io.Fonts->AddFontFromFileTTF("../assets/fonts/NK57-Monospace-Cd-Rg.otf", 18);

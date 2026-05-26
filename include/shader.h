@@ -1,5 +1,8 @@
 #pragma once
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <s_math.h>
 
 #include <string>
@@ -110,7 +113,19 @@ class CubeMap {
 
 public:
 
-    CubeMap(const std::vector <std::string>& textureFaces);
+    /* 
+    Cubemap with custom modifications 
+    @param internal_format GL_RGB / GL_SRGB / GL_RGB16F (for HDR)
+    @param type GL_UNSIGNED_BYTE / GL_FLOAT
+    @param res_size Resolution of the Texture
+    */
+    CubeMap(const std::vector <std::string>& textureFaces, const uint16_t internal_format, const uint16_t type, const uint16_t res_size);
+
+    /* Cubemap designed for Irradiance Maps. @param res_size Resolution of the Irradiance Map */
+    CubeMap(const std::vector <std::string>& textureFaces, const uint16_t res_size) : CubeMap(textureFaces, GL_RGB, GL_UNSIGNED_BYTE, res_size) {}
+
+    /* General purpose cubemap */
+    CubeMap(const std::vector <std::string>& textureFaces) : CubeMap(textureFaces, GL_SRGB8, GL_UNSIGNED_BYTE, 0) {}
 
     void bindTexture(const unsigned int textureUnit) const;
     void destroy();

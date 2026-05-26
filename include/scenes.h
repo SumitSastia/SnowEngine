@@ -6,6 +6,7 @@
 #include <frame.h>
 #include <s_math.h>
 #include <model.h>
+#include <ibl.h>
 
 class Scene {
 
@@ -69,6 +70,7 @@ class Scene1 : public Scene {
     DebugFrame* debugFrame;
 
     // FrameBuffers
+    IBLFrame ibl_frame;
 
 public:
 

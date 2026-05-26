@@ -19,6 +19,7 @@ add_executable(${TARGET_NAME}
 
     src/glad.c
     src/s_math.cpp
+    ${IMGUI_SRC}
     src/main.cpp
     src/shader.cpp
     src/camera.cpp
@@ -31,7 +32,7 @@ add_executable(${TARGET_NAME}
     src/lights.cpp
     src/frame.cpp
     src/model.cpp
-    ${IMGUI_SRC}
+    src/ibl.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)

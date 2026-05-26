@@ -35,7 +35,7 @@ bool Renderer::init() {
 
     // ---------- Main Window ----------------- //
 
-    window = glfwCreateWindow(WIN_W,WIN_H,"FirstWindow 1.0", nullptr, nullptr);
+    window = glfwCreateWindow(WIN_W,WIN_H,"SnowEngine 1.0", nullptr, nullptr);
 
     if(!window){
         std::cerr << "Unable to initialize the window!" << std::endl;

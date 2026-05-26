@@ -30,7 +30,8 @@ enum scene1_shaders {
     PBR_2D,
     PBR_INST,
     PBR_NORM3D,
-    PBR_NORM2D
+    PBR_NORM2D,
+    TEST
 };
 
 namespace scene_var {
@@ -203,6 +204,10 @@ void Scene1::init() {
         Shader(
             "../shaders/planes/normalTexPlane.vert",
             "../shaders/commonFrag/pbr_normalTex.frag", true
+        ),
+        Shader(
+            "../shaders/cubeMap/env.vert",
+            "../shaders/cubeMap/env.frag"
         )
     };
 
@@ -316,17 +321,19 @@ void Scene1::init() {
         "assets/textures/skybox/Daylight_Box_Left_irradiance.png",
         "assets/textures/skybox/Daylight_Box_Top_irradiance.png",
         "assets/textures/skybox/Daylight_Box_Bottom_irradiance.png",
-        "assets/textures/skybox/Daylight_Box_Front_irradiance2.png",
+        "assets/textures/skybox/Daylight_Box_Front_irradiance.png",
         "assets/textures/skybox/Daylight_Box_Back_irradiance.png"
     };
     
     _skybox = new Skybox(skyboxFaces);
     _skybox->setIrradianceMap(envFaces);
 
+    ibl_frame.loadEnvironment("assets/env/hdri-sky.hdr");
+
     // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
 
-    std::cout << "Scene1 - Loaded Shaders: " << loaded_shaders.size() << std::endl;
+    std::cout << "Scene1 - Loaded Shaders: "  << loaded_shaders.size() << std::endl;
     std::cout << "Scene1 - Loaded Entities: " << loaded_entities.size() + cubes.getCount() << std::endl;
 }
 
@@ -420,7 +427,7 @@ void Scene1::render() const {
     currentShader.setInt("irradianceMap", loadedTextures);
     _skybox->bindIrradiance(loadedTextures++);
 
-    advCube.draw();
+    // advCube.draw();
 
     currentShader = loaded_shaders[PBR_3D];
     currentShader.use();
@@ -434,6 +441,9 @@ void Scene1::render() const {
     currentShader.setBool("useIrradiance", _skybox->getVisibility());
     currentShader.setInt("irradianceMap", loadedTextures);
     _skybox->bindIrradiance(loadedTextures++);
+
+    currentShader.setInt("env", loadedTextures);
+    _skybox->bindTexture(loadedTextures++);
 
     mySphere->draw();
 
@@ -455,6 +465,9 @@ void Scene1::render() const {
     currentShader.setInt("irradianceMap", loadedTextures);
     _skybox->bindIrradiance(loadedTextures++);
 
+    currentShader.setInt("env", loadedTextures);
+    _skybox->bindTexture(loadedTextures++);
+
     cubes.draw();
 
     Renderer::disableCulling();
@@ -470,6 +483,7 @@ void Scene1::render() const {
 
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindDiffuseTex(loadedTextures++);
+    // ibl_frame.bindEnv(loadedTextures++);
 
     currentShader.setInt("texture3", loadedTextures);
     myFloor.bindNormalTex(loadedTextures++);
@@ -507,18 +521,29 @@ void Scene1::render() const {
 
     myWall.draw();
 
-    // Models
-    // currentShader = loaded_shaders[MODEL_3D];
-    // currentShader.use();
+    // Testing ENV
 
-    // currentShader.setMat4("model",        entityModels[4].getMatrix());
-    // currentShader.setMat3("normalMatrix", entityModels[4].getNormal());
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_CULL_FACE);
 
-    // currentShader.setInt("texture0", loadedTextures);
-    // mySphere->bindTextures(loadedTextures++);
-    // mySphere->draw();
+    currentShader = loaded_shaders[CUBEMAP];
+    currentShader.use();
 
-    // this->renderSkybox();
+    currentShader.setMat4("projection", projection);
+    currentShader.setMat4("view"      , glm::mat4(glm::mat3(view)));
+
+    currentShader.setInt("cubeMap", 0);
+    ibl_frame.bindEnv(0);
+
+    // currentShader.setInt("cubeMap", 0);
+    // _skybox->bindTexture(0);
+
+    _skybox->draw();
+
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
 }
 
 void Scene1::renderGbuffer() const {
@@ -660,6 +685,30 @@ void Scene1::renderLight() const {
     this->renderSkybox();
 }
 
+void Scene1::renderSkybox() const {
+
+    if (!_skybox->getVisibility()) return;
+
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_CULL_FACE);
+
+    const Shader currentShader = loaded_shaders[CUBEMAP];
+    currentShader.use();
+
+    currentShader.setMat4("projection", Camera::instance().getPerspective());
+    currentShader.setMat4("view", glm::mat4(glm::mat3(Camera::instance().getView())));
+
+    currentShader.setInt("cubeMap", 0);
+    _skybox->bindTexture(0);
+
+    _skybox->draw();
+
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+}
+
 void Scene1::renderDirectShadow() const {
 
     Renderer::disableCulling();
@@ -756,30 +805,6 @@ void Scene1::renderPointShadow() const {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Scene1::renderSkybox() const {
-
-    if (!_skybox->getVisibility()) return;
-
-    glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_FALSE);
-    glDisable(GL_CULL_FACE);
-
-    const Shader currentShader = loaded_shaders[CUBEMAP];
-    currentShader.use();
-
-    currentShader.setMat4("projection", Camera::instance().getPerspective());
-    currentShader.setMat4("view", glm::mat4(glm::mat3(Camera::instance().getView())));
-
-    currentShader.setInt("cubeMap", 0);
-    _skybox->bindTexture(0);
-
-    _skybox->draw();
-
-    glDepthFunc(GL_LESS);
-    glDepthMask(GL_TRUE);
-    glEnable(GL_CULL_FACE);
 }
 
 void Scene1::destroy() {

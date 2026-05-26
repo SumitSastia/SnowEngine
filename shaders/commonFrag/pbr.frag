@@ -17,6 +17,8 @@ uniform sampler2D texture2; // roughness
 uniform samplerCube irradianceMap;
 uniform bool useIrradiance;
 
+uniform samplerCube env;
+
 #include <commonlight.glsl>
 
 void main() {
@@ -37,6 +39,8 @@ void main() {
 
     // PBR Lighting
     vec3 V = normalize(camPos - vPos);
+    vec3 R = reflect(-V, vNormal);
+    vec3 reflected_color = texture(env, R).rgb;
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, tex, metallic);
@@ -46,7 +50,7 @@ void main() {
     // vec3 kD = (1.0 - kS);
 
     vec3 envDiffuse = texture(irradianceMap, vNormal).rgb * tex * kD;
-    if (useIrradiance) color = envDiffuse;
+    if (useIrradiance) color = envDiffuse + metallic * kS * reflected_color;
 
     for (int i = 0; i < light_count; i++) { 
 

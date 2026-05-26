@@ -323,7 +323,7 @@ void Texture2D::destroy() {
     width = 0; height = 0;
 }
 
-CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
+CubeMap::CubeMap(const std::vector <std::string>& textureFaces, const uint16_t internal_format, const uint16_t type, const uint16_t res_size) {
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -350,8 +350,8 @@ CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
 
             glTexImage2D(
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                0, GL_SRGB8, width, height,
-                0, GL_RGB, GL_UNSIGNED_BYTE, pixelData
+                0, internal_format, (res_size)? res_size : width, (res_size)? res_size : height,
+                0, GL_RGB, type, pixelData
             );
         }
         else {
