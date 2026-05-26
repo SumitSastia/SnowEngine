@@ -12,6 +12,76 @@
 
 std::filesystem::path base = std::filesystem::current_path();
 
+// ------------------------------ Foward Declarations -------------------------------- //
+
+namespace gfx::cubemap {
+
+    unsigned int Cube::vao = 0;
+    unsigned int Cube::vbo = 0;
+
+    Cube::Cube() {
+
+        const float cubemapVertices[] = {
+            
+            -1.0f,  1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f,  1.0f,
+            1.0f,  1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            -1.0f,  1.0f, -1.0f,
+             1.0f,  1.0f, -1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+             1.0f, -1.0f,  1.0f
+        };
+
+        glGenBuffers(1, &vbo);
+        glGenVertexArrays(1, &vao);
+
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(cubemapVertices), cubemapVertices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glBindVertexArray(0);
+    }
+
+};
+
 // ------------------------------ Class Functions ------------------------------------ //
 
 /*
@@ -297,89 +367,56 @@ CubeMap::CubeMap(const std::vector <std::string>& textureFaces) {
 
     stbi_image_free(pixelData);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
 
-    const float skyboxVertices[] = {
-                  
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
+void CubeMap::bindTexture(const unsigned int textureUnit) const {
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+}
 
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
+void CubeMap::destroy() {
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f
-    };
-
-    glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
+    glDeleteTextures(1, &textureID);
 }
 
 Skybox::Skybox(const std::vector <std::string>& textureFaces) {
 
-    _cubemap  = new CubeMap(textureFaces);
+    _cubeMap  = new CubeMap(textureFaces);
     isVisible = false;
 
     lightIntensity = 0.8f;
+    _irradianceMap = nullptr;
+}
+
+void Skybox::setIrradianceMap(const std::vector <std::string>& textureFaces) {
+
+    if (_irradianceMap) {
+    
+        _irradianceMap->destroy();
+        delete _irradianceMap;
+    }
+
+    _irradianceMap = new CubeMap(textureFaces);
 }
 
 void Skybox::bindTexture(const unsigned int textureUnit) const {
+   _cubeMap->bindTexture(textureUnit);
+}
 
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, _cubemap->get_ID());
+void Skybox::bindIrradiance(const unsigned int textureUnit) const {
+    _irradianceMap->bindTexture(textureUnit);
 }
 
 void Skybox::draw() const {
 
-    glBindVertexArray(_cubemap->get_VAO());
+    glBindVertexArray(gfx::cubemap::Cube::getVAO());
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 }
 
 void Skybox::destroy() {
-    delete _cubemap;
+    delete _cubeMap;
 }
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //

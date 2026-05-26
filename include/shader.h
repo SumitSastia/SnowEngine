@@ -7,7 +7,7 @@
 
 const uint8_t MAX_SHADERS = 8;
 
-// ------------------------------ Function Declarations ------------------------------ //
+// ------------------------------ Foward Declarations -------------------------------- //
 
 namespace lights {
 
@@ -15,6 +15,24 @@ namespace lights {
     struct PointLight;
     struct SpotLight;
 }
+
+namespace gfx::cubemap {
+
+    class Cube {
+
+        static unsigned int vbo, vao;
+        Cube();
+
+    public:
+
+        static const unsigned int getVAO() {
+
+            static Cube instance {};
+            return instance.vao;
+        }
+    };
+
+};
 
 // ------------------------------ Classes -------------------------------------------- //
 
@@ -88,19 +106,20 @@ public:
 
 class CubeMap {
     
-    unsigned int VBO, VAO, textureID;
+    unsigned int textureID;
 
 public:
 
     CubeMap(const std::vector <std::string>& textureFaces);
 
-    const unsigned int& get_VAO() const { return VAO; }
-    const unsigned int& get_ID() const { return textureID; }
+    void bindTexture(const unsigned int textureUnit) const;
+    void destroy();
 };
 
 class Skybox {
 
-    CubeMap* _cubemap;
+    CubeMap* _cubeMap;
+    CubeMap* _irradianceMap;
     
     bool  isVisible;
     float lightIntensity;
@@ -115,7 +134,10 @@ public:
     void  setIntensity(const float intensity) { lightIntensity = intensity; }
     float getIntensity() const { return lightIntensity; }
 
+    void setIrradianceMap(const std::vector <std::string>& textureFaces);
+
     void bindTexture(const unsigned int textureUnit) const;
+    void bindIrradiance(const unsigned int textureUni) const;
 
     void draw() const;
     void destroy();

@@ -16,6 +16,9 @@ uniform sampler2D texture1; // metallic
 uniform sampler2D texture2; // roughness
 uniform sampler2D texture3; // normal
 
+uniform samplerCube irradianceMap;
+uniform bool useIrradiance;
+
 #include <commonlight.glsl>
 
 void main() {
@@ -44,8 +47,12 @@ void main() {
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, tex, metallic);
 
-    // reflectance
-    // vec3 Lo = vec3(0.0);
+    vec3 kS  = fresnalSchlick(max(dot(normal,V), 0.0), F0);
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
+    // vec3 kD = (1.0 - kS);
+
+    vec3 envDiffuse = texture(irradianceMap, normal).rgb * tex * kD;
+    if (useIrradiance) color = envDiffuse;
 
     for (int i = 0; i < light_count; i++) { 
 
