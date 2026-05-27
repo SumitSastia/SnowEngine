@@ -222,6 +222,8 @@ void Scene1::init() {
 
     mySphere = new Model3D("../assets/models/test_cube/sphere.obj");
 
+    cubes.loadDiffuseTex("assets/textures/pure_red.png");
+
     // myFloor.loadNormalTex("assets/textures/texture_maps/wall_normal.png");
 
     myWall.loadDiffuseTex("assets/textures/parallex_maps/bricks2.jpg");
@@ -371,8 +373,11 @@ void Scene1::render() const {
     const unsigned int dl_depthMap = loadedTextures++;
     directFrame->bindTexture(dl_depthMap);
 
-    const unsigned int env_cubemap = loadedTextures++;
-    ibl_frame->bindEnvBlurred(env_cubemap);
+    const unsigned int env_irradiance = loadedTextures++;
+    ibl_frame->bindIrradianceMap(env_irradiance);
+
+    const unsigned int env_prefilter = loadedTextures++;
+    ibl_frame->bindPreFilterMap(env_prefilter);
 
     std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13,19,20,21,22,23};
     const uint8_t _length = commonShaders.size();
@@ -408,7 +413,7 @@ void Scene1::render() const {
         currentShader.setFloat("skyboxIntensity", showSkybox? _skybox->getIntensity() : 0.0f);
 
         currentShader.setBool("useIrradiance", _skybox->getVisibility());
-        currentShader.setInt("irradianceMap", env_cubemap);
+        currentShader.setInt("irradianceMap", env_irradiance);
     }
 
     // Cube
@@ -429,7 +434,7 @@ void Scene1::render() const {
     currentShader.setInt("texture3", loadedTextures);
     advCube.bindNormalTex(loadedTextures++);
 
-    // advCube.draw();
+    advCube.draw();
 
     currentShader = loaded_shaders[PBR_3D];
     currentShader.use();
@@ -441,7 +446,14 @@ void Scene1::render() const {
     mySphere->bindTextures(loadedTextures++);
 
     currentShader.setInt("env", loadedTextures);
-    _skybox->bindTexture(loadedTextures++);
+    // _skybox->bindTexture(loadedTextures++);
+    ibl_frame->bindEnv(loadedTextures++);
+
+    currentShader.setInt("preFilterMap", loadedTextures);
+    ibl_frame->bindPreFilterMap(loadedTextures++);
+
+    currentShader.setInt("brdfLUT", loadedTextures);
+    ibl_frame->bindBRDFLUT(loadedTextures++);
 
     mySphere->draw();
 
@@ -460,7 +472,14 @@ void Scene1::render() const {
     // cubes.bindSpecularTex(loadedTextures++);
 
     currentShader.setInt("env", loadedTextures);
-    _skybox->bindTexture(loadedTextures++);
+    // _skybox->bindTexture(loadedTextures++);
+    ibl_frame->bindEnv(loadedTextures++);
+
+    currentShader.setInt("preFilterMap", loadedTextures);
+    ibl_frame->bindPreFilterMap(loadedTextures++);
+
+    currentShader.setInt("brdfLUT", loadedTextures);
+    ibl_frame->bindBRDFLUT(loadedTextures++);
 
     cubes.draw();
 
@@ -477,7 +496,7 @@ void Scene1::render() const {
 
     currentShader.setInt("texture0", loadedTextures);
     myFloor.bindDiffuseTex(loadedTextures++);
-    // ibl_frame.bindEnv(loadedTextures++);
+    // ibl_frame->bindBRDFLUT(loadedTextures++);
 
     currentShader.setInt("texture3", loadedTextures);
     myFloor.bindNormalTex(loadedTextures++);
@@ -514,8 +533,7 @@ void Scene1::render() const {
     // Testing ENV
 
     glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_FALSE);
-    glDisable(GL_CULL_FACE);
+    Renderer::disableCulling();
 
     currentShader = loaded_shaders[CUBEMAP];
     currentShader.use();
@@ -524,16 +542,12 @@ void Scene1::render() const {
     currentShader.setMat4("view"      , glm::mat4(glm::mat3(view)));
 
     currentShader.setInt("cubeMap", 0);
-    ibl_frame->bindEnvBlurred(0);
+    // ibl_frame->bindEnv(0);
+    ibl_frame->bindPreFilterMap(0);
 
-    // currentShader.setInt("cubeMap", 0);
-    // _skybox->bindTexture(0);
-
-    _skybox->draw();
+    if (_skybox->getVisibility()) _skybox->draw();
 
     glDepthFunc(GL_LESS);
-    glDepthMask(GL_TRUE);
-    glEnable(GL_CULL_FACE);
 }
 
 void Scene1::renderGbuffer() const {

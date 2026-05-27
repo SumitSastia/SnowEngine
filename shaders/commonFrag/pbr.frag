@@ -15,6 +15,8 @@ uniform sampler2D texture1; // metallic
 uniform sampler2D texture2; // roughness
 
 uniform samplerCube irradianceMap;
+uniform samplerCube preFilterMap;
+uniform sampler2D brdfLUT;
 uniform bool useIrradiance;
 
 uniform samplerCube env;
@@ -28,6 +30,9 @@ void main() {
     float metallic  = texture(texture0, vTexCords).r;
     float roughness = texture(texture0, vTexCords).r;
 
+    metallic = 0.8;
+    roughness = 0.2;
+
     // Ambient
     vec3 color = vec3(0.05) * tex;
 
@@ -38,6 +43,7 @@ void main() {
     // color *= (1.0 - shadow);
 
     // PBR Lighting
+    vec3 N = vNormal;
     vec3 V = normalize(camPos - vPos);
     vec3 R = reflect(-V, vNormal);
     vec3 reflected_color = texture(env, R).rgb;
@@ -46,11 +52,21 @@ void main() {
     F0 = mix(F0, tex, metallic);
 
     vec3 kS  = fresnalSchlick(max(dot(vNormal,V), 0.0), F0);
-    vec3 kD = (1.0 - kS) * (1.0 - metallic);
-    // vec3 kD = (1.0 - kS);
+    vec3 kD = (1.0 - kS);
 
+    // IBL Diffuse
     vec3 envDiffuse = texture(irradianceMap, vNormal).rgb * tex * kD;
-    if (useIrradiance) color = envDiffuse + metallic * kS * reflected_color;
+
+    // IBL Specular
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(preFilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+
+    vec3 F        = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+
+    // if (useIrradiance) color = envDiffuse  + metallic * kS * reflected_color;
+    if (useIrradiance) color = envDiffuse + kD * specular;
 
     for (int i = 0; i < light_count; i++) { 
 

@@ -287,3 +287,8 @@ vec3 calcPBR(pointLight light, vec3 tex, vec3 normal, vec3 F0, float metallic, f
 
     return Lo;
 }
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}

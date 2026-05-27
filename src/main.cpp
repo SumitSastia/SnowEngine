@@ -32,6 +32,7 @@ int main() {
 
     glEnable(GL_MULTISAMPLE);
     glDisable(GL_FRAMEBUFFER_SRGB);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     // ---------- CallBack Functions ---------- //
 

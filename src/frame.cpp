@@ -18,6 +18,7 @@ namespace frameBuffers {
         
         glBindVertexArray(gfx::internal::Screen::getVAO());
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
     }
 }
 
@@ -265,8 +266,7 @@ void HDRFrame::render() const {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    glBindVertexArray(frameBuffers::get_defaultVAO());
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    frameBuffers::renderScreen();
 }
 
 BloomFrame::BloomFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
