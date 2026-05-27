@@ -70,7 +70,7 @@ class Scene1 : public Scene {
     DebugFrame* debugFrame;
 
     // FrameBuffers
-    IBLFrame ibl_frame;
+    IBLFrame* ibl_frame;
 
 public:
 

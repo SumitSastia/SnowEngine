@@ -328,7 +328,7 @@ void Scene1::init() {
     _skybox = new Skybox(skyboxFaces);
     _skybox->setIrradianceMap(envFaces);
 
-    ibl_frame.loadEnvironment("assets/env/hdri-sky.hdr");
+    ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
 
     // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
@@ -371,6 +371,9 @@ void Scene1::render() const {
     const unsigned int dl_depthMap = loadedTextures++;
     directFrame->bindTexture(dl_depthMap);
 
+    const unsigned int env_cubemap = loadedTextures++;
+    ibl_frame->bindEnvBlurred(env_cubemap);
+
     std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13,19,20,21,22,23};
     const uint8_t _length = commonShaders.size();
 
@@ -403,6 +406,9 @@ void Scene1::render() const {
         currentShader.setSpotLight("sl", DefaultLights::instance().flashlight);
 
         currentShader.setFloat("skyboxIntensity", showSkybox? _skybox->getIntensity() : 0.0f);
+
+        currentShader.setBool("useIrradiance", _skybox->getVisibility());
+        currentShader.setInt("irradianceMap", env_cubemap);
     }
 
     // Cube
@@ -423,10 +429,6 @@ void Scene1::render() const {
     currentShader.setInt("texture3", loadedTextures);
     advCube.bindNormalTex(loadedTextures++);
 
-    currentShader.setBool("useIrradiance", _skybox->getVisibility());
-    currentShader.setInt("irradianceMap", loadedTextures);
-    _skybox->bindIrradiance(loadedTextures++);
-
     // advCube.draw();
 
     currentShader = loaded_shaders[PBR_3D];
@@ -437,10 +439,6 @@ void Scene1::render() const {
 
     currentShader.setInt("texture0", loadedTextures);
     mySphere->bindTextures(loadedTextures++);
-
-    currentShader.setBool("useIrradiance", _skybox->getVisibility());
-    currentShader.setInt("irradianceMap", loadedTextures);
-    _skybox->bindIrradiance(loadedTextures++);
 
     currentShader.setInt("env", loadedTextures);
     _skybox->bindTexture(loadedTextures++);
@@ -460,10 +458,6 @@ void Scene1::render() const {
 
     // currentShader.setInt("texture2", loadedTextures);
     // cubes.bindSpecularTex(loadedTextures++);
-
-    currentShader.setBool("useIrradiance", _skybox->getVisibility());
-    currentShader.setInt("irradianceMap", loadedTextures);
-    _skybox->bindIrradiance(loadedTextures++);
 
     currentShader.setInt("env", loadedTextures);
     _skybox->bindTexture(loadedTextures++);
@@ -487,10 +481,6 @@ void Scene1::render() const {
 
     currentShader.setInt("texture3", loadedTextures);
     myFloor.bindNormalTex(loadedTextures++);
-
-    currentShader.setBool("useIrradiance", _skybox->getVisibility());
-    currentShader.setInt("irradianceMap", loadedTextures);
-    _skybox->bindIrradiance(loadedTextures++);
 
     myFloor.draw();
 
@@ -534,7 +524,7 @@ void Scene1::render() const {
     currentShader.setMat4("view"      , glm::mat4(glm::mat3(view)));
 
     currentShader.setInt("cubeMap", 0);
-    ibl_frame.bindEnv(0);
+    ibl_frame->bindEnvBlurred(0);
 
     // currentShader.setInt("cubeMap", 0);
     // _skybox->bindTexture(0);
@@ -682,7 +672,7 @@ void Scene1::renderLight() const {
     }
 
     // Skybox
-    this->renderSkybox();
+    // this->renderSkybox();
 }
 
 void Scene1::renderSkybox() const {

@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-IBLFrame::IBLFrame() {
+IBLFrame::IBLFrame(const char* path, const uint16_t resolution) {
 
     glGenFramebuffers(1, &captureFBO);
     glGenRenderbuffers(1, &captureRBO);
@@ -15,14 +15,14 @@ IBLFrame::IBLFrame() {
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
     glGenTextures(1, &env_cubeMap);
     glBindTexture(GL_TEXTURE_CUBE_MAP, env_cubeMap);
 
     for (unsigned int i = 0; i < 6; i++) {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -36,7 +36,14 @@ IBLFrame::IBLFrame() {
         "../shaders/cubeMap/rect2cube.frag"
     );
 
+    shaderBlur = new Shader(
+        "../shaders/cubeMap/env.vert",
+        "../shaders/cubeMap/convolution.frag"
+    );
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    this->loadEnvironment(path, resolution);
 }
 
 void IBLFrame::renderCube() const {
@@ -51,7 +58,7 @@ void IBLFrame::renderCube() const {
     glBindVertexArray(0);
 }
 
-void IBLFrame::loadEnvironment(const char* path) {
+void IBLFrame::loadEnvironment(const char* path, const uint16_t resolution) {
 
     isHDR = true;
 
@@ -87,10 +94,10 @@ void IBLFrame::loadEnvironment(const char* path) {
     stbi_image_free(pixelData);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    this->convertCubeMap();
+    this->convertCubeMap(resolution);
 }
 
-void IBLFrame::convertCubeMap() const {
+void IBLFrame::convertCubeMap(const uint16_t resolution) {
 
     glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 
@@ -104,7 +111,7 @@ void IBLFrame::convertCubeMap() const {
         glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
 
-    glViewport(0,0,512,512);
+    glViewport(0, 0, resolution, resolution);
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     
     shader->use();
@@ -135,11 +142,67 @@ void IBLFrame::convertCubeMap() const {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    this->createIrradiance(captureProjection, captureViews, 32);
+}
+
+void IBLFrame::createIrradiance(glm::mat4 captureProjection, glm::mat4 captureViews[], const uint16_t resolution) {
+
+    // glDeleteFramebuffers(1, &captureFBO);
+    // glDeleteRenderbuffers(1, &captureRBO);
+
+    // glGenFramebuffers(1, &captureFBO);
+    // glGenRenderbuffers(1, &captureRBO);
+
+    glViewport(0, 0, resolution, resolution);
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
+
+    glGenTextures(1, &irradianceMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+
+    for (unsigned int i = 0; i < 6; i++) {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    shaderBlur->use();
+    shaderBlur->setMat4("projection", captureProjection);
+    shaderBlur->setInt("environmentMap", 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, env_cubeMap);
+
+    Renderer::disableCulling();
+    Renderer::disableDepth();
+
+    for (unsigned int i = 0; i < 6; i++) {
+
+        shaderBlur->setMat4("view", captureViews[i]);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        this->renderCube();
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void IBLFrame::bindEnv(const unsigned int textureUnit) const {
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, env_cubeMap);
-    // glBindTexture(GL_TEXTURE_2D, env_texture);
+}
+
+void IBLFrame::bindEnvBlurred(const unsigned int textureUnit) const {
+
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
 }
