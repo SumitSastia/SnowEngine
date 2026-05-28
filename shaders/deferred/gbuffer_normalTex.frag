@@ -22,5 +22,5 @@ void main() {
     normal = (normal * 2.0 - 1.0);
     gNormal = normalize(TBN * normal);
 
-	// gTexture = vec4(vec3(0.9), 1.0);
+	gTexture = vec4(vec3(0.95), 1.0);
 }

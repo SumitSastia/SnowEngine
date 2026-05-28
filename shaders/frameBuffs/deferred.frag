@@ -6,6 +6,7 @@ out vec4 FragColor;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gTexture;
+uniform sampler2D gOcclusion;
 
 #include <deferred_lighting.glsl>
 
@@ -24,13 +25,11 @@ void main() {
     vec3 vNormal = texture(gNormal, vTexCords).xyz;
     vec4 albedo  = texture(gTexture, vTexCords);
 
+    float occlusion = texture(gOcclusion, vTexCords).r;
+
     vec3 tex = albedo.rgb;
 
-    // if (albedo.a == 0.0) {
-    //     discard;
-    // }
-
-    vec3 color = tex * ambientStrength;
+    vec3 color = tex * occlusion;
     vec3 normal = normalize(vNormal);
 
     // Directional Lighting
@@ -39,17 +38,15 @@ void main() {
     // dirColor *= (1.0 - shadow);
     // color += dirColor;
 
-    // float shadow2;
-
     // Point Shadow
-    for (int i = 0; i < light_count; i++) {
+    // for (int i = 0; i < light_count; i++) {
 
-        vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
-        const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
+    //     vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
+    //     const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
 
-        lightColor *= shadow;
-        color += lightColor;
-    }
+    //     lightColor *= shadow;
+    //     color += lightColor;
+    // }
 
     if (useSpotLight) {
         color += calcSpotLight(vPos, tex, normal);

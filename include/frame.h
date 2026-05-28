@@ -176,8 +176,11 @@ public:
 	Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight);
 
 	const Shader* getShader() const { return shader; }
-	void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
+	// void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
 
 	void init() override {}
 	void render() const override;
+
+	void bind_gPosition(const unsigned int textureUnit) const;
+	void bind_gNormal(const unsigned int textureUnit) const;
 };

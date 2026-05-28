@@ -13,8 +13,8 @@ uniform sampler2D texture0;
 void main() {
 
 	gPosition = vPos;
-	gNormal   = vNormal;
+	gNormal   = normalize(vNormal);
 	gTexture  = texture(texture0, vTexCords);
 
-	// gTexture = vec4(vec3(0.9), 1.0);
+	gTexture = vec4(vec3(0.95), 1.0);
 }

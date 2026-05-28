@@ -323,9 +323,9 @@ void Scene1::init() {
     };
     
     _skybox = new Skybox(skyboxFaces);
-    _skybox->setIrradianceMap(envFaces);
+    // _skybox->setIrradianceMap(envFaces);
 
-    ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
+    // ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
 
     // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
@@ -369,10 +369,10 @@ void Scene1::render() const {
     directFrame->bindTexture(dl_depthMap);
 
     const unsigned int env_irradiance = loadedTextures++;
-    ibl_frame->bindIrradianceMap(env_irradiance);
+    // ibl_frame->bindIrradianceMap(env_irradiance);
 
     const unsigned int env_prefilter = loadedTextures++;
-    ibl_frame->bindPreFilterMap(env_prefilter);
+    // ibl_frame->bindPreFilterMap(env_prefilter);
 
     std::vector <uint8_t> commonShaders = {0,2,6,7,8,11,12,13,19,20,21,22,23};
     const uint8_t _length = commonShaders.size();
@@ -442,13 +442,13 @@ void Scene1::render() const {
 
     currentShader.setInt("env", loadedTextures);
     // _skybox->bindTexture(loadedTextures++);
-    ibl_frame->bindEnv(loadedTextures++);
+    // ibl_frame->bindEnv(loadedTextures++);
 
     currentShader.setInt("preFilterMap", loadedTextures);
-    ibl_frame->bindPreFilterMap(loadedTextures++);
+    // ibl_frame->bindPreFilterMap(loadedTextures++);
 
     currentShader.setInt("brdfLUT", loadedTextures);
-    ibl_frame->bindBRDFLUT(loadedTextures++);
+    // ibl_frame->bindBRDFLUT(loadedTextures++);
 
     mySphere->draw();
 
@@ -468,13 +468,13 @@ void Scene1::render() const {
 
     currentShader.setInt("env", loadedTextures);
     // _skybox->bindTexture(loadedTextures++);
-    ibl_frame->bindEnv(loadedTextures++);
+    // ibl_frame->bindEnv(loadedTextures++);
 
     currentShader.setInt("preFilterMap", loadedTextures);
-    ibl_frame->bindPreFilterMap(loadedTextures++);
+    // ibl_frame->bindPreFilterMap(loadedTextures++);
 
     currentShader.setInt("brdfLUT", loadedTextures);
-    ibl_frame->bindBRDFLUT(loadedTextures++);
+    // ibl_frame->bindBRDFLUT(loadedTextures++);
 
     cubes.draw();
 
@@ -538,7 +538,7 @@ void Scene1::render() const {
 
     currentShader.setInt("cubeMap", 0);
     // ibl_frame->bindEnv(0);
-    ibl_frame->bindPreFilterMap(0);
+    // ibl_frame->bindPreFilterMap(0);
 
     if (_skybox->getVisibility()) _skybox->draw();
 
@@ -632,6 +632,7 @@ void Scene1::renderGbuffer() const {
 
 void Scene1::renderDeferred(const Shader& currentShader) const {
 
+    // Not Working
     // 0 - gPosition
     // 1 - gNormal
     // 2 - gTexture

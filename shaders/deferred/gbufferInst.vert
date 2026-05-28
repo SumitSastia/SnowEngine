@@ -18,6 +18,6 @@ void main(){
     gl_Position = projection * view * instanceModel * vec4(aPos, 1.0);
 
     vPos      = vec3(instanceModel * vec4(aPos, 1.0));
-    vNormal   = normalize(instanceNormal * aNormal);
+    vNormal   = (instanceNormal * aNormal);
     vTexCords = aTexCords;
 }

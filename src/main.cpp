@@ -9,6 +9,7 @@
 #include <scenes.h>
 #include <model.h>
 #include <text.h>
+#include <ssao.h>
 
 // ------------------------------ Global Variables ----------------------------------- //
 
@@ -31,6 +32,7 @@ int main() {
     Input::init();
     DebugMenu::init(window);
     Text::init("../assets/fonts/BlockBlueprint.ttf");
+    SSAO::init();
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -57,7 +59,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = false;
+    bool deferredRender = true;
 
     // ---------- Loop ------------------------ //
 
@@ -136,6 +138,24 @@ int main() {
 
             mainScene->renderGbuffer();
 
+            // Occlusion 
+            SSAO::bindFBO();
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            SSAO::shader->use();
+
+            SSAO::shader->setInt("gPosition", 0);
+            deferredFrame->bind_gPosition(0);
+
+            SSAO::shader->setInt("gNormal", 1);
+            deferredFrame->bind_gNormal(1);
+
+            SSAO::bindNoiseTex(2);
+            SSAO::shader->setMat4("projection", mainCamera.getPerspective());
+            SSAO::shader->setMat4("view", mainCamera.getView());
+
+            frameBuffers::renderScreen();
+
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             Renderer::clear();
 
@@ -151,7 +171,7 @@ int main() {
         // Debug - UI
         DebugMenu::endUI();
 
-        Text::render("Hello World", glm::vec2(100.0f), 1.0, glm::vec3(1.0f));
+        // Text::render((deferredRender)? "Deferred Rendering" : "Forward Rendering", glm::vec2(50.0f), 1.0, glm::vec3(1.0f));
 
         glfwSwapBuffers(window);
     }

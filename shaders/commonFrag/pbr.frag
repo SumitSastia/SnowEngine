@@ -66,7 +66,7 @@ void main() {
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
     // if (useIrradiance) color = envDiffuse  + metallic * kS * reflected_color;
-    if (useIrradiance) color = envDiffuse + kD * specular;
+    // if (useIrradiance) color = envDiffuse + kD * specular;
 
     for (int i = 0; i < light_count; i++) { 
 

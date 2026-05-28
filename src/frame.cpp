@@ -2,6 +2,7 @@
 #include <shader.h>
 #include <renderer.h>
 #include <input.h>
+#include <ssao.h>
 
 #include <iostream>
 
@@ -451,9 +452,10 @@ void Gbuffer::render() const {
     const unsigned int textureUnit = 3;
 
     shader->use();
-    shader->setInt("gPosition", textureUnit);
-    shader->setInt("gNormal", textureUnit + 1);
-    shader->setInt("gTexture", textureUnit + 2);
+    shader->setInt("gPosition",  textureUnit);
+    shader->setInt("gNormal",    textureUnit + 1);
+    shader->setInt("gTexture",   textureUnit + 2);
+    shader->setInt("gOcclusion", textureUnit + 3);
     
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -466,9 +468,23 @@ void Gbuffer::render() const {
     glActiveTexture(GL_TEXTURE2 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindTexture(GL_TEXTURE_2D, gTexture);
+
+    SSAO::bindOcclusion(textureUnit + 3);
     
     glBindVertexArray(frameBuffers::get_defaultVAO());
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     Renderer::enableDepth();
+}
+
+void Gbuffer::bind_gPosition(const unsigned int textureUnit) const {
+
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+}
+
+void Gbuffer::bind_gNormal(const unsigned int textureUnit) const {
+
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
 }
