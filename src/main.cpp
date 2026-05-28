@@ -8,6 +8,7 @@
 #include <input.h>
 #include <scenes.h>
 #include <model.h>
+#include <text.h>
 
 // ------------------------------ Global Variables ----------------------------------- //
 
@@ -29,10 +30,15 @@ int main() {
 
     Input::init();
     DebugMenu::init(window);
+    Text::init("../assets/fonts/BlockBlueprint.ttf");
 
     glEnable(GL_MULTISAMPLE);
-    glDisable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+    glDisable(GL_FRAMEBUFFER_SRGB);
+
+    // glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // ---------- CallBack Functions ---------- //
 
@@ -144,6 +150,8 @@ int main() {
 
         // Debug - UI
         DebugMenu::endUI();
+
+        Text::render("Hello World", glm::vec2(100.0f), 1.0, glm::vec3(1.0f));
 
         glfwSwapBuffers(window);
     }

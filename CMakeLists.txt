@@ -3,6 +3,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(TARGET_NAME SnowEngine)
 
+# find_package(Freetype REQUIRED)
+
 project(${TARGET_NAME})
 
 set(IMGUI_SRC
@@ -33,7 +35,10 @@ add_executable(${TARGET_NAME}
     src/frame.cpp
     src/model.cpp
     src/ibl.cpp
+    src/text.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)
-target_link_libraries(${TARGET_NAME} PRIVATE glfw assimp)
+target_include_directories(${TARGET_NAME} PRIVATE include/freetype2)
+
+target_link_libraries(${TARGET_NAME} PRIVATE glfw assimp freetype)

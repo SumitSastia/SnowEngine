@@ -27,8 +27,8 @@ void main() {
 
     vec3 tex = texture(texture0, vTexCords).rgb;
 
-    float metallic  = texture(texture0, vTexCords).r;
-    float roughness = texture(texture0, vTexCords).r;
+    float metallic  = 0.01 * (tex.r + tex.g + tex.b);
+    float roughness = 0.1 * (tex.r + tex.g + tex.b);
 
     metallic = 0.8;
     roughness = 0.2;

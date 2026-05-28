@@ -30,8 +30,7 @@ enum scene1_shaders {
     PBR_2D,
     PBR_INST,
     PBR_NORM3D,
-    PBR_NORM2D,
-    TEST
+    PBR_NORM2D
 };
 
 namespace scene_var {
@@ -204,10 +203,6 @@ void Scene1::init() {
         Shader(
             "../shaders/planes/normalTexPlane.vert",
             "../shaders/commonFrag/pbr_normalTex.frag", true
-        ),
-        Shader(
-            "../shaders/cubeMap/env.vert",
-            "../shaders/cubeMap/env.frag"
         )
     };
 
@@ -222,7 +217,7 @@ void Scene1::init() {
 
     mySphere = new Model3D("../assets/models/test_cube/sphere.obj");
 
-    cubes.loadDiffuseTex("assets/textures/pure_red.png");
+    // cubes.loadDiffuseTex("assets/textures/pure_red.png");
 
     // myFloor.loadNormalTex("assets/textures/texture_maps/wall_normal.png");
 
