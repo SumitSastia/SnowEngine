@@ -1,6 +1,7 @@
 #include <ssao.h>
 #include <renderer.h>
 #include <shader.h>
+#include <frame.h>
 
 std::vector <glm::vec3> SSAO::ssaoKernel {};
 std::vector <glm::vec3> SSAO::ssaoNoise  {};
@@ -9,7 +10,11 @@ unsigned int SSAO::fbo          = 0;
 unsigned int SSAO::colorBuffer  = 0;
 unsigned int SSAO::noiseTexture = 0;
 
-Shader* SSAO::shader = nullptr;
+unsigned int SSAO::fbo_blur         = 0;
+unsigned int SSAO::colorBuffer_blur = 0;
+
+Shader* SSAO::shader     = nullptr;
+Shader* SSAO::shaderBlur = nullptr;
 
 // ----------------------------------------------------------------------------------- //
 
@@ -19,6 +24,11 @@ void SSAO::init() {
     shader = new Shader(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/ssao/ssao.frag"
+    );
+
+    shaderBlur = new Shader(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/ssao/ssaoBlur.frag"
     );
 
     shader->use();
@@ -84,6 +94,20 @@ void SSAO::init() {
     
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
 
+    // Blur Frame
+
+    glGenFramebuffers(1, &fbo_blur);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_blur);
+
+    glGenTextures(1, &colorBuffer_blur);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer_blur);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, WIN_W, WIN_H, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer_blur, 0);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -102,10 +126,23 @@ void SSAO::bindNoiseTex(const unsigned int textureUnit) {
 void SSAO::bindOcclusion(const unsigned int textureUnit) {
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer_blur);
 }
 
 void SSAO::setInt(const unsigned int textureUnit) {
+    // shader->use();
+}
 
-    shader->use();
+void SSAO::blurSSAO() {
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_blur);
+
+    shaderBlur->use();
+    shader->setInt("ssaoInput", 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+
+    frameBuffers::renderScreen();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

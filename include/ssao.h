@@ -16,6 +16,11 @@ class SSAO {
     static unsigned int colorBuffer;
     static unsigned int noiseTexture;
 
+    static unsigned int fbo_blur;
+    static unsigned int colorBuffer_blur;
+
+    static Shader* shaderBlur;
+
     static float lerp(float a, float b, float f) {
         return a + f * (b - a);
     }
@@ -30,4 +35,5 @@ public:
     static void bindOcclusion(const unsigned int textureUnit);
 
     static void setInt(const unsigned int textureUnit);
+    static void blurSSAO();
 };

@@ -155,6 +155,7 @@ int main() {
             SSAO::shader->setMat4("view", mainCamera.getView());
 
             frameBuffers::renderScreen();
+            SSAO::blurSSAO();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             Renderer::clear();
