@@ -25,6 +25,7 @@ class IBLFrame {
     Shader* shaderBRDF;
 
     bool isHDR;
+    bool isInit;
 
     void renderCube() const;
     void renderSquare() const;
@@ -52,4 +53,6 @@ public:
     void bindIrradianceMap(const unsigned int textureUnit) const;
     void bindPreFilterMap(const unsigned int textureUnit) const;
     void bindBRDFLUT(const unsigned int textureUnit) const;
+
+    void draw(const unsigned int textureUnit) const;
 };

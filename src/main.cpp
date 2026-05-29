@@ -59,7 +59,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = true;
+    bool deferredRender = false;
 
     // ---------- Loop ------------------------ //
 

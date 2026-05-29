@@ -1,11 +1,9 @@
 #include <renderer.h>
 #include <frame.h>
+#include <entity.h>
 
 bool Renderer::culling = false;
 
-/*
-Returns true if Renderer is successfully initialized.
-*/
 bool Renderer::init() {
 
     if (!glfwInit()) {
@@ -143,3 +141,4 @@ void Renderer::copyDepth(const FrameBuffer* read_fbo, const FrameBuffer* write_f
         GL_NEAREST
     );
 }
+

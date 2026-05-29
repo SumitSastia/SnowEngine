@@ -1,6 +1,5 @@
 #pragma once
 
-#include <entity.h>
 #include <s_math.h>
 
 #include <vector>
@@ -9,7 +8,7 @@
 class Texture2D;
 
 // Hardcoded Model
-class Shape : public Entity {
+class Shape {
 
 protected:
 

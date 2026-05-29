@@ -37,6 +37,7 @@ add_executable(${TARGET_NAME}
     src/ibl.cpp
     src/text.cpp
     src/ssao.cpp
+    src/entity.cpp
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)

@@ -3,6 +3,8 @@
 #include <camera.h>
 #include <renderer.h>
 
+#include <thread>
+
 glm::vec3 customPos = glm::vec3(-3.0f, 1.5f, 3.0f);
 
 enum scene1_shaders {
@@ -225,11 +227,11 @@ void Scene1::init() {
     myWall.loadNormalTex("assets/textures/parallex_maps/bricks2_normal.jpg");
     myWall.loadSpecularTex("assets/textures/parallex_maps/bricks2_disp.jpg");
 
-    loaded_entities.push_back(myCube);
-    loaded_entities.push_back(myFloor);
-    loaded_entities.push_back(myGround);
-    loaded_entities.push_back(advCube);
-    loaded_entities.push_back(*mySphere);
+    // loaded_entities.push_back(myCube);
+    // loaded_entities.push_back(myFloor);
+    // loaded_entities.push_back(myGround);
+    // loaded_entities.push_back(advCube);
+    // loaded_entities.push_back(*mySphere);
 
     Matrix4 cubeModel   {};
     Matrix4 floorModel  {};
@@ -325,13 +327,16 @@ void Scene1::init() {
     _skybox = new Skybox(skyboxFaces);
     // _skybox->setIrradianceMap(envFaces);
 
-    // ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
+    // ECS
+    cube = ecs.createEntity();
+
+    ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
 
     // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
 
     std::cout << "Scene1 - Loaded Shaders: "  << loaded_shaders.size() << std::endl;
-    std::cout << "Scene1 - Loaded Entities: " << loaded_entities.size() + cubes.getCount() << std::endl;
+    // std::cout << "Scene1 - Loaded Entities: " << loaded_entities.size() + cubes.getCount() << std::endl;
 }
 
 void Scene1::update(const float& delta_time) {
@@ -525,6 +530,9 @@ void Scene1::render() const {
 
     myWall.draw();
 
+    // ECS
+    RenderSystem::instance().render(EntityShapes::instance().getECS());
+
     // Testing ENV
 
     glDepthFunc(GL_LEQUAL);
@@ -537,10 +545,10 @@ void Scene1::render() const {
     currentShader.setMat4("view"      , glm::mat4(glm::mat3(view)));
 
     currentShader.setInt("cubeMap", 0);
-    // ibl_frame->bindEnv(0);
+    ibl_frame->bindEnv(0);
     // ibl_frame->bindPreFilterMap(0);
 
-    if (_skybox->getVisibility()) _skybox->draw();
+    if (_skybox->getVisibility()) ibl_frame->draw(0);
 
     glDepthFunc(GL_LESS);
 }

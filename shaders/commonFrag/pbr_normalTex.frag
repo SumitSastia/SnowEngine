@@ -52,7 +52,7 @@ void main() {
     // vec3 kD = (1.0 - kS);
 
     vec3 envDiffuse = texture(irradianceMap, normal).rgb * tex * kD;
-    if (useIrradiance) color = envDiffuse;
+    // if (useIrradiance) color = envDiffuse;
 
     for (int i = 0; i < light_count; i++) { 
 

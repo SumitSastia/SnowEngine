@@ -7,8 +7,9 @@
 #include <stb_image.h>
 
 #include <iostream>
+#include <thread>
 
-IBLFrame::IBLFrame(const char* path, const uint16_t resolution) {
+IBLFrame::IBLFrame(const char* path, const uint16_t resolution): isInit(false) {
 
     glGenFramebuffers(1, &captureFBO);
     glGenRenderbuffers(1, &captureRBO);
@@ -56,6 +57,8 @@ IBLFrame::IBLFrame(const char* path, const uint16_t resolution) {
 
     this->loadEnvironment(path, resolution);
     this->brdfLUT();
+    
+    isInit = true;
 }
 
 void IBLFrame::renderCube() const {
@@ -155,8 +158,8 @@ void IBLFrame::convertCubeMap(const uint16_t resolution) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    this->createIrradiance(captureProjection, captureViews, 32);
-    this->preFilter(captureProjection, captureViews);
+    // this->createIrradiance(captureProjection, captureViews, 32);
+    // this->preFilter(captureProjection, captureViews);
 }
 
 void IBLFrame::createIrradiance(const glm::mat4 captureProjection, const glm::mat4 captureViews[], const uint16_t resolution) {
@@ -308,4 +311,12 @@ void IBLFrame::bindBRDFLUT(const unsigned int textureUnit) const {
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+}
+
+void IBLFrame::draw(const unsigned int textureUnit) const {
+
+    if (!isInit) return;
+
+    this->bindEnv(textureUnit);
+    gfx::cubemap::Cube::draw();
 }

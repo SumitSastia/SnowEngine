@@ -33,6 +33,13 @@ namespace gfx::cubemap {
             static Cube instance {};
             return instance.vao;
         }
+
+        static void draw() {
+
+            glBindVertexArray(vao);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glBindVertexArray(0);
+        }
     };
 
 };

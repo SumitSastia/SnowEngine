@@ -13,7 +13,15 @@ const unsigned int WIN_H = 720;
 
 extern std::filesystem::path base;
 
+// ------------------------------ Foward Declarations -------------------------------- //
+
 class FrameBuffer;
+class ECS;
+
+struct Transform;
+struct EntityMesh;
+
+// ----------------------------------------------------------------------------------- //
 
 class Renderer {
 
@@ -38,7 +46,7 @@ public:
         return instance;
     }
 
-    bool init();
+    bool init(); /* Returns true if Renderer is successfully initialized. */
     void render() const {}
     void terminate();
     

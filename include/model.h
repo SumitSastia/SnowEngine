@@ -87,7 +87,7 @@ public:
     void destroy();
 };
 
-class Model3D : public Entity {
+class Model3D {
 
     glm::mat4 projection;
     glm::mat4 view;

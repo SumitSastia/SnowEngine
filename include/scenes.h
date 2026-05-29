@@ -7,6 +7,7 @@
 #include <s_math.h>
 #include <model.h>
 #include <ibl.h>
+#include <entity.h>
 
 class Scene {
 
@@ -65,6 +66,10 @@ class Scene1 : public Scene {
 
     // Skybox
     Skybox* _skybox;
+
+    // ECS
+    ECS ecs;
+    Entity cube;
 
     // Debug
     DebugFrame* debugFrame;

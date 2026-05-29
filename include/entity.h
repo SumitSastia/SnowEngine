@@ -1,8 +1,104 @@
 #pragma once
 
-class Entity {
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <cstdint>
+#include <vector>
+
+// ------------------------------ Foward Declarations -------------------------------- //
+
+#define MAX_ENTITIES 25
+
+class Shape;
+class Shader;
+
+using Entity = uint32_t;
+
+// ------------------------------ Components ----------------------------------------- //
+
+struct Transform {
+
+    glm::vec3 position;
+    glm::vec3 rotation;
+    glm::vec3 scale;
+
+    glm::mat4 model;
+    glm::mat3 normalMatrix;
+
+    void computeModel();
+};
+
+struct EntityMesh {
+
+    Shape* shape;
+};
+
+struct Material {
+
+    Shader* shader;
+};
+
+class ECS {
+
+    Entity nextEntity;
+    
+public:
+
+    ECS():
+        nextEntity(0),
+        transforms(MAX_ENTITIES),
+        meshes(MAX_ENTITIES),
+        materials(MAX_ENTITIES) {
+    }
+
+    std::vector <Transform>  transforms;
+    std::vector <EntityMesh> meshes;
+    std::vector <Material>   materials;
+
+    Entity createEntity() {
+
+        transforms.push_back(Transform{});
+        meshes.push_back(EntityMesh{});
+        materials.push_back(Material{});
+
+        return nextEntity++;
+    }
+
+    const Entity getTotal() const { return nextEntity; }
+};
+
+class RenderSystem {
+
+    void bindCameraGlobals(const Shader* shader) const;
+    void draw(const EntityMesh& mesh, const Transform& transform, const Material& material) const;
 
 public:
 
-    void draw() const {}
+    static RenderSystem& instance() {
+
+        static RenderSystem instance {};
+        return instance;
+    }
+
+    void render(const ECS& ecs) const;
+};
+
+class EntityShapes {
+
+    ECS ecs;
+    EntityShapes();
+
+public:
+    
+    Entity cube;
+    
+    static EntityShapes& instance() {
+
+        static EntityShapes instance {};
+        return instance;
+    }
+
+    const ECS& getECS() const { return ecs; }
 };
