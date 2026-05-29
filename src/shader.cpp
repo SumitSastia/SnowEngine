@@ -323,6 +323,37 @@ void Texture2D::destroy() {
     width = 0; height = 0;
 }
 
+// ------------------------------ Shaders -------------------------------------------- //
+
+std::vector <bool>    Shaders::isLoaded(MAX_SHADERS, false);
+std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
+
+std::vector <shader_paths> Shaders::path = {
+
+    shader_paths("ecs/generic3d.vert", "ecs/test.frag"),
+    shader_paths("ecs/generic2d.vert", "ecs/test.frag")
+};
+
+Shader* Shaders::get(shaderNames shader) {
+
+    if (!isLoaded[shader]) {
+
+        const std::string base_path = "../shaders/";
+
+        const std::string vertPath = base_path + path[shader].first;
+        const std::string fragPath = base_path + path[shader].second;
+
+        // std::cout << vertPath << '\n' << fragPath << std::endl;
+
+        loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str());
+        isLoaded[shader] = true;
+    }
+
+    return loadedShaders[shader];
+}
+
+// ------------------------------ Shaders -------------------------------------------- //
+
 CubeMap::CubeMap(const std::vector <std::string>& textureFaces, const uint16_t internal_format, const uint16_t type, const uint16_t res_size) {
 
     glGenTextures(1, &textureID);

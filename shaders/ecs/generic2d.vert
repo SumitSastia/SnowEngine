@@ -1,0 +1,22 @@
+#version 450 core
+
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec2 aTexCords;
+
+out vec3 vPos;
+out vec3 vNormal;
+out vec2 vTexCords;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+uniform mat3 normalMatrix;
+
+void main(){
+
+    gl_Position = projection * view * model * vec4(aPos, 0.0, 1.0);
+
+    vPos      = vec3(model * vec4(aPos, 0.0, 1.0));
+    vNormal   = normalMatrix * vec3(0.0, 0.0, 1.0);
+    vTexCords = aTexCords;
+}

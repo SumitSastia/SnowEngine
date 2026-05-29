@@ -189,3 +189,29 @@ namespace colors {
     const glm::vec3 BLACK  { 0.000f, 0.000f, 0.000f };
     const glm::vec3 GRAY   { 0.133f, 0.133f, 0.133f };
 }
+
+// ------------------------------ Shaders -------------------------------------------- //
+
+#define MAX_SHADERS 30
+
+enum shaderNames {
+
+    TEST3D,
+    TEST2D,
+    PHONG3D,
+    PHONG2D
+};
+
+using shader_paths = std::pair <std::string, std::string>;
+
+class Shaders {
+
+    static std::vector <bool>    isLoaded;
+    static std::vector <Shader*> loadedShaders;
+
+    static std::vector <shader_paths> path;
+
+public:
+
+    static Shader* get(shaderNames shader);
+};

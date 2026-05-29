@@ -13,6 +13,7 @@
 
 class Shape;
 class Shader;
+class Texture2D;
 
 using Entity = uint32_t;
 
@@ -35,9 +36,25 @@ struct EntityMesh {
     Shape* shape;
 };
 
+// Phong
 struct Material {
 
     Shader* shader;
+
+    Texture2D* albedo;
+    Texture2D* normal;
+};
+
+// PBR + IBL
+struct MaterialPBR {
+
+    Shader* shader;
+
+    Texture2D* albedo;
+    Texture2D* normal;
+    
+    Texture2D* metallic;
+    Texture2D* roughness;
 };
 
 class ECS {

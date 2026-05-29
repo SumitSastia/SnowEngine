@@ -5,7 +5,7 @@
 #include <shapes.h>
 #include <renderer.h>
 
-// ------------------------------ ECS Renderer --------------------------------------- //\
+// ------------------------------ ECS Renderer --------------------------------------- //
 
 void RenderSystem::bindCameraGlobals(const Shader* shader) const {
 
@@ -60,10 +60,13 @@ EntityShapes::EntityShapes() {
     ecs.meshes[cube].shape = &DefaultShapes::instance().cube;
     
     // Material
-    ecs.materials[cube].shader = new Shader(
-        "../shaders/ecs/cube.vert",
-        "../shaders/ecs/cube.frag"
-    );
+    // ecs.materials[cube].shader = new Shader(
+    //     "../shaders/ecs/generic3d.vert",
+    //     "../shaders/ecs/test.frag"
+    // );
+
+    // const Shader* shader = Shaders::get(TEST3D);
+    ecs.materials[cube].shader = Shaders::get(TEST3D);
     
     // Transform
     Transform transform {};
