@@ -34,6 +34,11 @@ void RenderSystem::draw(const EntityMesh& mesh, const Transform& transform, cons
 
     bindCameraGlobals(material.shader);
 
+    if (material.albedo) {
+        material.shader->setInt("albedo", 0);
+        material.albedo->bind(0);
+    }
+
     mesh.shape->draw();
 }
 
@@ -54,27 +59,38 @@ void Transform::computeModel() {
 
 EntityShapes::EntityShapes() {
 
-    cube = ecs.createEntity();
+    cube   = ecs.createEntity();
+    square = ecs.createEntity();
     
-    // Mesh
-    ecs.meshes[cube].shape = &DefaultShapes::instance().cube;
+    // cube
+    ecs.meshes[cube].shape     = &DefaultShapes::instance().cube;
+    ecs.materials[cube].shader = Shaders::get(ALBEDO3D);
+    ecs.materials[cube].albedo = DefaultShapes::instance().cube.getAlbedo();
     
-    // Material
-    // ecs.materials[cube].shader = new Shader(
-    //     "../shaders/ecs/generic3d.vert",
-    //     "../shaders/ecs/test.frag"
-    // );
+    {
+        Transform transform {};
 
-    // const Shader* shader = Shaders::get(TEST3D);
-    ecs.materials[cube].shader = Shaders::get(TEST3D);
-    
-    // Transform
-    Transform transform {};
+        transform.position = glm::vec3(-3.0f, 0.0f, 3.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
 
-    transform.position = glm::vec3(-3.0f, 0.0f, 3.0f);
-    transform.rotation = glm::vec3(0.0f);
-    transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
+        ecs.transforms[cube] = transform;
+    }
 
-    transform.computeModel();
-    ecs.transforms[cube] = transform;
+    // square
+    ecs.meshes[square].shape     = &DefaultShapes::instance().square;
+    ecs.materials[square].shader = Shaders::get(ALBEDO2D);
+    ecs.materials[square].albedo = DefaultShapes::instance().square.getAlbedo();
+
+    {
+        Transform transform {};
+
+        transform.position = glm::vec3(-3.0f, 0.0f, 5.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+
+        transform.computeModel();
+        ecs.transforms[square] = transform;
+    }
 }

@@ -50,6 +50,11 @@ public:
         return _copy;
     }
 
+    // @note Temporary till Asset Manager is Initialized
+    Texture2D* getAlbedo() const {
+        return shapeDiffuseTexture;
+    }
+
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
         const unsigned int* indices, const size_t& size_i

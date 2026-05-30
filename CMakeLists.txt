@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
 
-set(TARGET_NAME SnowEngine)
 
-# find_package(Freetype REQUIRED)
+set(TARGET_NAME SnowEngine)
+set(CMAKE_BUILD_TYPE Debug)
 
 project(${TARGET_NAME})
 

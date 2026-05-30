@@ -43,6 +43,12 @@ struct Material {
 
     Texture2D* albedo;
     Texture2D* normal;
+
+    Material():
+        shader(nullptr),
+        albedo(nullptr),
+        normal(nullptr) {
+    }
 };
 
 // PBR + IBL
@@ -52,9 +58,17 @@ struct MaterialPBR {
 
     Texture2D* albedo;
     Texture2D* normal;
-    
+
     Texture2D* metallic;
     Texture2D* roughness;
+
+    MaterialPBR():
+        shader(nullptr),
+        albedo(nullptr),
+        normal(nullptr),
+        metallic(nullptr),
+        roughness(nullptr) {
+    }
 };
 
 class ECS {
@@ -110,6 +124,7 @@ class EntityShapes {
 public:
     
     Entity cube;
+    Entity square;
     
     static EntityShapes& instance() {
 

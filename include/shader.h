@@ -107,6 +107,7 @@ public:
     @param format 0 - GL_RGB, 1 - GL_SRGB
     */
     void load(const char* path, const bool format = 0);
+    void bind(const unsigned int textureUnit) const;
 
     void destroy();
 
@@ -198,6 +199,8 @@ enum shaderNames {
 
     TEST3D,
     TEST2D,
+    ALBEDO3D,
+    ALBEDO2D,
     PHONG3D,
     PHONG2D
 };

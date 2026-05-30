@@ -23,6 +23,8 @@ float lastTime  = 0.0f;
 int main() {
 
     // ---------- Initialization --------------- //
+
+    running::time::start();
     
     GLFWwindow* window = Renderer::instance().getWindow();
 
@@ -60,6 +62,10 @@ int main() {
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
     bool deferredRender = false;
+
+    const uint64_t init_time = running::time::getTime();
+
+    std::cout << "Time taken to Initialize: " << init_time << running::time::unit << std::endl;
 
     // ---------- Loop ------------------------ //
 

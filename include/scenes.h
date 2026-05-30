@@ -8,6 +8,7 @@
 #include <model.h>
 #include <ibl.h>
 #include <entity.h>
+#include <s_time.h>
 
 class Scene {
 

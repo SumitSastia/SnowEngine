@@ -315,6 +315,12 @@ void Texture2D::load(const char* path, const bool format) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Texture2D::bind(const unsigned int textureUnit) const {
+
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+}
+
 void Texture2D::destroy() {
 
     glDeleteTextures(1, &textureID);
@@ -331,7 +337,9 @@ std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
 std::vector <shader_paths> Shaders::path = {
 
     shader_paths("ecs/generic3d.vert", "ecs/test.frag"),
-    shader_paths("ecs/generic2d.vert", "ecs/test.frag")
+    shader_paths("ecs/generic2d.vert", "ecs/test.frag"),
+    shader_paths("ecs/generic3d.vert", "ecs/albedo.frag"),
+    shader_paths("ecs/generic2d.vert", "ecs/albedo.frag")
 };
 
 Shader* Shaders::get(shaderNames shader) {
@@ -342,8 +350,6 @@ Shader* Shaders::get(shaderNames shader) {
 
         const std::string vertPath = base_path + path[shader].first;
         const std::string fragPath = base_path + path[shader].second;
-
-        // std::cout << vertPath << '\n' << fragPath << std::endl;
 
         loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str());
         isLoaded[shader] = true;
