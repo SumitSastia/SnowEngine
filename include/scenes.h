@@ -7,8 +7,8 @@
 #include <s_math.h>
 #include <model.h>
 #include <ibl.h>
-#include <entity.h>
 #include <s_time.h>
+#include <ecs/rendersystem.h>
 
 class Scene {
 
@@ -69,14 +69,14 @@ class Scene1 : public Scene {
     Skybox* _skybox;
 
     // ECS
-    ECS ecs;
+    // ECS ecs;
     Entity cube;
 
     // Debug
     DebugFrame* debugFrame;
 
     // FrameBuffers
-    IBLFrame* ibl_frame;
+    // IBLFrame* ibl_frame;
 
 public:
 
@@ -96,4 +96,30 @@ public:
     void renderSkybox() const override;
     void renderDebug() const override;
     void destroy() override;
+};
+
+class Scene2 : public Scene {
+
+    Entity wood_box;
+    Entity light1;
+
+    EntityManager    entityManager;
+    ComponentManager componentManager;
+
+public:
+
+    Scene2() { init(); }
+
+    void init() override;
+    void input(GLFWwindow* window, const float& delta_time) override {}
+    void update(const float& delta_time) override {}
+    void render() const override;
+    void renderGbuffer() const override {}
+    void renderDeferred(const Shader& currentShader) const override {}
+    void renderLight() const override;
+    void renderDirectShadow() const override {}
+    void renderPointShadow() const override {}
+    void renderSkybox() const override {}
+    void renderDebug() const override {}
+    void destroy() override {}
 };

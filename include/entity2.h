@@ -7,9 +7,12 @@
 #include <cstdint>
 #include <vector>
 
+#include <lights.h>
+
 // ------------------------------ Foward Declarations -------------------------------- //
 
 #define MAX_ENTITIES 25
+#define MAX_LIGHTS   10
 
 class Shape;
 class Shader;
@@ -37,14 +40,15 @@ struct EntityMesh {
 };
 
 // Phong
-struct Material {
+struct MaterialPhong {
 
-    Shader* shader;
+    Shader*    shader; // 8-Bytes
+    Texture2D* albedo; // 8-Bytes
+    Texture2D* normal; // 8-Bytes
 
-    Texture2D* albedo;
-    Texture2D* normal;
+    glm::vec3 color;   // 12-Bytes
 
-    Material():
+    MaterialPhong():
         shader(nullptr),
         albedo(nullptr),
         normal(nullptr) {
@@ -54,13 +58,12 @@ struct Material {
 // PBR + IBL
 struct MaterialPBR {
 
-    Shader* shader;
+    Shader*    shader;    // 8-Bytes
+    Texture2D* albedo;    // 8-Bytes
+    Texture2D* normal;    // 8-Bytes
 
-    Texture2D* albedo;
-    Texture2D* normal;
-
-    Texture2D* metallic;
-    Texture2D* roughness;
+    Texture2D* metallic;  // 8-Bytes
+    Texture2D* roughness; // 8-Bytes
 
     MaterialPBR():
         shader(nullptr),
@@ -77,23 +80,20 @@ class ECS {
     
 public:
 
-    ECS():
-        nextEntity(0),
-        transforms(MAX_ENTITIES),
-        meshes(MAX_ENTITIES),
-        materials(MAX_ENTITIES) {
-    }
+    ECS();
 
     std::vector <Transform>  transforms;
     std::vector <EntityMesh> meshes;
-    std::vector <Material>   materials;
+
+    std::vector <MaterialPhong> materials;
+    std::vector <MaterialPBR>   materialPBR; 
+
+    std::vector <lights::PointLight> lightSources;
+    std::vector <bool> hasPointLight;
+
+    uint32_t total_lights;
 
     Entity createEntity() {
-
-        transforms.push_back(Transform{});
-        meshes.push_back(EntityMesh{});
-        materials.push_back(Material{});
-
         return nextEntity++;
     }
 
@@ -103,7 +103,13 @@ public:
 class RenderSystem {
 
     void bindCameraGlobals(const Shader* shader) const;
-    void draw(const EntityMesh& mesh, const Transform& transform, const Material& material) const;
+    void bindPointLightGlobals(const ECS& ecs) const;
+
+    // For Lights
+    // void draw(const EntityMesh& mesh, const Transform& transform, const MaterialLight& material) const;
+
+    // For Phong
+    void draw(const EntityMesh& mesh, const Transform& transform, const MaterialPhong& material) const;
 
 public:
 
@@ -113,6 +119,7 @@ public:
         return instance;
     }
 
+    // void update(const ECS& ecs) const;
     void render(const ECS& ecs) const;
 };
 

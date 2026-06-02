@@ -106,6 +106,8 @@ void Scene1::init() {
     total_shaders  = 6;
     total_entities = 3;
 
+    running::time::startInterval();
+
     loaded_shaders = {
 
         Shader(
@@ -207,6 +209,9 @@ void Scene1::init() {
             "../shaders/commonFrag/pbr_normalTex.frag", true
         )
     };
+
+    const uint64_t time = running::time::endInterval();
+    std::cout << "Shader Compilation Time: " << time << running::time::unit << std::endl;
 
     // Entities
 
@@ -328,9 +333,14 @@ void Scene1::init() {
     // _skybox->setIrradianceMap(envFaces);
 
     // ECS
-    cube = ecs.createEntity();
+    // cube = ecs.createEntity();
 
-    ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
+    running::time::startInterval();
+
+    // ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
+
+    const uint64_t time2 = running::time::endInterval();
+    std::cout << "IBL Frame Time: " << time2 << running::time::unit << std::endl;
 
     // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
@@ -530,9 +540,6 @@ void Scene1::render() const {
 
     myWall.draw();
 
-    // ECS
-    RenderSystem::instance().render(EntityShapes::instance().getECS());
-
     // Testing ENV
 
     glDepthFunc(GL_LEQUAL);
@@ -545,10 +552,10 @@ void Scene1::render() const {
     currentShader.setMat4("view"      , glm::mat4(glm::mat3(view)));
 
     currentShader.setInt("cubeMap", 0);
-    ibl_frame->bindEnv(0);
+    // ibl_frame->bindEnv(0);
     // ibl_frame->bindPreFilterMap(0);
 
-    if (_skybox->getVisibility()) ibl_frame->draw(0);
+    // if (_skybox->getVisibility()) ibl_frame->draw(0);
 
     glDepthFunc(GL_LESS);
 }
@@ -835,4 +842,70 @@ void Scene1::destroy() {
     mySphere->destroy();
 
     delete mySphere;
+}
+
+// --------------------------------------------------------------------------------------------- //
+
+void Scene2::init() {
+
+    wood_box = entityManager.createEntity();
+    light1   = entityManager.createEntity();
+
+    entityManager.visibleEntities.push_back(wood_box);
+    entityManager.emissiveEntities.push_back(light1);
+
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(-3.0f, 0.0f, 3.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
+
+        MeshComponent mesh;
+        mesh.shape = EntityShapes::instance().cube;
+
+        MaterialComponent material;
+        material.shader = Shaders::get(PHONG3D);
+        material.albedo = DefaultShapes::instance().cube.getAlbedo();
+        
+        componentManager.addComponent(wood_box, mesh);
+        componentManager.addComponent(wood_box, transform);
+        componentManager.addComponent(wood_box, material);
+    }
+
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(0.0f, 1.0f, 0.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(0.75f);
+        transform.computeModel();
+
+        MeshComponent mesh;
+        mesh.shape = EntityShapes::instance().cube;
+
+        MaterialComponent material;
+        material.shader = Shaders::get(LIGHT3D);
+
+        PointLightComponent pointlight;
+        pointlight.color     = colors::GREEN;
+        pointlight.constant  = DefaultLights::instance().cubelight.constant;
+        pointlight.linear    = DefaultLights::instance().cubelight.linear;
+        pointlight.quadratic = DefaultLights::instance().cubelight.quadratic;
+
+        componentManager.addComponent(light1, mesh);
+        componentManager.addComponent(light1, transform);
+        componentManager.addComponent(light1, material);
+        componentManager.addComponent(light1, pointlight);
+    }
+
+}
+
+void Scene2::render() const {
+
+    RenderSystem::render(entityManager, componentManager);
+}
+
+void Scene2::renderLight() const {
+    
+    RenderSystem::renderLights(entityManager, componentManager);
 }

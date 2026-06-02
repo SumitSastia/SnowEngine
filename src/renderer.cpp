@@ -1,6 +1,5 @@
 #include <renderer.h>
 #include <frame.h>
-#include <entity.h>
 
 bool Renderer::culling = false;
 

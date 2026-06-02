@@ -32,11 +32,13 @@ struct SpotLight {
     float quadratic;
 };
 
+// For Phong --------------//
+
 uniform vec3  camPos;
 uniform float far_plane;
 uniform int   light_count;
 
-uniform pointLight pl[MAX_LIGHTS];
+uniform pointLight  pl[MAX_LIGHTS];
 uniform samplerCube depthMap[MAX_LIGHTS];
 
 uniform directionalLight dl;
@@ -46,6 +48,8 @@ uniform bool useSpotLight;
 uniform SpotLight sl;
 
 uniform float skyboxIntensity;
+
+//-------------------------//
 
 const float pi = 3.14159265359;
 float ambientStrength = (0.1 + skyboxIntensity / 2);

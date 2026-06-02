@@ -52,18 +52,27 @@ class Shader {
     static std::string loadShaderFile(const char* path);
     static std::string preprocessFile(const char* path);
 
-public:
-
+    /* 
+    Compile Shaders
+    @note Both parameters requires string of Shader Source.
+    */
     Shader(const std::string vertexStr, const std::string fragmentStr);
+
+public:
 
     Shader(const char* vertPath, const char* fragPath): 
         Shader(loadShaderFile(vertPath), loadShaderFile(fragPath)) {
     }
 
+    // Preprocess header files, (if #include <> is present)
     Shader(const char* vertPath, const char* fragPath, const bool preprocess):
         Shader(loadShaderFile(vertPath), preprocessFile(fragPath)) {
     }
 
+    /*
+    Vertex -> Geometry -> Fragment
+    @note No preprocess functionality.
+    */
     Shader(const char* vertPath, const char* geomPath, const char* fragPath);
 
     const unsigned int getShader() const { return shaderProgram; }
@@ -80,8 +89,9 @@ public:
     void setMat3 (const char* target, const glm::mat3& matrix) const;
     void setMat4 (const char* target, const glm::mat4& matrix) const;
 
-    void setPointLight      (const std::string& target, const lights::PointLight& pl) const;
-    void setSpotLight       (const std::string& target, const lights::SpotLight& sl) const;
+    void setPointLight      (const std::string& target, const lights::PointLight&       pl) const;
+    void setPointLight      (const uint32_t&    target, const lights::PointLight&       pl) const;
+    void setSpotLight       (const std::string& target, const lights::SpotLight&        sl) const;
     void setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl) const;
 };
 
@@ -199,10 +209,13 @@ enum shaderNames {
 
     TEST3D,
     TEST2D,
+    LIGHT3D,
     ALBEDO3D,
     ALBEDO2D,
     PHONG3D,
-    PHONG2D
+    PHONG2D,
+
+    SHADER_COUNT
 };
 
 using shader_paths = std::pair <std::string, std::string>;
@@ -212,9 +225,11 @@ class Shaders {
     static std::vector <bool>    isLoaded;
     static std::vector <Shader*> loadedShaders;
 
+    static std::vector <bool>         preprocess;
     static std::vector <shader_paths> path;
 
 public:
 
     static Shader* get(shaderNames shader);
+    static uint32_t totat() { return SHADER_COUNT; }
 };

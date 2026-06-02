@@ -1,6 +1,7 @@
 #pragma once
 
 #include <s_math.h>
+#include <ecs/component.h>
 
 class Shape;
 
@@ -8,34 +9,34 @@ namespace lights {
 
     struct DirectionalLight {
 
-        glm::vec3 direction;
-        glm::vec3 color;
+        glm::vec3 direction; // 12-Bytes
+        glm::vec3 color;     // 12-Bytes
     };
 
     struct PointLight {
 
         glm::vec3 position;
-        glm::vec3 color;
+        glm::vec3 color;    // 12-Bytes
 
-        float constant;
-        float linear;
-        float quadratic;
+        float constant;     // 4-Bytes 
+        float linear;       // 4-Bytes 
+        float quadratic;    // 4-Bytes 
     };
 
     struct SpotLight {
 
-        glm::vec3 position;
-        glm::vec3 direction;
-        glm::vec3 color;
+        glm::vec3 position;  // 12-Bytes
+        glm::vec3 direction; // 12-Bytes
+        glm::vec3 color;     // 12-Bytes
 
-        bool isVisible;
-
-        float cutOffangle;
-        float outerCutOff;
-
-        float constant;
-        float linear;
-        float quadratic;
+        float cutOffangle;   // 4-Bytes
+        float outerCutOff;   // 4-Bytes
+        
+        float constant;      // 4-Bytes
+        float linear;        // 4-Bytes
+        float quadratic;     // 4-Bytes
+        
+        bool isVisible;      // 1-Byte
     };
 }
 

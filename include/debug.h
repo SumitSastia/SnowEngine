@@ -7,7 +7,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <s_math.h>
+
 #include <string>
+#include <iostream>
 
 struct TextBox {
         
@@ -22,6 +25,15 @@ public:
     static DebugMenu& instance() {
         static DebugMenu instance{};
         return instance;
+    }
+
+    template <typename T>
+    static void log(T data) {
+        std::cout << data << '\n';
+    }
+
+    static void printVec3(const glm::vec3& vec) {
+        std::cout << "x: " << vec.x << ", y: " << vec.y << ", z: " << vec.z << '\n';
     }
 
     static void beginUI();

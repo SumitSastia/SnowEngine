@@ -1,96 +1,136 @@
-#include <entity.h>
+// #include <entity.h>
 
-#include <camera.h>
-#include <shader.h>
-#include <shapes.h>
-#include <renderer.h>
+// #include <camera.h>
+// #include <shader.h>
+// #include <shapes.h>
+// #include <renderer.h>
 
-// ------------------------------ ECS Renderer --------------------------------------- //
+// #include <s_time.h>
 
-void RenderSystem::bindCameraGlobals(const Shader* shader) const {
+// ECS::ECS():
+//     hasPointLight(MAX_ENTITIES, false)
+// {
+//     transforms.reserve(MAX_ENTITIES);
+//     meshes.reserve(MAX_ENTITIES);
+//     materials.reserve(MAX_ENTITIES);
 
-    shader->setMat4("projection", Camera::instance().getPerspective());
-    shader->setMat4("view",       Camera::instance().getView());
-}
+//     lightSources.reserve(MAX_ENTITIES);
+// }
 
-void RenderSystem::render(const ECS& ecs) const {
+// // ------------------------------ ECS Renderer --------------------------------------- //
 
-    for (Entity entity = 0; entity < ecs.getTotal(); entity++) {
+// void RenderSystem::bindCameraGlobals(const Shader* shader) const {
 
-        const Transform&  transform = ecs.transforms[entity];
-        const EntityMesh& mesh      = ecs.meshes[entity];
-        const Material&   material  = ecs.materials[entity];
+//     shader->setMat4("projection", Camera::instance().getPerspective());
+//     shader->setMat4("view",       Camera::instance().getView());
+//     shader->setVec3("camPos",     Camera::instance().getPos());
+// }
 
-        draw(mesh, transform, material);
-    }
-}
+// void RenderSystem::bindPointLightGlobals(const ECS& ecs) const {
 
-void RenderSystem::draw(const EntityMesh& mesh, const Transform& transform, const Material& material) const {
+//     // running::time::startInterval();
 
-    material.shader->use();
+//     for (Entity entity = 0; entity < ecs.getTotal(); entity++) {
 
-    material.shader->setMat4("model",        transform.model);
-    material.shader->setMat4("normalMatrix", transform.normalMatrix);
+//         if (ecs.hasPointLight[entity]) {
+            
+//             const Shader* shader = ecs.materials[entity].shader;
 
-    bindCameraGlobals(material.shader);
+//             shader->use();
 
-    if (material.albedo) {
-        material.shader->setInt("albedo", 0);
-        material.albedo->bind(0);
-    }
+//             shader->setInt("light_count", ecs.total_lights);
+//             shader->setFloat("far_plane", 25.0f);
 
-    mesh.shape->draw();
-}
+//             for (uint32_t pl = 0; pl < ecs.total_lights; pl++) {
+//                 shader->setPointLight(pl, ecs.lightSources[entity]);
+//             }
+//         }
+//     } 
 
-// ------------------------------ ECS Renderer --------------------------------------- //
+//     // const uint64_t time = running::time::endInterval();
+//     // std::cout << "bindPointLightGlobals: " << time << running::time::unit << std::endl;
+// }
 
-void Transform::computeModel() {
+// void RenderSystem::render(const ECS& ecs) const {
 
-    model = glm::translate(glm::mat4(1.0f), position);
+//     bindPointLightGlobals(ecs);
 
-    model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+//     for (Entity entity = 0; entity < ecs.getTotal(); entity++) {
 
-    model = glm::scale(model, scale);
+//         const Transform&     transform = ecs.transforms[entity];
+//         const EntityMesh&    mesh      = ecs.meshes[entity];
+//         const MaterialPhong& material  = ecs.materials[entity];
 
-    normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-}
+//         draw(mesh, transform, material);
+//     }
+// }
 
-EntityShapes::EntityShapes() {
+// void RenderSystem::draw(const EntityMesh& mesh, const Transform& transform, const MaterialPhong& material) const {
 
-    cube   = ecs.createEntity();
-    square = ecs.createEntity();
+//     material.shader->use();
+
+//     material.shader->setMat4("model",        transform.model);
+//     material.shader->setMat4("normalMatrix", transform.normalMatrix);
+
+//     bindCameraGlobals(material.shader);
+
+//     if (material.albedo) {
+//         material.shader->setInt("albedo", 0);
+//         material.albedo->bind(0);
+//     }
+
+//     mesh.shape->draw();
+// }
+
+// // ------------------------------ ECS Renderer --------------------------------------- //
+
+// void Transform::computeModel() {
+
+//     model = glm::translate(glm::mat4(1.0f), position);
+
+//     model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+//     model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+//     model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+//     model = glm::scale(model, scale);
+
+//     normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+// }
+
+// EntityShapes::EntityShapes() {
+
+//     cube   = ecs.createEntity();
+//     square = ecs.createEntity();
     
-    // cube
-    ecs.meshes[cube].shape     = &DefaultShapes::instance().cube;
-    ecs.materials[cube].shader = Shaders::get(ALBEDO3D);
-    ecs.materials[cube].albedo = DefaultShapes::instance().cube.getAlbedo();
+//     // cube
+//     ecs.meshes[cube].shape     = &DefaultShapes::instance().cube;
+//     ecs.materials[cube].shader = Shaders::get(ALBEDO3D);
+//     ecs.materials[cube].albedo = DefaultShapes::instance().cube.getAlbedo();
     
-    {
-        Transform transform {};
+//     {
+//         Transform transform {};
 
-        transform.position = glm::vec3(-3.0f, 0.0f, 3.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
+//         transform.position = glm::vec3(-3.0f, 0.0f, 3.0f);
+//         transform.rotation = glm::vec3(0.0f);
+//         transform.scale    = glm::vec3(1.0f);
 
-        transform.computeModel();
-        ecs.transforms[cube] = transform;
-    }
+//         transform.computeModel();
+//         ecs.transforms[cube] = transform;
+//     }
 
-    // square
-    ecs.meshes[square].shape     = &DefaultShapes::instance().square;
-    ecs.materials[square].shader = Shaders::get(ALBEDO2D);
-    ecs.materials[square].albedo = DefaultShapes::instance().square.getAlbedo();
+//     // square
+//     ecs.meshes[square].shape     = &DefaultShapes::instance().square;
+//     ecs.materials[square].shader = Shaders::get(ALBEDO2D);
+//     ecs.materials[square].albedo = DefaultShapes::instance().square.getAlbedo();
 
-    {
-        Transform transform {};
+//     {
+//         Transform transform {};
 
-        transform.position = glm::vec3(-3.0f, 0.0f, 5.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
+//         transform.position = glm::vec3(-3.0f, 0.0f, 5.0f);
+//         transform.rotation = glm::vec3(0.0f);
+//         transform.scale    = glm::vec3(1.0f);
 
-        transform.computeModel();
-        ecs.transforms[square] = transform;
-    }
-}
+//         transform.computeModel();
+//         ecs.transforms[square] = transform;
+//     }
+// }

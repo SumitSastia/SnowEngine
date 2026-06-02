@@ -1,6 +1,7 @@
 #include <shader.h>
 #include <renderer.h>
 #include <lights.h>
+#include <ecs/component.h>
 
 #include <iostream>
 #include <fstream>
@@ -338,8 +339,21 @@ std::vector <shader_paths> Shaders::path = {
 
     shader_paths("ecs/generic3d.vert", "ecs/test.frag"),
     shader_paths("ecs/generic2d.vert", "ecs/test.frag"),
+    shader_paths("lights/ecs.vert",    "lights/light.frag"),
     shader_paths("ecs/generic3d.vert", "ecs/albedo.frag"),
-    shader_paths("ecs/generic2d.vert", "ecs/albedo.frag")
+    shader_paths("ecs/generic2d.vert", "ecs/albedo.frag"),
+    shader_paths("ecs/generic3d.vert", "ecs/phong.frag"),
+    shader_paths("ecs/generic2d.vert", "ecs/phong.frag")
+};
+
+std::vector <bool> Shaders::preprocess = {
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1
 };
 
 Shader* Shaders::get(shaderNames shader) {
@@ -351,7 +365,7 @@ Shader* Shaders::get(shaderNames shader) {
         const std::string vertPath = base_path + path[shader].first;
         const std::string fragPath = base_path + path[shader].second;
 
-        loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str());
+        loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str(), preprocess[shader]);
         isLoaded[shader] = true;
     }
 
@@ -519,6 +533,20 @@ void Shader::setPointLight(const std::string& target, const lights::PointLight& 
     this->setFloat((target + ".constant" ).c_str(), pl.constant);
     this->setFloat((target + ".linear"   ).c_str(), pl.linear);
     this->setFloat((target + ".quadratic").c_str(), pl.quadratic);
+}
+
+void Shader::setPointLight(const std::uint32_t& target, const lights::PointLight& pl) const {
+
+    const std::string id = std::to_string(target);
+
+    // std::cout << ("pl[" + id + "].position").c_str() << std::endl;
+
+    this->setVec3(("pl[" + id + "].position").c_str(), pl.position);
+    this->setVec3(("pl[" + id + ".color"   ).c_str(), pl.color);
+
+    this->setFloat(("pl[" + id + "].constant" ).c_str(), pl.constant);
+    this->setFloat(("pl[" + id + "].linear"   ).c_str(), pl.linear);
+    this->setFloat(("pl[" + id + "].quadratic").c_str(), pl.quadratic);
 }
 
 void Shader::setSpotLight(const std::string& target, const lights::SpotLight& sl) const {

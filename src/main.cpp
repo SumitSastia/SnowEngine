@@ -54,6 +54,7 @@ int main() {
     Camera& mainCamera = Camera::instance();
 
     Scene* mainScene = new Scene1();
+    Scene2* scene2   = new Scene2();
 
     DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
     HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
@@ -102,6 +103,7 @@ int main() {
         mainScene->update(deltaTime);
 
         ImGui::End();
+        // RenderSystem::update(EntityShapes::instance().getECS());
 
         // Rendering //
 
@@ -117,7 +119,10 @@ int main() {
 
             Renderer::clear();
 
-            mainScene->render();
+            if (Input::isKeyPressed(GLFW_KEY_O))
+                mainScene->render();
+            
+            scene2->render();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -127,7 +132,10 @@ int main() {
             Renderer::copyDepth(hdrFrame);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            mainScene->renderLight();
+            if (Input::isKeyPressed(GLFW_KEY_O))
+                mainScene->renderLight();
+            
+            scene2->renderLight();
         }
         else {
 

@@ -18,14 +18,6 @@ void DebugMenu::init(GLFWwindow* window) {
 }
 
 void DebugMenu::update() {
-
-    // ImGui_ImplOpenGL3_NewFrame();
-    // ImGui_ImplGlfw_NewFrame();
-    // ImGui::NewFrame();
-
-    // ImGui::Begin("Rendering Method");
-    // ImGui::Text("");
-    // ImGui::End();
 }
 
 void DebugMenu::beginUI() {

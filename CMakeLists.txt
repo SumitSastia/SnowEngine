@@ -17,6 +17,13 @@ set(IMGUI_SRC
     include/imgui/imgui_impl_opengl3.cpp
 )
 
+set(ECS_SRC
+
+    src/ecs/entity.cpp
+    src/ecs/component.cpp
+    src/ecs/rendersystem.cpp
+)
+
 add_executable(${TARGET_NAME}
 
     src/glad.c
@@ -37,7 +44,8 @@ add_executable(${TARGET_NAME}
     src/ibl.cpp
     src/text.cpp
     src/ssao.cpp
-    src/entity.cpp
+    # src/entity.cpp
+    ${ECS_SRC}
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)
