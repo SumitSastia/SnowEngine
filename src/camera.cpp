@@ -1,6 +1,8 @@
 #include <camera.h>
 #include <debug.h>
 #include <renderer.h>
+#include <input.h>
+#include <lights.h>
 
 #include <iostream>
 
@@ -110,66 +112,48 @@ void Camera::look_at(){
 }
 
 void Camera::input_handler(GLFWwindow* window, float deltaTime){
-
-    static bool PRESSED_E = false;
-    static bool PRESSED_X = false;
     
-    if(glfwGetKey(window,GLFW_KEY_W)){
+    if (glfwGetKey(window,GLFW_KEY_W)) {
         position += target * camSpeed * deltaTime;
     }
-    if(glfwGetKey(window,GLFW_KEY_S)){
+    if (glfwGetKey(window,GLFW_KEY_S)) {
         position -= target * camSpeed * deltaTime;
     }
     
-    if(glfwGetKey(window,GLFW_KEY_A)){
+    if (glfwGetKey(window,GLFW_KEY_A)) {
         position -= glm::normalize(glm::cross(target,up_axis)) * camSpeed * deltaTime;
     }
-    if(glfwGetKey(window,GLFW_KEY_D)){
+    if (glfwGetKey(window,GLFW_KEY_D)) {
         position += glm::normalize(glm::cross(target,up_axis)) * camSpeed * deltaTime;
     }
 
-    if(glfwGetKey(window,GLFW_KEY_SPACE)){
+    if (glfwGetKey(window,GLFW_KEY_SPACE)) {
         position.y += camSpeed * deltaTime;
     }
-    if(glfwGetKey(window,GLFW_KEY_LEFT_CONTROL)){
+    if (glfwGetKey(window,GLFW_KEY_LEFT_CONTROL)) {
         position.y -= camSpeed * deltaTime;
     }
 
-    if(glfwGetKey(window,GLFW_KEY_LEFT_SHIFT)){
+    if (glfwGetKey(window,GLFW_KEY_LEFT_SHIFT)) {
         camSpeed = 5.0f;
     }
     else{
         camSpeed = 1.0f;
     }
 
-    if(glfwGetKey(window,GLFW_KEY_E)){
-
-        if(!PRESSED_E){
-            if(!mouseEnabled){
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            }
-            else{
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            }
-
-            mouseEnabled = !mouseEnabled;
-            PRESSED_E = true;
-        }
-    }
-    else{
-        PRESSED_E = false;
+    if (Input::isKeyDown(GLFW_KEY_E)) {
+        (mouseEnabled)?
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        mouseEnabled = !mouseEnabled;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_X)) {
-
-        if (!PRESSED_X) {
-            Uturn = true;
-            yaw_initial = yaw;
-            PRESSED_X = true;
-        }
+    if (Input::isKeyDown(GLFW_KEY_X)) {
+        Uturn = true;
+        yaw_initial = yaw;
     }
-    else {
-        PRESSED_X = false;
+
+    if (Input::isKeyDown(GLFW_KEY_T)) {
+        DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
     }
 }
 

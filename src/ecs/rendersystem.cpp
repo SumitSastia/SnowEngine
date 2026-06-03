@@ -5,6 +5,7 @@
 #include <shapes.h>
 #include <renderer.h>
 #include <debug.h>
+#include <lights.h>
 
 #include <iostream>
 
@@ -50,17 +51,48 @@ void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, con
     }
 }
 
+void RenderSystem::bindFlashLightGlobals(const ComponentManager& componentManager) {
+
+    for (const Shader* shader : componentManager.uniqueShaders) {
+
+        shader->use();
+        shader->setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
+        shader->setSpotLight("sl", DefaultLights::instance().flashlight);
+
+        bindCameraGlobals(shader);
+    }
+}
+
 void RenderSystem::render(const EntityManager& entityManager, const ComponentManager& componentManager) {
 
     bindPointLightGlobals(entityManager, componentManager);
+    bindFlashLightGlobals(componentManager);
 
     for (const Entity& entity : entityManager.visibleEntities) {
 
-        const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
-        const TransformComponent& transform = componentManager.arr_transform[entity];
-        const MaterialComponent&  material  = componentManager.arr_material[entity];
+        if (
+            componentManager.has_mesh[entity] &&
+            componentManager.has_transform[entity] &&
+            componentManager.has_material[entity]
+        ) {
 
-        draw(mesh, transform, material);
+            const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
+            const TransformComponent& transform = componentManager.arr_transform[entity];
+            const MaterialComponent&  material  = componentManager.arr_material[entity];
+    
+            draw(mesh, transform, material);
+        }
+
+        if (
+            componentManager.has_instance[entity] && 
+            componentManager.has_material[entity]
+        ) {
+
+            const InstanceComponent& instance = componentManager.arr_instance[entity];
+            const MaterialComponent& material = componentManager.arr_material[entity];
+
+            draw(instance, material);
+        }
     }
 }
 
@@ -78,17 +110,17 @@ void RenderSystem::renderLights(const EntityManager& entityManager, const Compon
 }
 
 void RenderSystem::draw(
-    const MeshComponent& mesh,
+    const MeshComponent&      mesh,
     const TransformComponent& transform,
-    const MaterialComponent& material
+    const MaterialComponent&  material
 ) {
     const Shader* shader = material.shader;
 
     shader->use();
     shader->setMat4("model",        transform.model);
-    shader->setMat3("normalMatrix", transform.normalMatrix);
+    shader->setMat3("normalMatrix", transform.model.getNormal());
 
-    bindCameraGlobals(shader);
+    // bindCameraGlobals(shader);
 
     if (material.albedo) {
         shader->setInt("albedo", 0);
@@ -99,9 +131,9 @@ void RenderSystem::draw(
 }
 
 void RenderSystem::draw(
-    const MeshComponent& mesh,
-    const TransformComponent& transform,
-    const MaterialComponent& material,
+    const MeshComponent&       mesh,
+    const TransformComponent&  transform,
+    const MaterialComponent&   material,
     const PointLightComponent& pointlight
 ) {
     const Shader* shader = material.shader;
@@ -110,7 +142,20 @@ void RenderSystem::draw(
     shader->setMat4("model", transform.model);
     shader->setVec3("lightColor", pointlight.color);
 
-    bindCameraGlobals(shader);
-
     mesh.shape.draw();
+}
+
+void RenderSystem::draw(
+    const InstanceComponent& instance,
+    const MaterialComponent& material
+) {
+
+    material.shader->use();
+
+    if (material.albedo) {
+        material.shader->setInt("albedo", 0);
+        material.albedo->bind(0);
+    }
+
+    instance.draw();
 }

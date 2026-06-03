@@ -30,9 +30,9 @@ void main() {
         // color += vec3(1.0, 0.0, 0.0);
     }
 
-    // if (useSpotLight) {
-    //     color += calcSpotLight(tex, vNormal);
-    // }
+    if (useSpotLight) {
+        color += calcSpotLight(tex, vNormal);
+    }
 
     FragColor = vec4(color, 1.0);
 

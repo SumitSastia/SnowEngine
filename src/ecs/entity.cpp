@@ -99,9 +99,40 @@ EntityShapes::EntityShapes() {
         0,1,2,
         1,3,2
     };
-    
+
     cube.bindVertices3D(verticesCube, sizeof(verticesCube), indicesCube, sizeof(indicesCube));
     square.bindVertices2D(verticesSquare, sizeof(verticesSquare), indicesSquare, sizeof(indicesSquare));
+
+    // Instance Cubes
+    glm::vec3 cubePositions[] = {
+
+        glm::vec3(5.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
+    cubes.count = 10;
+
+    for (uint32_t i = 0; i < 10; i++) {
+
+        cubes.transforms[i].position = cubePositions[i];
+        cubes.transforms[i].rotation = (i * 15.0f * glm::vec3(1.0f, 2.0f, 3.0f));
+        cubes.transforms[i].scale    = glm::vec3(0.8);
+
+        cubes.transforms[i].computeModel();
+    }
+
+    cubes.bindVertices(
+        verticesCube, sizeof(verticesCube), 
+        indicesCube,  sizeof(indicesCube)
+    );
 }
 
 EntityManager::EntityManager(): nextEntity(0) {

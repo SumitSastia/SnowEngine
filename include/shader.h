@@ -214,6 +214,7 @@ enum shaderNames {
     ALBEDO2D,
     PHONG3D,
     PHONG2D,
+    INSTANCE3D,
 
     SHADER_COUNT
 };

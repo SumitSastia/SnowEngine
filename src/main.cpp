@@ -25,6 +25,7 @@ int main() {
     // ---------- Initialization --------------- //
 
     running::time::start();
+    std::cout << "//----------------------------------------//\n\n"; 
     
     GLFWwindow* window = Renderer::instance().getWindow();
 
@@ -64,9 +65,7 @@ int main() {
 
     bool deferredRender = false;
 
-    const uint64_t init_time = running::time::getTime();
-
-    std::cout << "Time taken to Initialize: " << init_time << running::time::unit << std::endl;
+    std::cout << "Time taken to Initialize: " << running::time::getTime() << std::endl;
 
     // ---------- Loop ------------------------ //
 
@@ -97,13 +96,13 @@ int main() {
         ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
 
         mainCamera.input_handler(window, deltaTime);
-        mainScene->input(window, deltaTime);
+        // mainScene->input(window, deltaTime);
+        scene2->input(window, deltaTime);
         
         mainCamera.update(deltaTime);
         mainScene->update(deltaTime);
 
         ImGui::End();
-        // RenderSystem::update(EntityShapes::instance().getECS());
 
         // Rendering //
 
@@ -199,6 +198,8 @@ int main() {
     Renderer::instance().terminate();
 
     glfwTerminate();
+
+    std::cout << "\n//----------------------------------------//" << std::endl; 
 
     return 0;
 }

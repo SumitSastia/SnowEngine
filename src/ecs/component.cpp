@@ -8,11 +8,13 @@ ComponentManager::ComponentManager():
     arr_transform(MAX_ENTITIES),
     arr_material(MAX_ENTITIES),
     arr_light(MAX_ENTITIES),
+    arr_instance(MAX_ENTITIES),
     
     has_mesh(MAX_ENTITIES, false),
     has_transform(MAX_ENTITIES, false),
     has_material(MAX_ENTITIES, false),
-    has_light(MAX_ENTITIES, false) {
+    has_light(MAX_ENTITIES, false),
+    has_instance(MAX_ENTITIES, false) {
 }
 
 // ------------------------------ Components ----------------------------------------- //
@@ -89,17 +91,111 @@ void ShapeComponent::draw() const {
     glBindVertexArray(0);
 }
 
+void InstanceComponent::bindVertices(
+    const float*        vertices, const size_t& size_v,
+    const unsigned int* indices,  const size_t& size_i
+) {
+    indicesCount = size_i / sizeof(u_int);
+
+    if (!count) DebugMenu::log("ERROR::TRANSFORMCOMPONENTS NOT INITIALIZED!");
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // TextureCords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    std::vector <glm::mat4> models(count);
+    std::vector <glm::mat3> normals(count);
+
+    for (uint32_t i = 0; i < count; i++) {
+
+        models[i]  = transforms[i].model;
+        normals[i] = transforms[i].model.getNormal();
+    }
+
+    // InstancedModel
+    glGenBuffers(1, &modelVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
+    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat4), &models[0], GL_STATIC_DRAW);
+
+    std::size_t vec4Size = sizeof(glm::vec4);
+    glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
+    
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+    glVertexAttribDivisor(3, 1);
+    
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+    glVertexAttribDivisor(4, 1);
+    
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glVertexAttribDivisor(5, 1);
+    
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+    glVertexAttribDivisor(6, 1);
+    
+    // InstancedNormal
+    glGenBuffers(1, &normalVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat3), &normals[0], GL_STATIC_DRAW);
+
+    std::size_t vec3Size = sizeof(glm::vec3);
+    glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+    
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * vec3Size, (void*)0);
+    glVertexAttribDivisor(7, 1);
+    
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 3, GL_FLOAT, GL_FALSE, 3 * vec3Size, (void*)(1 * vec3Size));
+    glVertexAttribDivisor(8, 1);
+    
+    glEnableVertexAttribArray(9);
+    glVertexAttribPointer(9, 3, GL_FLOAT, GL_FALSE, 3 * vec3Size, (void*)(2 * vec3Size));
+    glVertexAttribDivisor(9, 1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void InstanceComponent::draw() const {
+
+    glBindVertexArray(VAO);
+    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, count);
+    glBindVertexArray(0);
+}
+
 void TransformComponent::computeModel() {
 
-    model = glm::translate(glm::mat4(1.0f), position);
+    model.matrix_4x4 = glm::translate(glm::mat4(1.0f), position);
 
-    model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    model.matrix_4x4 = glm::rotate(model.matrix_4x4, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model.matrix_4x4 = glm::rotate(model.matrix_4x4, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model.matrix_4x4 = glm::rotate(model.matrix_4x4, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    model = glm::scale(model, scale);
-
-    normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    model.matrix_4x4 = glm::scale(model.matrix_4x4, scale);
 }
 
 // ------------------------------ Components ----------------------------------------- //
@@ -149,4 +245,11 @@ void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, c
 
     arr_light[entity] = component;
     has_light[entity] = true;
+}
+
+template <>
+void ComponentManager::addComponent<InstanceComponent>(const Entity& entity, const InstanceComponent& component) {
+
+    arr_instance[entity] = component;
+    has_instance[entity] = true;
 }

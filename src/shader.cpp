@@ -337,23 +337,25 @@ std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
 
 std::vector <shader_paths> Shaders::path = {
 
-    shader_paths("ecs/generic3d.vert", "ecs/test.frag"),
-    shader_paths("ecs/generic2d.vert", "ecs/test.frag"),
-    shader_paths("lights/ecs.vert",    "lights/light.frag"),
-    shader_paths("ecs/generic3d.vert", "ecs/albedo.frag"),
-    shader_paths("ecs/generic2d.vert", "ecs/albedo.frag"),
-    shader_paths("ecs/generic3d.vert", "ecs/phong.frag"),
-    shader_paths("ecs/generic2d.vert", "ecs/phong.frag")
+    shader_paths("ecs/generic3d.vert",  "ecs/test.frag"),
+    shader_paths("ecs/generic2d.vert",  "ecs/test.frag"),
+    shader_paths("lights/ecs.vert",     "lights/light.frag"),
+    shader_paths("ecs/generic3d.vert",  "ecs/albedo.frag"),
+    shader_paths("ecs/generic2d.vert",  "ecs/albedo.frag"),
+    shader_paths("ecs/generic3d.vert",  "ecs/phong.frag"),
+    shader_paths("ecs/generic2d.vert",  "ecs/phong.frag"),
+    shader_paths("ecs/instance3d.vert", "ecs/phong.frag")
 };
 
 std::vector <bool> Shaders::preprocess = {
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    1
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
 };
 
 Shader* Shaders::get(shaderNames shader) {

@@ -7,9 +7,12 @@
 #include <vector>
 #include <cstdint>
 
+#include <s_math.h>
+
 // ------------------------------ Foward Declarations -------------------------------- //
 
 #define TOTAL_COMPONENTS 10
+#define MAX_INSTANCES 100
 
 class Shape;
 class Shader;
@@ -39,6 +42,15 @@ struct ShapeComponent {
         const unsigned int* indices, const size_t& size_i
     );
 
+    // To be defined for static instance entities
+    void bindVerticesInstance(
+        const float*        vertices, const size_t& size_v,
+        const unsigned int* indices,  const size_t& size_i,
+        const glm::mat4*    models,   const size_t& size_m,
+        const glm::mat3*    normals,  const size_t& size_n,
+        uint& modelVBO, uint& normalVBO
+    );
+
     void draw() const;
 };
 
@@ -48,8 +60,7 @@ struct TransformComponent {
     glm::vec3 rotation;
     glm::vec3 scale;
 
-    glm::mat4 model;
-    glm::mat3 normalMatrix;
+    Matrix4   model;
 
     void computeModel();
 };
@@ -142,6 +153,42 @@ struct MaterialComponent {
     }
 };
 
+struct InstanceComponent {
+
+    uint VAO, VBO, EBO;
+    uint modelVBO, normalVBO;
+
+    uint indicesCount;
+    uint count;
+
+    std::vector <TransformComponent> transforms;
+
+    InstanceComponent():
+        count(0), indicesCount(0),
+        transforms(MAX_INSTANCES) {
+    }
+
+    // void bindVertices(
+    //     const float*        vertices, const size_t& size_v,
+    //     const unsigned int* indices,  const size_t& size_i,
+    //     const glm::mat4*    models,   const size_t& size_m,
+    //     const glm::mat3*    normals,  const size_t& size_n
+    // );
+
+    void bindVertices(
+        const float*        vertices, const size_t& size_v,
+        const unsigned int* indices,  const size_t& size_i
+    );
+
+    // To be implemented for Dynamic Entities
+    void updateModels(
+        const glm::mat4* models,  const size_t& size_m,
+        const glm::mat3* normals, const size_t& size_n
+    ) {}
+
+    void draw() const;
+};
+
 class ComponentManager {
     
     void addShader(Shader* shader);
@@ -152,6 +199,7 @@ public:
     std::vector <MeshComponent>      arr_mesh;
     std::vector <TransformComponent> arr_transform;
     std::vector <MaterialComponent>  arr_material;
+    std::vector <InstanceComponent>  arr_instance;
 
     // Light Sources
     std::vector <PointLightComponent> arr_light;
@@ -162,6 +210,7 @@ public:
     std::vector <bool> has_mesh;
     std::vector <bool> has_transform;
     std::vector <bool> has_material;
+    std::vector <bool> has_instance;
 
     std::vector <bool> has_light;
 

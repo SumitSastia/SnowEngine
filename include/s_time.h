@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <string>
 
 namespace running::time {
 
@@ -21,23 +22,23 @@ namespace running::time {
     }
 
     // Get Time taken to process instructions from the Start of Program.
-    inline const uint64_t getTime() {
+    inline const std::string getTime() {
 
         time_keyword stopTime = std::chrono::high_resolution_clock::now();
         time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - startTime);
 
-        return duration.count();
+        return (std::to_string(duration.count()) + unit);
     }
 
     inline void startInterval() {
         lastIntervalTime = std::chrono::high_resolution_clock::now();
     }
 
-    inline const uint64_t endInterval() {
+    inline const std::string endInterval() {
 
         time_keyword stopTime = std::chrono::high_resolution_clock::now();
         time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - lastIntervalTime);
 
-        return duration.count();
+        return (std::to_string(duration.count()) + unit);
     }
 }

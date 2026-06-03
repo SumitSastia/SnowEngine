@@ -34,6 +34,8 @@ public:
     ShapeComponent cube;
     ShapeComponent square;
     
+    InstanceComponent cubes;
+    
     static EntityShapes& instance() {
 
         static EntityShapes instance {};

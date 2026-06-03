@@ -101,7 +101,12 @@ public:
 class Scene2 : public Scene {
 
     Entity wood_box;
+    Entity box2;
+    Entity floor;
+    Entity wall;
     Entity light1;
+    Entity light2;
+    Entity cubes;
 
     EntityManager    entityManager;
     ComponentManager componentManager;
@@ -111,7 +116,7 @@ public:
     Scene2() { init(); }
 
     void init() override;
-    void input(GLFWwindow* window, const float& delta_time) override {}
+    void input(GLFWwindow* window, const float& delta_time) override;
     void update(const float& delta_time) override {}
     void render() const override;
     void renderGbuffer() const override {}

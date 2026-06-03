@@ -4,11 +4,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Matrix4 {
+struct Matrix4 {
 
     glm::mat4 matrix_4x4;
-
-public:
     
     Matrix4() : matrix_4x4(glm::mat4(1.0f)) {}
     Matrix4(float value) : matrix_4x4(glm::mat4(value)) {}

@@ -127,8 +127,8 @@ vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
     float frag_dist   = length(light.position - vPos);
     float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
 
-    // return (attenuation * (diffuseLight + specularLight));
-    return (diffuseLight + specularLight);
+    return (attenuation * (diffuseLight + specularLight));
+    // return (diffuseLight + specularLight);
 }
 
 vec3 calcSpecPointLight(pointLight light, vec3 tex, vec3 tex2, vec3 normal) {
