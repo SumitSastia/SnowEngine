@@ -1,6 +1,7 @@
 #include <shader.h>
 #include <renderer.h>
 #include <lights.h>
+#include <debug.h>
 #include <ecs/component.h>
 
 #include <iostream>
@@ -283,6 +284,8 @@ void Shader::destroy() {
 
 void Texture2D::load(const char* path, const bool format) {
 
+    // running::core::timer t;
+
     std::string path_str(path);
     std::string base_str = base.string();
 
@@ -291,6 +294,8 @@ void Texture2D::load(const char* path, const bool format) {
     std::string finalPath = base_str + path_str;
 
     unsigned char* pixelData = stbi_load(finalPath.c_str(), &width, &height, nullptr, 4);
+
+    // DebugMenu::log("STBI load: " + t.end());
 
     if(!pixelData){
         std::cerr << "Failed to Load Image!\n" << finalPath << std::endl;
@@ -312,8 +317,12 @@ void Texture2D::load(const char* path, const bool format) {
     glTexImage2D(GL_TEXTURE_2D, 0, (format)? GL_SRGB : GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    // DebugMenu::log("Image -> Memory Bind: " + t.end());
+
     stbi_image_free(pixelData);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    // DebugMenu::log("Cleaning stbi memory: " + t.end());
 }
 
 void Texture2D::bind(const unsigned int textureUnit) const {
@@ -342,20 +351,12 @@ std::vector <shader_paths> Shaders::path = {
     shader_paths("lights/ecs.vert",     "lights/light.frag"),
     shader_paths("ecs/generic3d.vert",  "ecs/albedo.frag"),
     shader_paths("ecs/generic2d.vert",  "ecs/albedo.frag"),
-    shader_paths("ecs/generic3d.vert",  "ecs/phong.frag"),
-    shader_paths("ecs/generic2d.vert",  "ecs/phong.frag"),
-    shader_paths("ecs/instance3d.vert", "ecs/phong.frag")
-};
-
-std::vector <bool> Shaders::preprocess = {
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
+    shader_paths("ecs/generic3d.vert",  "ecs/phong.frag", true),
+    shader_paths("ecs/generic2d.vert",  "ecs/phong.frag", true),
+    shader_paths("ecs/instance3d.vert", "ecs/phong.frag", true),
+    shader_paths("ecs/instance2d.vert", "ecs/phong.frag", true),
+    shader_paths("ecs/norm3d.vert",     "ecs/normPhong.frag", true),
+    shader_paths("ecs/norm2d.vert",     "ecs/normPhong.frag", true)
 };
 
 Shader* Shaders::get(shaderNames shader) {
@@ -364,10 +365,10 @@ Shader* Shaders::get(shaderNames shader) {
 
         const std::string base_path = "../shaders/";
 
-        const std::string vertPath = base_path + path[shader].first;
-        const std::string fragPath = base_path + path[shader].second;
+        const std::string& vertPath = base_path + path[shader].vert;
+        const std::string& fragPath = base_path + path[shader].frag;
 
-        loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str(), preprocess[shader]);
+        loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str(), path[shader].preprocess);
         isLoaded[shader] = true;
     }
 

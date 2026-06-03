@@ -243,3 +243,20 @@ void Model3D::destroy() {
         meshes[i].destroy();
     }
 }
+
+void Mesh::clean() {
+
+    vertices.clear();
+    indices.clear();
+    textures.clear();
+}
+
+void Model3D::clean() {
+
+    for (unsigned int i = 0; i < total_mesh; i++) {
+        meshes[i].clean();
+    }
+
+    meshes.clear();
+    loadedTextures.clear();
+}

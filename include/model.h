@@ -36,14 +36,14 @@ struct MeshTexture {
 
 class Mesh {
 
+public:
+    
     unsigned int VBO, VAO, EBO;
     void setupMesh();
 
-public:
-
-    std::vector <Vertex> vertices;
+    std::vector <Vertex>       vertices;
     std::vector <unsigned int> indices;
-    std::vector <MeshTexture> textures;
+    std::vector <MeshTexture>  textures;
 
     Mesh(
         const std::vector <Vertex>& vertices,
@@ -84,6 +84,11 @@ public:
     void bindTextures(const unsigned int textureUnit) const;
     void draw() const;
     void destroy();
+    
+    // clears vertices, indices, textures
+    // @warning Must only be called my Model3D.
+    // @note Vertex Array Buffer still exists.
+    void clean();
 };
 
 class Model3D {
@@ -95,17 +100,17 @@ class Model3D {
     uint16_t total_mesh;
     std::string directory;
     
-    std::vector <Mesh> meshes;
-    std::vector <MeshTexture> loadedTextures;
-
     void loadModel(const std::string& path);
-
+    
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-
+    
     std::vector<MeshTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& type_str) const;
-
+    
 public:
+    
+    std::vector <Mesh> meshes;
+    std::vector <MeshTexture> loadedTextures;
 
     Model3D(const char* path) : directory(""), total_mesh(0) {
         loadModel(path);
@@ -116,4 +121,7 @@ public:
 
     void draw() const;
     void destroy();
+
+    // Cleans meshes, loadedTextures after converting them to ECS Component.
+    void clean();
 };

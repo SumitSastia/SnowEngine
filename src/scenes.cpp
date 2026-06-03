@@ -2,6 +2,7 @@
 #include <scenes.h>
 #include <camera.h>
 #include <renderer.h>
+#include <debug.h>
 
 #include <thread>
 
@@ -106,7 +107,7 @@ void Scene1::init() {
     total_shaders  = 6;
     total_entities = 3;
 
-    running::time::startInterval();
+    // running::time::startInterval();
 
     loaded_shaders = {
 
@@ -210,8 +211,8 @@ void Scene1::init() {
         )
     };
 
-    const std::string time = running::time::endInterval();
-    std::cout << "Shader Compilation Time: " << time << std::endl;
+    // const std::string time = running::time::endInterval();
+    // std::cout << "Shader Compilation Time: " << time << std::endl;
 
     // Entities
 
@@ -335,12 +336,12 @@ void Scene1::init() {
     // ECS
     // cube = ecs.createEntity();
 
-    running::time::startInterval();
+    // running::time::startInterval();
 
     // ibl_frame = new IBLFrame("assets/env/hdri-sky.hdr", 1024);
 
-    const std::string time2 = running::time::endInterval();
-    std::cout << "IBL Frame Time: " << time2 << std::endl;
+    // const std::string time2 = running::time::endInterval();
+    // std::cout << "IBL Frame Time: " << time2 << std::endl;
 
     // Debug
     debugFrame = new DebugFrame(WIN_W, WIN_H);
@@ -848,6 +849,8 @@ void Scene1::destroy() {
 
 void Scene2::init() {
 
+    running::globalTimer::startInterval();
+
     wood_box = entityManager.createEntity();
     box2     = entityManager.createEntity();
     floor    = entityManager.createEntity();
@@ -855,11 +858,13 @@ void Scene2::init() {
     light1   = entityManager.createEntity();
     light2   = entityManager.createEntity();
     cubes    = entityManager.createEntity();
+    sphere   = entityManager.createEntity();
 
     entityManager.visibleEntities.push_back(wood_box);
     entityManager.visibleEntities.push_back(floor);
     entityManager.visibleEntities.push_back(wall);
     entityManager.visibleEntities.push_back(cubes);
+    entityManager.visibleEntities.push_back(sphere);
 
     entityManager.emissiveEntities.push_back(light1);
     entityManager.emissiveEntities.push_back(light2);
@@ -873,16 +878,21 @@ void Scene2::init() {
         transform.computeModel();
 
         MeshComponent mesh;
-        mesh.shape = EntityShapes::instance().cube;
+        // mesh.shape = EntityShapes::instance().cube;
+        mesh.shape = EntityShapes::instance().cubeNormalMapped;
 
         MaterialComponent material;
-        material.shader = Shaders::get(PHONG3D);
+        // material.shader = Shaders::get(PHONG3D);
+        material.shader = Shaders::get(NORM_PHONG3D);
         material.albedo = DefaultShapes::instance().cube.getAlbedo();
+        material.normal = DefaultShapes::instance().advancedCube.getNormalMap();
         
         componentManager.addComponent(wood_box, mesh);
         componentManager.addComponent(wood_box, transform);
         componentManager.addComponent(wood_box, material);
     }
+
+    DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
     // floor
     {
@@ -896,13 +906,17 @@ void Scene2::init() {
         mesh.shape = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(PHONG2D);
+        // material.shader = Shaders::get(PHONG2D);
+        material.shader = Shaders::get(NORM_PHONG2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
+        material.normal = DefaultShapes::instance().square.getNormalMap();
         
         componentManager.addComponent(floor, mesh);
         componentManager.addComponent(floor, transform);
         componentManager.addComponent(floor, material);
     }
+
+    DebugMenu::log("Floor: " + running::globalTimer::endInterval());
 
     // wall
     {
@@ -916,23 +930,54 @@ void Scene2::init() {
         mesh.shape = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(PHONG2D);
+        // material.shader = Shaders::get(PHONG2D);
+        material.shader = Shaders::get(NORM_PHONG2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
+        material.normal = DefaultShapes::instance().square.getNormalMap();
         
         componentManager.addComponent(wall, mesh);
         componentManager.addComponent(wall, transform);
         componentManager.addComponent(wall, material);
     }
 
+    DebugMenu::log("Wall: " + running::globalTimer::endInterval());
+
+    // sphere
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(6.0f, 0.0f, 3.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
+
+        Model3D* sphereModel = new Model3D("../assets/models/test_cube/sphere.obj");
+
+        ModelComponent modelComponent;
+        modelComponent.init(sphereModel, Shaders::get(ALBEDO3D));
+        componentManager.addShader(Shaders::get(ALBEDO3D));
+
+        // sphereModel->clean();
+
+        componentManager.addComponent(sphere, modelComponent);
+        componentManager.addComponent(sphere, transform);
+    }
+
+    DebugMenu::log("Sphere: " + running::globalTimer::endInterval());
+
     // cubes
     {
         MaterialComponent material;
         material.shader = Shaders::get(INSTANCE3D);
-        material.albedo = DefaultShapes::instance().cube.getAlbedo();
+        material.albedo = new Texture2D();
+        material.albedo->load("assets/textures/grunge-box-small.jpg");
+
+        DebugMenu::log("Image Loading: " + running::globalTimer::endInterval());
         
         componentManager.addComponent(cubes, EntityShapes::instance().cubes);
         componentManager.addComponent(cubes, material);
     }
+
+    DebugMenu::log("Cubes: " + running::globalTimer::endInterval());
 
     // light1
     {
@@ -960,6 +1005,8 @@ void Scene2::init() {
         componentManager.addComponent(light1, pointlight);
     }
 
+    DebugMenu::log("Light1: " + running::globalTimer::endInterval());
+
     // light2
     {
         TransformComponent transform;
@@ -986,6 +1033,8 @@ void Scene2::init() {
         componentManager.addComponent(light2, pointlight);
     }
 
+    DebugMenu::log("Light2: " + running::globalTimer::endInterval());
+
 }
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {
@@ -995,34 +1044,37 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
 
     // Model of the Object to move
     const Entity& entity  = entityManager.visibleEntities[model_counter];
-    Matrix4& movableModel = componentManager.arr_transform[entity].model;
 
-    if (glfwGetKey(window, GLFW_KEY_KP_8)) {
-        movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
-    }
+    if (componentManager.has_transform[entity]) {
+        Matrix4& movableModel = componentManager.arr_transform[entity].model;
 
-    if (glfwGetKey(window, GLFW_KEY_KP_2)) {
-        movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f, 1.0f));
-    }
+        if (glfwGetKey(window, GLFW_KEY_KP_8)) {
+            movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
+        }
 
-    if (glfwGetKey(window, GLFW_KEY_KP_4)) {
-        movableModel.translate(move_speed * glm::vec3(-1.0f, 0.0f, 0.0f));
-    }
+        if (glfwGetKey(window, GLFW_KEY_KP_2)) {
+            movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f, 1.0f));
+        }
 
-    if (glfwGetKey(window, GLFW_KEY_KP_6)) {
-        movableModel.translate(move_speed * glm::vec3( 1.0f, 0.0f, 0.0f));
-    }
+        if (glfwGetKey(window, GLFW_KEY_KP_4)) {
+            movableModel.translate(move_speed * glm::vec3(-1.0f, 0.0f, 0.0f));
+        }
 
-    if (glfwGetKey(window, GLFW_KEY_KP_9)) {
-        movableModel.translate(move_speed * glm::vec3( 0.0f, 1.0f, 0.0f));
-    }
+        if (glfwGetKey(window, GLFW_KEY_KP_6)) {
+            movableModel.translate(move_speed * glm::vec3( 1.0f, 0.0f, 0.0f));
+        }
 
-    if (glfwGetKey(window, GLFW_KEY_KP_7)) {
-        movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
-    }
+        if (glfwGetKey(window, GLFW_KEY_KP_9)) {
+            movableModel.translate(move_speed * glm::vec3( 0.0f, 1.0f, 0.0f));
+        }
 
-    if (Input::isKeyDown(GLFW_KEY_KP_1)) {
-        model_counter = (model_counter + 1) % entityManager.visibleEntities.size();
+        if (glfwGetKey(window, GLFW_KEY_KP_7)) {
+            movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
+        }
+
+        if (Input::isKeyDown(GLFW_KEY_KP_1)) {
+            model_counter = (model_counter + 1) % entityManager.visibleEntities.size();
+        }
     }
 }
 

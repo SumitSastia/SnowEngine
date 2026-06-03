@@ -17,6 +17,7 @@
 class Shape;
 class Shader;
 class Texture2D;
+class Model3D;
 
 using Entity = uint32_t;
 
@@ -32,6 +33,11 @@ struct ShapeComponent {
         indicesCount(0) {
     }
 
+    ShapeComponent(uint VAO, uint VBO, uint EBO, uint indicesCount):
+        VAO(VAO), VBO(VBO), EBO(EBO),
+        indicesCount(indicesCount) {
+    }
+
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
         const unsigned int* indices, const size_t& size_i
@@ -42,13 +48,9 @@ struct ShapeComponent {
         const unsigned int* indices, const size_t& size_i
     );
 
-    // To be defined for static instance entities
-    void bindVerticesInstance(
-        const float*        vertices, const size_t& size_v,
-        const unsigned int* indices,  const size_t& size_i,
-        const glm::mat4*    models,   const size_t& size_m,
-        const glm::mat3*    normals,  const size_t& size_n,
-        uint& modelVBO, uint& normalVBO
+    void bindVertices3D_Normal(
+        const float* vertices, const size_t& size_v,
+        const unsigned int* indices, const size_t& size_i
     );
 
     void draw() const;
@@ -146,10 +148,12 @@ struct MaterialComponent {
 
     Shader*    shader;
     Texture2D* albedo;
+    Texture2D* normal;
 
     MaterialComponent(): 
         shader(nullptr),
-        albedo(nullptr) {
+        albedo(nullptr),
+        normal(nullptr) {
     }
 };
 
@@ -168,13 +172,6 @@ struct InstanceComponent {
         transforms(MAX_INSTANCES) {
     }
 
-    // void bindVertices(
-    //     const float*        vertices, const size_t& size_v,
-    //     const unsigned int* indices,  const size_t& size_i,
-    //     const glm::mat4*    models,   const size_t& size_m,
-    //     const glm::mat3*    normals,  const size_t& size_n
-    // );
-
     void bindVertices(
         const float*        vertices, const size_t& size_v,
         const unsigned int* indices,  const size_t& size_i
@@ -189,17 +186,26 @@ struct InstanceComponent {
     void draw() const;
 };
 
+struct ModelComponent {
+
+    std::vector <MeshComponent>     meshes;
+    std::vector <MaterialComponent> materials;
+
+    void init(const Model3D* model, Shader* shader);
+};
+
 class ComponentManager {
     
-    void addShader(Shader* shader);
-
 public:
+    
+    void addShader(Shader* shader);
     
     // Renderable Objects
     std::vector <MeshComponent>      arr_mesh;
     std::vector <TransformComponent> arr_transform;
     std::vector <MaterialComponent>  arr_material;
     std::vector <InstanceComponent>  arr_instance;
+    std::vector <ModelComponent>     arr_model;
 
     // Light Sources
     std::vector <PointLightComponent> arr_light;
@@ -211,6 +217,7 @@ public:
     std::vector <bool> has_transform;
     std::vector <bool> has_material;
     std::vector <bool> has_instance;
+    std::vector <bool> has_model;
 
     std::vector <bool> has_light;
 

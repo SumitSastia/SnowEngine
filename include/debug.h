@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include <s_math.h>
+#include <s_time.h>
 
 #include <string>
 #include <iostream>

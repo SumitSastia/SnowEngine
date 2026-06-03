@@ -100,8 +100,49 @@ EntityShapes::EntityShapes() {
         1,3,2
     };
 
+    const float verticesCubeNormalMapped[] = {
+
+        // Front         // Normals     // UV     // Tangents
+        -0.5, 0.5, 0.5,  0.0,0.0, 1.0,  0.0,0.0,  1.0,0.0,0.0,
+         0.5, 0.5, 0.5,  0.0,0.0, 1.0,  1.0,0.0,  1.0,0.0,0.0,
+        -0.5,-0.5, 0.5,  0.0,0.0, 1.0,  0.0,1.0,  1.0,0.0,0.0,
+         0.5,-0.5, 0.5,  0.0,0.0, 1.0,  1.0,1.0,  1.0,0.0,0.0,
+         
+        // Back
+         0.5, 0.5,-0.5,  0.0,0.0,-1.0,  0.0,0.0, -1.0,0.0,0.0,
+        -0.5, 0.5,-0.5,  0.0,0.0,-1.0,  1.0,0.0, -1.0,0.0,0.0,
+         0.5,-0.5,-0.5,  0.0,0.0,-1.0,  0.0,1.0, -1.0,0.0,0.0,
+        -0.5,-0.5,-0.5,  0.0,0.0,-1.0,  1.0,1.0, -1.0,0.0,0.0,
+
+        // Left
+        -0.5, 0.5,-0.5,  -1.0,0.0,0.0,  0.0,0.0,  0.0,0.0,1.0,
+        -0.5, 0.5, 0.5,  -1.0,0.0,0.0,  1.0,0.0,  0.0,0.0,1.0,
+        -0.5,-0.5,-0.5,  -1.0,0.0,0.0,  0.0,1.0,  0.0,0.0,1.0,
+        -0.5,-0.5, 0.5,  -1.0,0.0,0.0,  1.0,1.0,  0.0,0.0,1.0,
+
+        // Right
+         0.5, 0.5, 0.5,  1.0,0.0,0.0,   0.0,0.0, 0.0,0.0,-1.0,
+         0.5, 0.5,-0.5,  1.0,0.0,0.0,   1.0,0.0, 0.0,0.0,-1.0,
+         0.5,-0.5, 0.5,  1.0,0.0,0.0,   0.0,1.0, 0.0,0.0,-1.0,
+         0.5,-0.5,-0.5,  1.0,0.0,0.0,   1.0,1.0, 0.0,0.0,-1.0,
+
+        // Top
+        -0.5, 0.5,-0.5,  0.0, 1.0,0.0,  0.0,0.0,  1.0,0.0,0.0,
+         0.5, 0.5,-0.5,  0.0, 1.0,0.0,  1.0,0.0,  1.0,0.0,0.0,
+        -0.5, 0.5, 0.5,  0.0, 1.0,0.0,  0.0,1.0,  1.0,0.0,0.0,
+         0.5, 0.5, 0.5,  0.0, 1.0,0.0,  1.0,1.0,  1.0,0.0,0.0,
+
+        // Bottom
+         0.5,-0.5,-0.5,  0.0,-1.0,0.0,  0.0,0.0,  1.0,0.0,0.0,
+        -0.5,-0.5,-0.5,  0.0,-1.0,0.0,  1.0,0.0,  1.0,0.0,0.0,
+         0.5,-0.5, 0.5,  0.0,-1.0,0.0,  0.0,1.0,  1.0,0.0,0.0,
+        -0.5,-0.5, 0.5,  0.0,-1.0,0.0,  1.0,1.0,  1.0,0.0,0.0
+    };
+
     cube.bindVertices3D(verticesCube, sizeof(verticesCube), indicesCube, sizeof(indicesCube));
     square.bindVertices2D(verticesSquare, sizeof(verticesSquare), indicesSquare, sizeof(indicesSquare));
+
+    cubeNormalMapped.bindVertices3D_Normal(verticesCubeNormalMapped, sizeof(verticesCubeNormalMapped), indicesCube, sizeof(indicesCube));
 
     // Instance Cubes
     glm::vec3 cubePositions[] = {
@@ -123,7 +164,7 @@ EntityShapes::EntityShapes() {
     for (uint32_t i = 0; i < 10; i++) {
 
         cubes.transforms[i].position = cubePositions[i];
-        cubes.transforms[i].rotation = (i * 15.0f * glm::vec3(1.0f, 2.0f, 3.0f));
+        cubes.transforms[i].rotation = (i * 12.0f * glm::vec3(1.0f, 2.0f, 3.0f));
         cubes.transforms[i].scale    = glm::vec3(0.8);
 
         cubes.transforms[i].computeModel();

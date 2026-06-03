@@ -33,6 +33,7 @@ public:
 
     ShapeComponent cube;
     ShapeComponent square;
+    ShapeComponent cubeNormalMapped;
     
     InstanceComponent cubes;
     

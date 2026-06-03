@@ -24,7 +24,7 @@ int main() {
 
     // ---------- Initialization --------------- //
 
-    running::time::start();
+    running::globalTimer::start();
     std::cout << "//----------------------------------------//\n\n"; 
     
     GLFWwindow* window = Renderer::instance().getWindow();
@@ -54,8 +54,13 @@ int main() {
 
     Camera& mainCamera = Camera::instance();
 
+    running::core::timer t;
     Scene* mainScene = new Scene1();
+    DebugMenu::log("Time taken to initialize - scene1: " + t.end());
+
+    // running::time::startInterval();
     Scene2* scene2   = new Scene2();
+    // std::cout << "Time taken to initialize - scene2: " << running::time::endInterval() << std::endl;
 
     DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
     HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
@@ -65,7 +70,7 @@ int main() {
 
     bool deferredRender = false;
 
-    std::cout << "Time taken to Initialize: " << running::time::getTime() << std::endl;
+    DebugMenu::log("Time taken to Initialize: " + running::globalTimer::getTime());
 
     // ---------- Loop ------------------------ //
 

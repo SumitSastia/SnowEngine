@@ -55,6 +55,11 @@ public:
         return shapeDiffuseTexture;
     }
 
+    // @note Temporary till Asset Manager is Initialized
+    Texture2D* getNormalMap() const {
+        return shapeNormalTexture;
+    }
+
     void bindVertices2D(
         const float* vertices, const size_t& size_v,
         const unsigned int* indices, const size_t& size_i

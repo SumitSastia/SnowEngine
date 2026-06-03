@@ -105,10 +105,16 @@ class Texture2D {
     
 public:
 
-    Texture2D() :
+    Texture2D():
         width(0),
         height(0),
         textureID(0) {
+    }
+
+    Texture2D(uint textureID):
+        width(0),
+        height(0),
+        textureID(textureID) {
     }
 
     /*
@@ -215,11 +221,28 @@ enum shaderNames {
     PHONG3D,
     PHONG2D,
     INSTANCE3D,
+    INSTANCE2D,
+    NORM_PHONG3D,
+    NORM_PHONG2D,
 
     SHADER_COUNT
 };
 
-using shader_paths = std::pair <std::string, std::string>;
+struct shader_paths {
+
+    std::string vert;
+    std::string frag;
+    bool preprocess;
+
+    shader_paths(
+        const std::string& vert,
+        const std::string& frag,
+        const bool preprocess = false
+    ):
+        vert(vert), frag(frag),
+        preprocess(preprocess) {
+    }
+};
 
 class Shaders {
 

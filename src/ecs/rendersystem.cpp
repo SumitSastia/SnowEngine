@@ -75,7 +75,6 @@ void RenderSystem::render(const EntityManager& entityManager, const ComponentMan
             componentManager.has_transform[entity] &&
             componentManager.has_material[entity]
         ) {
-
             const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
             const TransformComponent& transform = componentManager.arr_transform[entity];
             const MaterialComponent&  material  = componentManager.arr_material[entity];
@@ -83,11 +82,41 @@ void RenderSystem::render(const EntityManager& entityManager, const ComponentMan
             draw(mesh, transform, material);
         }
 
+        // if (
+        //     componentManager.has_model[entity] &&
+        //     componentManager.has_transform[entity] &&
+        //     componentManager.has_material[entity]
+        // ) {
+        //     const TransformComponent& transform = componentManager.arr_transform[entity];
+        //     const MaterialComponent&  material  = componentManager.arr_material[entity];
+
+        //     for (const MeshComponent& mesh : componentManager.arr_model[entity].meshes){
+
+        //         draw(mesh, transform, material);
+        //     }
+        // }
+
+        if (
+            componentManager.has_model[entity] &&
+            componentManager.has_transform[entity]
+        ) {
+            
+            const TransformComponent& transform = componentManager.arr_transform[entity];
+            const uint total_meshes = componentManager.arr_model[entity].meshes.size();
+
+            for (uint i = 0 ; i < total_meshes; i++) {
+
+                const MeshComponent&     mesh     = componentManager.arr_model[entity].meshes[i];
+                const MaterialComponent& material = componentManager.arr_model[entity].materials[i];
+
+                draw(mesh, transform, material);
+            }
+        }
+
         if (
             componentManager.has_instance[entity] && 
             componentManager.has_material[entity]
         ) {
-
             const InstanceComponent& instance = componentManager.arr_instance[entity];
             const MaterialComponent& material = componentManager.arr_material[entity];
 
@@ -120,11 +149,16 @@ void RenderSystem::draw(
     shader->setMat4("model",        transform.model);
     shader->setMat3("normalMatrix", transform.model.getNormal());
 
-    // bindCameraGlobals(shader);
+    bindCameraGlobals(shader);
 
     if (material.albedo) {
         shader->setInt("albedo", 0);
         material.albedo->bind(0);
+    }
+
+    if (material.normal) {
+        material.shader->setInt("normalMap", 1);
+        material.normal->bind(1);
     }
 
     mesh.shape.draw();
@@ -139,7 +173,7 @@ void RenderSystem::draw(
     const Shader* shader = material.shader;
 
     shader->use();
-    shader->setMat4("model", transform.model);
+    shader->setMat4("model",      transform.model);
     shader->setVec3("lightColor", pointlight.color);
 
     mesh.shape.draw();
@@ -155,6 +189,11 @@ void RenderSystem::draw(
     if (material.albedo) {
         material.shader->setInt("albedo", 0);
         material.albedo->bind(0);
+    }
+
+    if (material.normal) {
+        material.shader->setInt("normalMap", 1);
+        material.albedo->bind(1);
     }
 
     instance.draw();

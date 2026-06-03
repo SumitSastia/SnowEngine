@@ -1,21 +1,8 @@
 #include <ecs/component.h>
 #include <debug.h>
 #include <ecs/entity.h>
-
-ComponentManager::ComponentManager():
-
-    arr_mesh(MAX_ENTITIES),
-    arr_transform(MAX_ENTITIES),
-    arr_material(MAX_ENTITIES),
-    arr_light(MAX_ENTITIES),
-    arr_instance(MAX_ENTITIES),
-    
-    has_mesh(MAX_ENTITIES, false),
-    has_transform(MAX_ENTITIES, false),
-    has_material(MAX_ENTITIES, false),
-    has_light(MAX_ENTITIES, false),
-    has_instance(MAX_ENTITIES, false) {
-}
+#include <model.h>
+#include <shader.h>
 
 // ------------------------------ Components ----------------------------------------- //
 
@@ -79,6 +66,44 @@ void ShapeComponent::bindVertices3D(
     // TextureCords
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void ShapeComponent::bindVertices3D_Normal(
+    const float* vertices, const size_t& size_v,
+    const unsigned int* indices, const size_t& size_i
+) {
+    indicesCount = size_i / sizeof(u_int);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // TextureCords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Tangent
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -198,7 +223,43 @@ void TransformComponent::computeModel() {
     model.matrix_4x4 = glm::scale(model.matrix_4x4, scale);
 }
 
+void ModelComponent::init(const Model3D* model, Shader* shader) {
+
+    for (const Mesh& mesh : model->meshes) {
+        
+        MeshComponent meshComponent;
+        meshComponent.shape = ShapeComponent(
+            mesh.VAO, mesh.VBO, mesh.EBO,
+            mesh.indices.size()
+        );
+
+        MaterialComponent material;
+        material.shader = shader;
+        material.albedo = new Texture2D(mesh.textures[0].id);
+
+        meshes.push_back(meshComponent);
+        materials.push_back(material);
+    }
+}
+
 // ------------------------------ Components ----------------------------------------- //
+
+ComponentManager::ComponentManager():
+
+    arr_mesh(MAX_ENTITIES),
+    arr_transform(MAX_ENTITIES),
+    arr_material(MAX_ENTITIES),
+    arr_light(MAX_ENTITIES),
+    arr_instance(MAX_ENTITIES),
+    arr_model(MAX_ENTITIES),
+    
+    has_mesh(MAX_ENTITIES, false),
+    has_transform(MAX_ENTITIES, false),
+    has_material(MAX_ENTITIES, false),
+    has_light(MAX_ENTITIES, false),
+    has_instance(MAX_ENTITIES, false),
+    has_model(MAX_ENTITIES, false) {
+}
 
 void ComponentManager::addShader(Shader* shader) {
 
@@ -252,4 +313,11 @@ void ComponentManager::addComponent<InstanceComponent>(const Entity& entity, con
 
     arr_instance[entity] = component;
     has_instance[entity] = true;
+}
+
+template <>
+void ComponentManager::addComponent<ModelComponent>(const Entity& entity, const ModelComponent& component) {
+
+    arr_model[entity] = component;
+    has_model[entity] = true;
 }
