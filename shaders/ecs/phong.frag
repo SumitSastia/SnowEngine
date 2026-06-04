@@ -16,7 +16,7 @@ uniform sampler2D albedo;
 void main() {
 
     vec3 tex   = texture(albedo, vTexCords).rgb;
-    vec3 color = 0.1 * tex; // Ambient
+    vec3 color = 0.01 * tex; // Ambient
 
     // Point Shadow
     for (int i = 0; i < light_count; i++) {

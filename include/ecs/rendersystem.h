@@ -26,6 +26,15 @@ class RenderSystem {
         const MaterialComponent& material
     );
 
+    static void drawShadow(
+        const MeshComponent&      mesh,
+        const TransformComponent& transform
+    );
+
+    static void drawShadowInstanced(
+        const InstanceComponent& instance
+    );
+
 public:
 
     static RenderSystem& instance() {
@@ -35,5 +44,6 @@ public:
     }
 
     static void render      (const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager); 
+    static void renderShadow(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager);
 };

@@ -229,9 +229,9 @@ void Scene1::init() {
 
     // myFloor.loadNormalTex("assets/textures/texture_maps/wall_normal.png");
 
-    myWall.loadDiffuseTex("assets/textures/parallex_maps/bricks2.jpg");
-    myWall.loadNormalTex("assets/textures/parallex_maps/bricks2_normal.jpg");
-    myWall.loadSpecularTex("assets/textures/parallex_maps/bricks2_disp.jpg");
+    myWall.loadDiffuseTex("assets/textures/parallax_maps/bricks2.jpg");
+    myWall.loadNormalTex("assets/textures/parallax_maps/bricks2_normal.jpg");
+    myWall.loadSpecularTex("assets/textures/parallax_maps/bricks2_disp.jpg");
 
     // loaded_entities.push_back(myCube);
     // loaded_entities.push_back(myFloor);
@@ -851,20 +851,22 @@ void Scene2::init() {
 
     running::globalTimer::startInterval();
 
-    wood_box = entityManager.createEntity();
-    box2     = entityManager.createEntity();
-    floor    = entityManager.createEntity();
-    wall     = entityManager.createEntity();
-    light1   = entityManager.createEntity();
-    light2   = entityManager.createEntity();
-    cubes    = entityManager.createEntity();
-    sphere   = entityManager.createEntity();
+    wood_box  = entityManager.createEntity();
+    box2      = entityManager.createEntity();
+    floor     = entityManager.createEntity();
+    wall      = entityManager.createEntity();
+    light1    = entityManager.createEntity();
+    light2    = entityManager.createEntity();
+    cubes     = entityManager.createEntity();
+    sphere    = entityManager.createEntity();
+    brickWall = entityManager.createEntity();
 
     entityManager.visibleEntities.push_back(wood_box);
     entityManager.visibleEntities.push_back(floor);
     entityManager.visibleEntities.push_back(wall);
     entityManager.visibleEntities.push_back(cubes);
     entityManager.visibleEntities.push_back(sphere);
+    entityManager.visibleEntities.push_back(brickWall);
 
     entityManager.emissiveEntities.push_back(light1);
     entityManager.emissiveEntities.push_back(light2);
@@ -882,7 +884,6 @@ void Scene2::init() {
         mesh.shape = EntityShapes::instance().cubeNormalMapped;
 
         MaterialComponent material;
-        // material.shader = Shaders::get(PHONG3D);
         material.shader = Shaders::get(NORM_PHONG3D);
         material.albedo = DefaultShapes::instance().cube.getAlbedo();
         material.normal = DefaultShapes::instance().advancedCube.getNormalMap();
@@ -906,7 +907,6 @@ void Scene2::init() {
         mesh.shape = EntityShapes::instance().square;
 
         MaterialComponent material;
-        // material.shader = Shaders::get(PHONG2D);
         material.shader = Shaders::get(NORM_PHONG2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
@@ -942,6 +942,36 @@ void Scene2::init() {
 
     DebugMenu::log("Wall: " + running::globalTimer::endInterval());
 
+    // Parallax wall
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(2.5f, 0.5f, -5.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(2.0f);
+        transform.computeModel();
+
+        MeshComponent mesh;
+        mesh.shape = EntityShapes::instance().square;
+
+        MaterialComponent material;
+        // material.shader = Shaders::get(NORM_PHONG2D);
+        material.shader = Shaders::get(PARALLAX2D);
+        
+        material.albedo = new Texture2D();
+        material.normal = new Texture2D();
+        material.height = new Texture2D();
+
+        material.albedo->load("assets/textures/parallax_maps/bricks2.jpg");
+        material.normal->load("assets/textures/parallax_maps/bricks2_normal.jpg");
+        material.height->load("assets/textures/parallax_maps/bricks2_disp.jpg");
+        
+        componentManager.addComponent(brickWall, mesh);
+        componentManager.addComponent(brickWall, transform);
+        componentManager.addComponent(brickWall, material);
+    }
+
+    DebugMenu::log("Parallax Wall: " + running::globalTimer::endInterval());
+
     // sphere
     {
         TransformComponent transform;
@@ -952,11 +982,12 @@ void Scene2::init() {
 
         Model3D* sphereModel = new Model3D("../assets/models/test_cube/sphere.obj");
 
+        Shader* shader = Shaders::get(PHONG3D);
         ModelComponent modelComponent;
-        modelComponent.init(sphereModel, Shaders::get(ALBEDO3D));
-        componentManager.addShader(Shaders::get(ALBEDO3D));
+        modelComponent.init(sphereModel, shader);
+        componentManager.addShader(shader);
 
-        // sphereModel->clean();
+        sphereModel->clean();
 
         componentManager.addComponent(sphere, modelComponent);
         componentManager.addComponent(sphere, transform);

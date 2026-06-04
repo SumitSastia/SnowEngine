@@ -157,8 +157,14 @@ void RenderSystem::draw(
     }
 
     if (material.normal) {
-        material.shader->setInt("normalMap", 1);
+        shader->setInt("normalMap", 1);
         material.normal->bind(1);
+    }
+
+    if (material.height) {
+        shader->setFloat("height_scale", 0.1);
+        shader->setInt("heightMap", 2);
+        material.height->bind(2);
     }
 
     mesh.shape.draw();

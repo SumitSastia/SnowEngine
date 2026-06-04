@@ -149,11 +149,13 @@ struct MaterialComponent {
     Shader*    shader;
     Texture2D* albedo;
     Texture2D* normal;
+    Texture2D* height;
 
     MaterialComponent(): 
         shader(nullptr),
         albedo(nullptr),
-        normal(nullptr) {
+        normal(nullptr),
+        height(nullptr) {
     }
 };
 

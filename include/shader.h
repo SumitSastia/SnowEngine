@@ -224,6 +224,7 @@ enum shaderNames {
     INSTANCE2D,
     NORM_PHONG3D,
     NORM_PHONG2D,
+    PARALLAX2D,
 
     SHADER_COUNT
 };

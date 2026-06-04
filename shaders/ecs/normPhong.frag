@@ -17,10 +17,10 @@ uniform sampler2D normalMap;
 
 void main() {
 
-    vec3 tex    = texture(albedo, vTexCords).rgb;
+    vec3 tex     = texture(albedo, vTexCords).rgb;
     vec3 vNormal = texture(normalMap, vTexCords).xyz;
 
-    vec3 color = 0.1 * tex; // Ambient
+    vec3 color = 0.01 * tex; // Ambient
 
     vNormal = (vNormal * 2.0 - 1.0);
     vNormal = normalize(TBN * vNormal);

@@ -108,6 +108,7 @@ class Scene2 : public Scene {
     Entity light2;
     Entity cubes;
     Entity sphere;
+    Entity brickWall;
 
     EntityManager    entityManager;
     ComponentManager componentManager;

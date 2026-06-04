@@ -346,17 +346,18 @@ std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
 
 std::vector <shader_paths> Shaders::path = {
 
-    shader_paths("ecs/generic3d.vert",  "ecs/test.frag"),
-    shader_paths("ecs/generic2d.vert",  "ecs/test.frag"),
-    shader_paths("lights/ecs.vert",     "lights/light.frag"),
-    shader_paths("ecs/generic3d.vert",  "ecs/albedo.frag"),
-    shader_paths("ecs/generic2d.vert",  "ecs/albedo.frag"),
-    shader_paths("ecs/generic3d.vert",  "ecs/phong.frag", true),
-    shader_paths("ecs/generic2d.vert",  "ecs/phong.frag", true),
-    shader_paths("ecs/instance3d.vert", "ecs/phong.frag", true),
-    shader_paths("ecs/instance2d.vert", "ecs/phong.frag", true),
-    shader_paths("ecs/norm3d.vert",     "ecs/normPhong.frag", true),
-    shader_paths("ecs/norm2d.vert",     "ecs/normPhong.frag", true)
+    shader_paths("ecs/generic3d.vert",    "ecs/test.frag"),
+    shader_paths("ecs/generic2d.vert",    "ecs/test.frag"),
+    shader_paths("lights/ecs.vert",       "lights/light.frag"),
+    shader_paths("ecs/generic3d.vert",    "ecs/albedo.frag"),
+    shader_paths("ecs/generic2d.vert",    "ecs/albedo.frag"),
+    shader_paths("ecs/generic3d.vert",    "ecs/phong.frag", true),
+    shader_paths("ecs/generic2d.vert",    "ecs/phong.frag", true),
+    shader_paths("ecs/instance3d.vert",   "ecs/phong.frag", true),
+    shader_paths("ecs/instance2d.vert",   "ecs/phong.frag", true),
+    shader_paths("ecs/norm3d.vert",       "ecs/normPhong.frag", true),
+    shader_paths("ecs/norm2d.vert",       "ecs/normPhong.frag", true),
+    shader_paths("ecs/p2d.vert",          "ecs/p2d.frag", true)
 };
 
 Shader* Shaders::get(shaderNames shader) {
