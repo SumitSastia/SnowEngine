@@ -251,6 +251,7 @@ ComponentManager::ComponentManager():
     arr_transform(MAX_ENTITIES),
     arr_material(MAX_ENTITIES),
     arr_light(MAX_ENTITIES),
+    arr_directionalLight(MAX_ENTITIES),
     arr_instance(MAX_ENTITIES),
     arr_model(MAX_ENTITIES),
     
@@ -258,6 +259,7 @@ ComponentManager::ComponentManager():
     has_transform(MAX_ENTITIES, false),
     has_material(MAX_ENTITIES, false),
     has_light(MAX_ENTITIES, false),
+    has_directionalLight(MAX_ENTITIES, false),
     has_instance(MAX_ENTITIES, false),
     has_model(MAX_ENTITIES, false) {
 }

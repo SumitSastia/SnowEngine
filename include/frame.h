@@ -97,6 +97,8 @@ class DirectShadowFrame : public FrameBuffer {
 
 public:
 
+	unsigned int getID() const { return texture_id; }
+
 	DirectShadowFrame(const uint16_t& shadow_size);
 	DirectShadowFrame() : DirectShadowFrame(frameBuffers::shadowSize) {}
 

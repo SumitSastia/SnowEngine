@@ -221,6 +221,21 @@ struct PointShadowData {
     }
 };
 
+struct DirectShadowData {
+
+    Entity  entity;
+    Matrix4 lightSpaceMatrix;
+    DirectShadowFrame* frame;
+
+    DirectShadowData():
+        entity(0), lightSpaceMatrix(Matrix4(1.0f)), frame(nullptr) {
+    }
+
+    DirectShadowData(Entity entity, Matrix4 matrix, DirectShadowFrame* frame):
+        entity(entity), lightSpaceMatrix(matrix), frame(frame) {
+    }
+};
+
 class ComponentManager {
     
 public:
@@ -237,13 +252,14 @@ public:
 
     // For Light Sources
     std::vector <PointLightComponent> arr_light;
+    std::vector <DirectionalLight>    arr_directionalLight;
 
     // For Objects to be lit by PointLights
     std::vector <Shader*> uniqueShaders;
 
     // For ShadowPass
-    std::vector <PointShadowData>    pointShadowFrames;
-    std::vector <DirectShadowFrame*> directShadowFrames;
+    std::vector <PointShadowData>  pointShadowFrames;
+    std::vector <DirectShadowData> directShadowFrames;
 
     // Verifiers
     std::vector <bool> has_mesh;
@@ -252,6 +268,7 @@ public:
     std::vector <bool> has_instance;
     std::vector <bool> has_model;
     std::vector <bool> has_light;
+    std::vector <bool> has_directionalLight;
 
     ComponentManager();
 

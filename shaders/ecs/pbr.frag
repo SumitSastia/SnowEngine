@@ -8,7 +8,7 @@ layout (location = 1) out vec4 BrightColor;
 in vec3 vPos;
 in vec3 vNormal;
 in vec2 vTexCords;
-// in vec4 lightSpace_vPos;
+in vec4 lightSpace_vPos;
 
 uniform sampler2D albedo;
 uniform sampler2D metallicMap;
@@ -38,10 +38,15 @@ void main() {
     vec3 color = vec3(0.05) * tex;
 
     // Directional Lighting
-    // color += calcDirectionalLight(tex, vNormal);
+    if (useDirectionalLight) {
 
-    // float shadow = calcDirectShadow();
-    // color *= (1.0 - shadow);
+        vec3 dirLightColor = calcDirectionalLight(tex, vNormal);
+
+        float shadow   = calcDirectShadow();
+        dirLightColor *= (1.0 - shadow);
+
+        color += dirLightColor;
+    }
 
     // PBR Lighting
     vec3 N = vNormal;

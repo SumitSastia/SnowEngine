@@ -344,9 +344,11 @@ void Texture2D::destroy() {
 std::vector <bool>    Shaders::isLoaded(MAX_SHADERS, false);
 std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
 
-Shader* Shaders::pointLightShadow            = nullptr;
-Shader* Shaders::directLightShadow           = nullptr;
+Shader* Shaders::pointLightShadow  = nullptr;
+Shader* Shaders::directLightShadow = nullptr;
+
 Shader* Shaders::pointLightShadow_instanced  = nullptr;
+Shader* Shaders::directLightShadow_instanced = nullptr;
 
 std::vector <shader_paths> Shaders::path = {
 
@@ -386,6 +388,11 @@ bool Shaders::initShaders() {
 
     directLightShadow = new Shader(
         "../shaders/directShadow/directShadow.vert",
+        "../shaders/directShadow/directShadow.frag"
+    );
+
+    directLightShadow_instanced = new Shader(
+        "../shaders/directShadow/directShadowInstanced.vert",
         "../shaders/directShadow/directShadow.frag"
     );
 

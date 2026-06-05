@@ -8,6 +8,7 @@ layout (location = 1) out vec4 BrightColor;
 in vec3 vPos;
 in vec3 vNormal;
 in vec2 vTexCords;
+in vec4 lightSpace_vPos;
 
 uniform sampler2D albedo;
 

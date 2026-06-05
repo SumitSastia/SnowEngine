@@ -123,6 +123,8 @@ int main() {
 
             mainScene->renderDirectShadow();
             mainScene->renderPointShadow();
+
+            scene2->renderDirectShadow();
             scene2->renderPointShadow();
             
             glViewport(0, 0, WIN_W, WIN_H);

@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <lights.h>
 #include <frame.h>
+#include <input.h>
 
 #include <iostream>
 
@@ -65,25 +66,30 @@ void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, con
             pointShadow.frame->bindTexture(shadowFrameUnit);
             shadowFrameUnit++;
         }
+
+        // --------------------- Directional Light ----------------- //
+
+        shader->setDirectionalLight("dl", DefaultLights::instance().sunlight);
+        // shader->setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
+        shader->setBool("useDirectionalLight", true);
+
+        shader->setInt("dl_depthMap", shadowFrameUnit);
+        componentManager.directShadowFrames[0].frame->bindTexture(shadowFrameUnit++);
+
+        shader->setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
+        
+
+        // shadowFrameUnit - last index = 2
     }
 }
 
-// void RenderSystem::bindFlashLightGlobals(const ComponentManager& componentManager) {
+void RenderSystem::update(const float deltaTime) {
 
-//     for (const Shader* shader : componentManager.uniqueShaders) {
-
-//         shader->use();
-//         shader->setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
-//         shader->setSpotLight("sl", DefaultLights::instance().flashlight);
-
-//         bindCameraGlobals(shader);
-//     }
-// }
+}
 
 void RenderSystem::render(const EntityManager& entityManager, const ComponentManager& componentManager) {
 
     bindPointLightGlobals(entityManager, componentManager);
-    // bindFlashLightGlobals(componentManager);
 
     for (const Entity& entity : entityManager.visibleEntities) {
 
@@ -132,12 +138,15 @@ void RenderSystem::renderLights(const EntityManager& entityManager, const Compon
 
     for (const Entity& entity : entityManager.emissiveEntities) {
 
-        const MeshComponent&       mesh       = componentManager.arr_mesh[entity];
-        const TransformComponent&  transform  = componentManager.arr_transform[entity];
-        const MaterialComponent&   material   = componentManager.arr_material[entity];
-        const PointLightComponent& pointlight = componentManager.arr_light[entity];
+        if (componentManager.has_light[entity]) {
 
-        draw(mesh, transform, material, pointlight);
+            const MeshComponent&       mesh       = componentManager.arr_mesh[entity];
+            const TransformComponent&  transform  = componentManager.arr_transform[entity];
+            const MaterialComponent&   material   = componentManager.arr_material[entity];
+            const PointLightComponent& pointlight = componentManager.arr_light[entity];
+            
+            draw(mesh, transform, material, pointlight);
+        }
     }
 }
 
@@ -154,7 +163,7 @@ void RenderSystem::draw(
 
     bindCameraGlobals(shader);
 
-    const uint32_t initialUnit = 2;
+    const uint32_t initialUnit = 3;
 
     if (material.albedo) {
         shader->setInt("albedo", initialUnit);
@@ -207,7 +216,7 @@ void RenderSystem::draw(
 
     material.shader->use();
 
-    const uint32_t initialUnit = 2;
+    const uint32_t initialUnit = 3;
 
     if (material.albedo) {
         material.shader->setInt("albedo", initialUnit);
@@ -295,6 +304,55 @@ void ShadowSystem::render(const EntityManager& entityManager, const ComponentMan
             }
         }
     }
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void ShadowSystem::renderDirectional(const EntityManager& entityManager, const ComponentManager& componentManager) {
+
+    Renderer::disableCulling();
+
+    for (const DirectShadowData& directShadow : componentManager.directShadowFrames) {
+
+        const Shader shader[2] = {
+            *Shaders::getDirectLightShadow(),
+            *Shaders::getDirectLightShadow_Instanced()
+        };
+
+        for (uint8_t i = 0; i < 2; i++) {
+
+            shader[i].use();
+            shader[i].setMat4("lightSpace", directShadow.lightSpaceMatrix);
+        }
+
+        directShadow.frame->bindFBO();
+        glViewport(0,0, frameBuffers::shadowSize, frameBuffers::shadowSize);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        
+        // Rendering meshes of VisibleEntities
+        for (const Entity& entity : entityManager.visibleEntities) {
+            
+            if (
+                componentManager.has_mesh[entity] &&
+                componentManager.has_transform[entity]
+            ) {
+                const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
+                const TransformComponent& transform = componentManager.arr_transform[entity];
+                
+                drawShadow(shader[0], mesh, transform);
+            }
+
+            if (
+                componentManager.has_instance[entity]
+            ) {
+                const InstanceComponent& instance = componentManager.arr_instance[entity];
+
+                drawShadowInstanced(shader[1], instance);
+            }
+        }
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ShadowSystem::drawShadow(

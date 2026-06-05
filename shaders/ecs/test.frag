@@ -5,6 +5,7 @@ out vec4 FragColor;
 in vec3 vPos;
 in vec3 vNormal;
 in vec2 vTexCords;
+in vec4 lightSpace_vPos;
 
 void main() {
 

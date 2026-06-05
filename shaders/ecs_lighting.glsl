@@ -43,6 +43,7 @@ uniform samplerCube depthMap[MAX_LIGHTS];
 
 uniform directionalLight dl;
 uniform sampler2D dl_depthMap;
+uniform bool useDirectionalLight;
 
 uniform bool useSpotLight;
 uniform SpotLight sl;
@@ -72,40 +73,40 @@ vec3 calcDirectionalLight(vec3 tex, vec3 normal) {
     return (diffuseLight + specularLight);
 }
 
-// float calcDirectShadow() {
+float calcDirectShadow() {
 
-//     if (lightSpace_vPos.w <= 0.0) {
-//         return 0.0;
-//     }
+    if (lightSpace_vPos.w <= 0.0) {
+        return 0.0;
+    }
 
-//     vec3 shadowCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
-//     shadowCords      = shadowCords * 0.5 + 0.5;
+    vec3 shadowCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
+    shadowCords      = shadowCords * 0.5 + 0.5;
 
-//     if (shadowCords.x < 0.0 || shadowCords.x > 1.0 ||
-//         shadowCords.y < 0.0 || shadowCords.y > 1.0 ||
-//         shadowCords.z > 1.0 || shadowCords.z < 0.0) {
-//         return 0.0;
-//     }
+    if (shadowCords.x < 0.0 || shadowCords.x > 1.0 ||
+        shadowCords.y < 0.0 || shadowCords.y > 1.0 ||
+        shadowCords.z > 1.0 || shadowCords.z < 0.0) {
+        return 0.0;
+    }
 
-//     float shadow = 0.0;
-//     float bias   = 0.0025;
+    float shadow = 0.0;
+    float bias   = 0.025;
 
-//     // Filtering
-//     shadow = 0.0;
-//     vec2 texelSize = 1.0 / textureSize(dl_depthMap, 0);
+    // Filtering
+    shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(dl_depthMap, 0);
 
-//     for (int x = -1; x <= 1; x++) {
-//         for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
 
-//             float PCFdepth = texture(dl_depthMap, shadowCords.xy + vec2(x,y) * texelSize).r;
-//             shadow += shadowCords.z - bias > PCFdepth ? 1.0 : 0.0;
-//         }
-//     }
+            float PCFdepth = texture(dl_depthMap, shadowCords.xy + vec2(x,y) * texelSize).r;
+            shadow += shadowCords.z - bias > PCFdepth ? 1.0 : 0.0;
+        }
+    }
 
-//     shadow /= 9.0;
+    shadow /= 9.0;
 
-//     return shadow;
-// }
+    return shadow;
+}
 
 vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
 

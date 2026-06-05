@@ -850,7 +850,7 @@ void Scene2::init() {
     running::globalTimer::startInterval();
 
     wood_box  = entityManager.createEntity();
-    box2      = entityManager.createEntity();
+    // box2      = entityManager.createEntity();
     floor     = entityManager.createEntity();
     wall      = entityManager.createEntity();
     light1    = entityManager.createEntity();
@@ -858,6 +858,7 @@ void Scene2::init() {
     cubes     = entityManager.createEntity();
     sphere    = entityManager.createEntity();
     brickWall = entityManager.createEntity();
+    sun       = entityManager.createEntity();
 
     entityManager.visibleEntities.push_back(wood_box);
     entityManager.visibleEntities.push_back(floor);
@@ -868,6 +869,26 @@ void Scene2::init() {
 
     entityManager.emissiveEntities.push_back(light1);
     entityManager.emissiveEntities.push_back(light2);
+
+    // Directional Light
+    float near_plane = 1.0f, far_plane = 10.0f, size = 10.0f;
+    glm::mat4 lightProjection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
+
+    glm::vec3 dirLight_src = glm::vec3(2.0f, 4.0f, 1.0f);
+
+    glm::mat4 lightView = glm::lookAt(
+        dirLight_src,
+        glm::vec3(0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    DirectShadowData sunlight(
+        entityManager.createEntity(),
+        Matrix4(lightProjection * lightView),
+        new DirectShadowFrame()
+    );
+
+    componentManager.directShadowFrames.push_back(sunlight);
 
     running::globalTimer::startInterval();
 
@@ -1149,4 +1170,9 @@ void Scene2::renderLight() const {
 void Scene2::renderPointShadow() const {
 
     ShadowSystem::render(entityManager, componentManager);
+}
+
+void Scene2::renderDirectShadow() const {
+
+    ShadowSystem::renderDirectional(entityManager, componentManager);
 }

@@ -8,8 +8,9 @@ struct Matrix4 {
 
     glm::mat4 matrix_4x4;
     
-    Matrix4() : matrix_4x4(glm::mat4(1.0f)) {}
-    Matrix4(float value) : matrix_4x4(glm::mat4(value)) {}
+    Matrix4(): matrix_4x4(glm::mat4(1.0f)) {}
+    Matrix4(float value): matrix_4x4(glm::mat4(value)) {}
+    Matrix4(glm::mat4 matrix): matrix_4x4(matrix) {}
 
     void setMatrix(const glm::mat4& matrix) { matrix_4x4 = matrix; }
     

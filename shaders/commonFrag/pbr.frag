@@ -37,10 +37,10 @@ void main() {
     vec3 color = vec3(0.05) * tex;
 
     // Directional Lighting
-    // color += calcDirectionalLight(tex, vNormal);
+    color += calcDirectionalLight(tex, vNormal);
 
-    // float shadow = calcDirectShadow();
-    // color *= (1.0 - shadow);
+    float shadow = calcDirectShadow();
+    color *= (1.0 - shadow);
 
     // PBR Lighting
     vec3 N = vNormal;

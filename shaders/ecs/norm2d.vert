@@ -5,6 +5,7 @@ layout (location = 1) in vec2 aTexCords;
 
 out vec3 vPos;
 out vec2 vTexCords;
+out vec4 lightSpace_vPos;
 
 out mat3 TBN;
 
@@ -12,6 +13,7 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 uniform mat3 normalMatrix;
+uniform mat4 lightSpaceMatrix;
 
 void main(){
 
@@ -19,6 +21,8 @@ void main(){
 
     vPos      = vec3(model * vec4(aPos, 0.0, 1.0));
     vTexCords = aTexCords;
+    
+    lightSpace_vPos = lightSpaceMatrix * vec4(vPos, 1.0);
 
     vec3 N = normalize(normalMatrix * vec3(0.0, 0.0, 1.0));
     vec3 T = normalize(normalMatrix * vec3(1.0, 0.0, 0.0));

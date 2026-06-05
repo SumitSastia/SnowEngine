@@ -34,6 +34,8 @@ public:
         return instance;
     }
 
+    static void update(const float deltaTime);
+
     static void render      (const EntityManager& entityManager, const ComponentManager& componentManager);
     static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager);
 };
@@ -57,5 +59,6 @@ public:
 
     static bool init();
 
-    static void render(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void render           (const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void renderDirectional(const EntityManager& entityManager, const ComponentManager& componentManager);
 };

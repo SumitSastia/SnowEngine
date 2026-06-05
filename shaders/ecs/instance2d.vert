@@ -8,9 +8,11 @@ layout (location = 6) in mat3 instanceNormal;
 out vec3 vPos;
 out vec3 vNormal;
 out vec2 vTexCords;
+out vec4 lightSpace_vPos;
 
 uniform mat4 projection;
 uniform mat4 view;
+uniform mat4 lightSpaceMatrix;
 
 void main(){
 
@@ -19,4 +21,6 @@ void main(){
     vPos      = vec3(instanceModel * vec4(aPos, 0.0, 1.0));
     vNormal   = normalize(instanceNormal * vec3(0.0, 0.0, 1.0));
     vTexCords = aTexCords;
+
+    lightSpace_vPos = lightSpaceMatrix * vec4(vPos, 1.0);
 }
