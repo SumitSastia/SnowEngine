@@ -355,8 +355,6 @@ void Scene1::update(const float& delta_time) {
     for (uint8_t i = 0; i < light_count; i++) {
         lights[i]->setPosition(lightModels[i]->getPos());
     }
-
-    DefaultLights::instance().update();
 }
 
 void Scene1::renderDebug() const {
@@ -871,6 +869,8 @@ void Scene2::init() {
     entityManager.emissiveEntities.push_back(light1);
     entityManager.emissiveEntities.push_back(light2);
 
+    running::globalTimer::startInterval();
+
     // wood_box
     {
         TransformComponent transform;
@@ -883,10 +883,17 @@ void Scene2::init() {
         // mesh.shape = EntityShapes::instance().cube;
         mesh.shape = EntityShapes::instance().cubeNormalMapped;
 
+        DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
+
         MaterialComponent material;
-        material.shader = Shaders::get(NORM_PHONG3D);
+        material.shader = Shaders::get(NORMPBR3D);
         material.albedo = DefaultShapes::instance().cube.getAlbedo();
         material.normal = DefaultShapes::instance().advancedCube.getNormalMap();
+
+        DebugMenu::log("DefaultShapes (init): " + running::globalTimer::endInterval());
+        
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
         
         componentManager.addComponent(wood_box, mesh);
         componentManager.addComponent(wood_box, transform);
@@ -907,7 +914,7 @@ void Scene2::init() {
         mesh.shape = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(NORM_PHONG2D);
+        material.shader = Shaders::get(NORMPBR2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
         
@@ -930,10 +937,12 @@ void Scene2::init() {
         mesh.shape = EntityShapes::instance().square;
 
         MaterialComponent material;
-        // material.shader = Shaders::get(PHONG2D);
-        material.shader = Shaders::get(NORM_PHONG2D);
+        material.shader = Shaders::get(NORMPBR2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
+
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
         
         componentManager.addComponent(wall, mesh);
         componentManager.addComponent(wall, transform);
@@ -961,16 +970,16 @@ void Scene2::init() {
         material.normal = new Texture2D();
         material.height = new Texture2D();
 
-        material.albedo->load("assets/textures/parallax_maps/bricks2.jpg");
-        material.normal->load("assets/textures/parallax_maps/bricks2_normal.jpg");
-        material.height->load("assets/textures/parallax_maps/bricks2_disp.jpg");
+        material.albedo->load("assets/textures/parallax_maps/bricks2.jpg",        1);
+        material.normal->load("assets/textures/parallax_maps/bricks2_normal.jpg", 1);
+        material.height->load("assets/textures/parallax_maps/bricks2_disp.jpg",   1);
         
         componentManager.addComponent(brickWall, mesh);
         componentManager.addComponent(brickWall, transform);
         componentManager.addComponent(brickWall, material);
     }
 
-    DebugMenu::log("Parallax Wall: " + running::globalTimer::endInterval());
+    DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::globalTimer::endInterval());
 
     // sphere
     {
@@ -982,7 +991,7 @@ void Scene2::init() {
 
         Model3D* sphereModel = new Model3D("../assets/models/test_cube/sphere.obj");
 
-        Shader* shader = Shaders::get(PHONG3D);
+        Shader* shader = Shaders::get(PBR3D);
         ModelComponent modelComponent;
         modelComponent.init(sphereModel, shader);
         componentManager.addShader(shader);
@@ -993,27 +1002,27 @@ void Scene2::init() {
         componentManager.addComponent(sphere, transform);
     }
 
-    DebugMenu::log("Sphere: " + running::globalTimer::endInterval());
+    DebugMenu::log("Sphere (Model3D to ECS): " + running::globalTimer::endInterval());
 
     // cubes
     {
         MaterialComponent material;
-        material.shader = Shaders::get(INSTANCE3D);
+        material.shader = Shaders::get(INSTANCEPBR3D);
         material.albedo = new Texture2D();
-        material.albedo->load("assets/textures/grunge-box-small.jpg");
+        material.albedo->load("assets/textures/grunge-box-small.jpg", 1);
 
-        DebugMenu::log("Image Loading: " + running::globalTimer::endInterval());
+        // DebugMenu::log("Image Loading: " + running::globalTimer::endInterval());
         
         componentManager.addComponent(cubes, EntityShapes::instance().cubes);
         componentManager.addComponent(cubes, material);
     }
 
-    DebugMenu::log("Cubes: " + running::globalTimer::endInterval());
+    DebugMenu::log("Cubes (albedo): " + running::globalTimer::endInterval());
 
     // light1
     {
         TransformComponent transform;
-        transform.position = glm::vec3(3.0f, 3.0f, -3.0f);
+        transform.position = glm::vec3(3.0f, 2.5f, -3.0f);
         transform.rotation = glm::vec3(0.0f);
         transform.scale    = glm::vec3(0.5f);
         transform.computeModel();
@@ -1041,7 +1050,7 @@ void Scene2::init() {
     // light2
     {
         TransformComponent transform;
-        transform.position = glm::vec3(-3.0f, 3.0f, 3.0f);
+        transform.position = glm::vec3(-3.0f, 2.5f, 3.0f);
         transform.rotation = glm::vec3(0.0f);
         transform.scale    = glm::vec3(0.5f);
         transform.computeModel();
@@ -1065,7 +1074,6 @@ void Scene2::init() {
     }
 
     DebugMenu::log("Light2: " + running::globalTimer::endInterval());
-
 }
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {
@@ -1074,7 +1082,7 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
     const  float   move_speed    = scene_var::speed * delta_time;
 
     // Model of the Object to move
-    const Entity& entity  = entityManager.visibleEntities[model_counter];
+    const Entity& entity = entityManager.visibleEntities[model_counter];
 
     if (componentManager.has_transform[entity]) {
         Matrix4& movableModel = componentManager.arr_transform[entity].model;
@@ -1107,14 +1115,38 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
             model_counter = (model_counter + 1) % entityManager.visibleEntities.size();
         }
     }
+
+    if (Input::isKeyPressed(GLFW_KEY_KP_5)) {
+
+        const float rotation_speed = 2.0f;
+
+        TransformComponent* transforms[2] = {
+            &componentManager.arr_transform[light1],
+            &componentManager.arr_transform[light2]
+        };
+
+        Matrix4 t_matrix {};
+        t_matrix.rotate(rotation_speed, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        for (uint8_t i = 0; i < 2; i++) {
+            transforms[i]->model.setMatrix(t_matrix.getMatrix() * transforms[i]->model.getMatrix());
+            transforms[i]->computePosition();
+        }
+    }
 }
 
 void Scene2::render() const {
 
+    Renderer::disableCulling();
     RenderSystem::render(entityManager, componentManager);
 }
 
 void Scene2::renderLight() const {
     
     RenderSystem::renderLights(entityManager, componentManager);
+}
+
+void Scene2::renderPointShadow() const {
+
+    ShadowSystem::render(entityManager, componentManager);
 }

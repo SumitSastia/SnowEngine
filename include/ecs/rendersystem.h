@@ -6,7 +6,7 @@ class RenderSystem {
 
     static void bindCameraGlobals(const Shader* shader);
     static void bindPointLightGlobals(const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void bindFlashLightGlobals(const ComponentManager& componentManager);
+    // static void bindFlashLightGlobals(const ComponentManager& componentManager);
 
     static void draw(
         const MeshComponent&      mesh,
@@ -26,15 +26,6 @@ class RenderSystem {
         const MaterialComponent& material
     );
 
-    static void drawShadow(
-        const MeshComponent&      mesh,
-        const TransformComponent& transform
-    );
-
-    static void drawShadowInstanced(
-        const InstanceComponent& instance
-    );
-
 public:
 
     static RenderSystem& instance() {
@@ -44,6 +35,27 @@ public:
     }
 
     static void render      (const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void renderShadow(const EntityManager& entityManager, const ComponentManager& componentManager);
     static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager);
+};
+
+class ShadowSystem {
+
+    static glm::mat4 shadowProj;
+
+    static void drawShadow(
+        const Shader&             shader,
+        const MeshComponent&      mesh,
+        const TransformComponent& transform
+    );
+
+    static void drawShadowInstanced(
+        const Shader&            shader,
+        const InstanceComponent& instance
+    );
+
+public:
+
+    static bool init();
+
+    static void render(const EntityManager& entityManager, const ComponentManager& componentManager);
 };

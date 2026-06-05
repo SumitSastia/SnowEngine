@@ -36,6 +36,8 @@ int main() {
     DebugMenu::init(window);
     Text::init("../assets/fonts/BlockBlueprint.ttf");
     SSAO::init();
+    ShadowSystem::init();
+    Shaders::initShaders();
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -55,11 +57,14 @@ int main() {
     Camera& mainCamera = Camera::instance();
 
     running::core::timer t;
-    Scene* mainScene = new Scene1();
+
+    Scene1* scene1 = new Scene1();
+    Scene* mainScene = scene1;
     DebugMenu::log("Time taken to initialize - scene1: " + t.end());
 
     // running::time::startInterval();
     Scene2* scene2   = new Scene2();
+    // Scene* mainScene = scene2;
     // std::cout << "Time taken to initialize - scene2: " << running::time::endInterval() << std::endl;
 
     DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
@@ -100,6 +105,7 @@ int main() {
         ImGui::Begin("Rendering Method");
         ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
 
+        DefaultLights::instance().update();
         mainCamera.input_handler(window, deltaTime);
         // mainScene->input(window, deltaTime);
         scene2->input(window, deltaTime);
@@ -117,6 +123,7 @@ int main() {
 
             mainScene->renderDirectShadow();
             mainScene->renderPointShadow();
+            scene2->renderPointShadow();
             
             glViewport(0, 0, WIN_W, WIN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());

@@ -225,6 +225,12 @@ enum shaderNames {
     NORM_PHONG3D,
     NORM_PHONG2D,
     PARALLAX2D,
+    PBR3D,
+    PBR2D,
+    NORMPBR3D,
+    NORMPBR2D,
+    INSTANCEPBR3D,
+    INSTANCEPBR2D,
 
     SHADER_COUNT
 };
@@ -253,7 +259,17 @@ class Shaders {
     static std::vector <bool>         preprocess;
     static std::vector <shader_paths> path;
 
+    static Shader* pointLightShadow;
+    static Shader* directLightShadow;
+    static Shader* pointLightShadow_instanced;
+
 public:
+
+    static bool initShaders();
+
+    static Shader* getPointLightShadow() { return pointLightShadow; }
+    static Shader* getDirectLightShadow() { return directLightShadow; }
+    static Shader* getPointLightShadow_Instanced() { return pointLightShadow_instanced; }
 
     static Shader* get(shaderNames shader);
     static uint32_t totat() { return SHADER_COUNT; }

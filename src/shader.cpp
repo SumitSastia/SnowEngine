@@ -344,21 +344,53 @@ void Texture2D::destroy() {
 std::vector <bool>    Shaders::isLoaded(MAX_SHADERS, false);
 std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
 
+Shader* Shaders::pointLightShadow            = nullptr;
+Shader* Shaders::directLightShadow           = nullptr;
+Shader* Shaders::pointLightShadow_instanced  = nullptr;
+
 std::vector <shader_paths> Shaders::path = {
 
-    shader_paths("ecs/generic3d.vert",    "ecs/test.frag"),
-    shader_paths("ecs/generic2d.vert",    "ecs/test.frag"),
-    shader_paths("lights/ecs.vert",       "lights/light.frag"),
-    shader_paths("ecs/generic3d.vert",    "ecs/albedo.frag"),
-    shader_paths("ecs/generic2d.vert",    "ecs/albedo.frag"),
-    shader_paths("ecs/generic3d.vert",    "ecs/phong.frag", true),
-    shader_paths("ecs/generic2d.vert",    "ecs/phong.frag", true),
-    shader_paths("ecs/instance3d.vert",   "ecs/phong.frag", true),
-    shader_paths("ecs/instance2d.vert",   "ecs/phong.frag", true),
-    shader_paths("ecs/norm3d.vert",       "ecs/normPhong.frag", true),
-    shader_paths("ecs/norm2d.vert",       "ecs/normPhong.frag", true),
-    shader_paths("ecs/p2d.vert",          "ecs/p2d.frag", true)
+    shader_paths("ecs/generic3d.vert",  "ecs/test.frag"),
+    shader_paths("ecs/generic2d.vert",  "ecs/test.frag"),
+    shader_paths("lights/ecs.vert",     "lights/light.frag"),
+    shader_paths("ecs/generic3d.vert",  "ecs/albedo.frag"),
+    shader_paths("ecs/generic2d.vert",  "ecs/albedo.frag"),
+    shader_paths("ecs/generic3d.vert",  "ecs/phong.frag", true),
+    shader_paths("ecs/generic2d.vert",  "ecs/phong.frag", true),
+    shader_paths("ecs/instance3d.vert", "ecs/phong.frag", true),
+    shader_paths("ecs/instance2d.vert", "ecs/phong.frag", true),
+    shader_paths("ecs/norm3d.vert",     "ecs/normPhong.frag", true),
+    shader_paths("ecs/norm2d.vert",     "ecs/normPhong.frag", true),
+    shader_paths("ecs/p2d.vert",        "ecs/p2d.frag", true),
+    shader_paths("ecs/generic3d.vert",  "ecs/pbr.frag", true),
+    shader_paths("ecs/generic2d.vert",  "ecs/pbr.frag", true),
+    shader_paths("ecs/norm3d.vert",     "ecs/normPbr.frag", true),
+    shader_paths("ecs/norm2d.vert",     "ecs/normPbr.frag", true),
+    shader_paths("ecs/instance3d.vert", "ecs/pbr.frag", true),
+    shader_paths("ecs/instance2d.vert", "ecs/pbr.frag", true)
 };
+
+bool Shaders::initShaders() {
+
+    pointLightShadow = new Shader(
+        "../shaders/pointShadow/shadow.vert",
+        "../shaders/pointShadow/shadow.geom",
+        "../shaders/pointShadow/shadow.frag"
+    );
+
+    pointLightShadow_instanced = new Shader(
+        "../shaders/pointShadow/instancedShadow.vert",
+        "../shaders/pointShadow/shadow.geom",
+        "../shaders/pointShadow/shadow.frag"
+    );
+
+    directLightShadow = new Shader(
+        "../shaders/directShadow/directShadow.vert",
+        "../shaders/directShadow/directShadow.frag"
+    );
+
+    return true;
+}
 
 Shader* Shaders::get(shaderNames shader) {
 

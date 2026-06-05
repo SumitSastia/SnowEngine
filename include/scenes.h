@@ -84,6 +84,8 @@ public:
         this->init();
     }
 
+    const std::vector <PointShadowFrame*>& getFrames() const { return shadowFrames; }
+
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
     void update(const float& delta_time) override;
@@ -115,7 +117,9 @@ class Scene2 : public Scene {
 
 public:
 
-    Scene2() { init(); }
+    Scene2() {
+        init();
+    }
 
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
@@ -125,7 +129,7 @@ public:
     void renderDeferred(const Shader& currentShader) const override {}
     void renderLight() const override;
     void renderDirectShadow() const override {}
-    void renderPointShadow() const override {}
+    void renderPointShadow() const override;
     void renderSkybox() const override {}
     void renderDebug() const override {}
     void destroy() override {}

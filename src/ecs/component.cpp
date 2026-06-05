@@ -3,6 +3,7 @@
 #include <ecs/entity.h>
 #include <model.h>
 #include <shader.h>
+#include <frame.h>
 
 // ------------------------------ Components ----------------------------------------- //
 
@@ -306,6 +307,10 @@ void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, c
 
     arr_light[entity] = component;
     has_light[entity] = true;
+
+    pointShadowFrames.push_back(
+        PointShadowData(entity, new PointShadowFrame())
+    );
 }
 
 template <>

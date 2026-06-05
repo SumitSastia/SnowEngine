@@ -156,34 +156,34 @@ vec3 calcSpecPointLight(pointLight light, vec3 tex, vec3 tex2, vec3 normal) {
     return (attenuation * vec3(diffuseLight + specularLight));
 }
 
-// float calcShadow(pointLight light, samplerCube map) {
+float calcShadow(pointLight light, samplerCube map) {
 
-//     vec3  fragToLight = vPos - light.position;
-//     float currentDepth = length(fragToLight);
+    vec3  fragToLight = vPos - light.position;
+    float currentDepth = length(fragToLight);
 
-//     float shadow  = 0.0;
-//     float bias    = 0.05;
-//     float samples = 4.0;
-//     float offset  = 0.1;
+    float shadow  = 0.0;
+    float bias    = 0.05;
+    float samples = 4.0;
+    float offset  = 0.1;
 
-//     for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
-//         for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
-//             for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
+    for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
+        for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
+            for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
 
-//                 float closestDepth = texture(map, fragToLight + vec3(x,y,z)).r;
-//                 closestDepth *= far_plane;
+                float closestDepth = texture(map, fragToLight + vec3(x,y,z)).r;
+                closestDepth *= far_plane;
 
-//                 if (currentDepth - bias > closestDepth) {
-//                     shadow += 1.0;
-//                 }
-//             }
-//         }
-//     }
+                if (currentDepth - bias > closestDepth) {
+                    shadow += 1.0;
+                }
+            }
+        }
+    }
 
-//     shadow /= (samples * samples * samples);
+    shadow /= (samples * samples * samples);
 
-//     return shadow;
-// }
+    return shadow;
+}
 
 vec3 calcSpotLight(vec3 tex, vec3 normal) {
 

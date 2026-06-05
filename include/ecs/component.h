@@ -18,6 +18,8 @@ class Shape;
 class Shader;
 class Texture2D;
 class Model3D;
+class PointShadowFrame;
+class DirectShadowFrame;
 
 using Entity = uint32_t;
 
@@ -65,6 +67,7 @@ struct TransformComponent {
     Matrix4   model;
 
     void computeModel();
+    void computePosition() { position = model.getMatrix()[3]; }
 };
 
 struct MeshComponent {
@@ -147,15 +150,23 @@ struct SpotLight {
 struct MaterialComponent {
 
     Shader*    shader;
+    
     Texture2D* albedo;
     Texture2D* normal;
     Texture2D* height;
+
+    Texture2D* metallic;
+    Texture2D* roughness;
+    Texture2D* ao;
 
     MaterialComponent(): 
         shader(nullptr),
         albedo(nullptr),
         normal(nullptr),
-        height(nullptr) {
+        height(nullptr),
+        metallic(nullptr),
+        roughness(nullptr),
+        ao(nullptr) {
     }
 };
 
@@ -196,31 +207,50 @@ struct ModelComponent {
     void init(const Model3D* model, Shader* shader);
 };
 
+struct PointShadowData {
+
+    Entity entity;
+    PointShadowFrame* frame;
+
+    PointShadowData():
+        entity(0), frame(nullptr) {
+    }
+
+    PointShadowData(Entity entity, PointShadowFrame* frame):
+        entity(entity), frame(frame) {
+    }
+};
+
 class ComponentManager {
     
 public:
     
+    // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);
     
-    // Renderable Objects
+    // For Renderable Objects
     std::vector <MeshComponent>      arr_mesh;
     std::vector <TransformComponent> arr_transform;
     std::vector <MaterialComponent>  arr_material;
     std::vector <InstanceComponent>  arr_instance;
     std::vector <ModelComponent>     arr_model;
 
-    // Light Sources
+    // For Light Sources
     std::vector <PointLightComponent> arr_light;
 
     // For Objects to be lit by PointLights
     std::vector <Shader*> uniqueShaders;
 
+    // For ShadowPass
+    std::vector <PointShadowData>    pointShadowFrames;
+    std::vector <DirectShadowFrame*> directShadowFrames;
+
+    // Verifiers
     std::vector <bool> has_mesh;
     std::vector <bool> has_transform;
     std::vector <bool> has_material;
     std::vector <bool> has_instance;
     std::vector <bool> has_model;
-
     std::vector <bool> has_light;
 
     ComponentManager();
