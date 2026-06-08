@@ -73,6 +73,17 @@ vec3 calcDirectionalLight(vec3 tex, vec3 normal) {
     return (diffuseLight + specularLight);
 }
 
+vec3 calcDirectionalLight_OnlyDiffuse(vec3 tex, vec3 normal) {
+
+    vec3 light_dir = normalize(dl.direction);
+
+    // Diffuse
+    float diffuse      = max(dot(normal, light_dir), 0.0);
+    vec3  diffuseLight = diffuse * tex * dl.color;
+
+    return diffuseLight;
+}
+
 float calcDirectShadow() {
 
     if (lightSpace_vPos.w <= 0.0) {
@@ -130,6 +141,20 @@ vec3 calcPointLight(pointLight light, vec3 tex, vec3 normal) {
 
     return (attenuation * (diffuseLight + specularLight));
     // return (diffuseLight + specularLight);
+}
+
+vec3 calcPointLight_OnlyDiffuse(pointLight light, vec3 tex, vec3 normal) {
+
+    // Diffuse
+    vec3  light_dir    = normalize(light.position - vPos);
+    float diffuse      = max(dot(normal, light_dir), 0.0);
+    vec3  diffuseLight = diffuse * tex * light.color;
+
+    // Attenuation
+    float frag_dist   = length(light.position - vPos);
+    float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
+
+    return (attenuation * (diffuseLight));
 }
 
 vec3 calcSpecPointLight(pointLight light, vec3 tex, vec3 tex2, vec3 normal) {

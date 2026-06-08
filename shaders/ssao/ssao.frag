@@ -25,7 +25,7 @@ void main() {
     mat3 TBN       = mat3(tangent, bitangent, normal);
     
     float bias      = 0.025;
-    float radius    = 1.0;
+    float radius    = 2.5;
     float occlusion = 0.0;
 
     for (int i = 0; i < 64; i++) {

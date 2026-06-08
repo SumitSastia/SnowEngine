@@ -26,6 +26,26 @@ class RenderSystem {
         const MaterialComponent& material
     );
 
+    static void drawGbuffer(
+        const MeshComponent&      mesh,
+        const TransformComponent& transform,
+        const MaterialComponent&  material
+    );
+
+    static void drawGbuffer(
+        const MeshComponent&       mesh,
+        const TransformComponent&  transform,
+        const MaterialComponent&   material,
+        const PointLightComponent& pointlight
+    );
+
+    static void drawGbuffer(
+        const InstanceComponent& instance,
+        const MaterialComponent& material
+    );
+
+    static uint8_t lastTextureUnit;
+
 public:
 
     static RenderSystem& instance() {
@@ -38,6 +58,9 @@ public:
 
     static void render      (const EntityManager& entityManager, const ComponentManager& componentManager);
     static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager);
+
+    static void renderGbuffer(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void lightningPass(const EntityManager& entityManager, const ComponentManager& componentManager);
 };
 
 class ShadowSystem {

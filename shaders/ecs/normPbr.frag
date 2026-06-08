@@ -16,22 +16,27 @@ uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 
-// uniform samplerCube irradianceMap;
-// uniform bool useIrradiance;
+uniform bool        useIrradiance;
+uniform samplerCube irradianceMap;
+uniform samplerCube preFilterMap;
+uniform sampler2D   brdfLUT;
 
 #include <ecs_lighting.glsl>
 #include <ecs_pbr.glsl>
 
 void main() {
 
-    vec3 tex    = texture(albedo, vTexCords).rgb;
-    vec3 normal = texture(normalMap, vTexCords).xyz;
+    vec3 tex     = texture(albedo, vTexCords).rgb;
+    vec3 vNormal = texture(normalMap, vTexCords).xyz;
 
     float metallic  = texture(metallicMap, vTexCords).r;
     float roughness = texture(roughnessMap, vTexCords).r;
 
-    normal = normalize(normal * 2.0 - 1.0);
-    normal = normalize(TBN * normal);
+    vNormal = normalize(vNormal * 2.0 - 1.0);
+    vNormal = normalize(TBN * vNormal);
+
+    metallic = 0.8;
+    roughness = 0.2;
 
     // Ambient
     vec3 color = vec3(0.05) * tex;
@@ -39,7 +44,7 @@ void main() {
     // Directional Lighting
     if (useDirectionalLight) {
 
-        vec3 dirLightColor = calcDirectionalLight(tex, normal);
+        vec3 dirLightColor = calcDirectionalLight(tex, vNormal);
 
         float shadow   = calcDirectShadow();
         dirLightColor *= (1.0 - shadow);
@@ -48,28 +53,44 @@ void main() {
     }
 
     // PBR Lighting
+    vec3 N = vNormal;
     vec3 V = normalize(camPos - vPos);
+    vec3 R = reflect(-V, vNormal);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, tex, metallic);
 
-    // vec3 kS  = fresnalSchlick(max(dot(normal,V), 0.0), F0);
-    // vec3 kD = (1.0 - kS) * (1.0 - metallic);
-    // vec3 kD = (1.0 - kS);
+    if (useIrradiance) {
 
-    // vec3 envDiffuse = texture(irradianceMap, normal).rgb * tex * kD;
-    // if (useIrradiance) color = envDiffuse;
+        vec3 kS  = fresnalSchlick(max(dot(vNormal,V), 0.0), F0);
+        vec3 kD = (1.0 - kS);
+        
+        // IBL Diffuse
+        vec3 envDiffuse = texture(irradianceMap, vNormal).rgb * tex * kD;
+        
+        // IBL Specular
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(preFilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+
+        vec3 F        = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+        vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+        
+        // color = envDiffuse  + metallic * kS * reflected_color;
+        color = envDiffuse + kD * specular;
+        // color = envDiffuse;
+    }
 
     for (int i = 0; i < light_count; i++) { 
 
-        vec3 Lo = calcPBR(pl[i], tex, normal, F0, metallic, roughness);
+        vec3 Lo = calcPBR(pl[i], tex, vNormal, F0, metallic, roughness);
         Lo *= (1.0 - calcShadow(pl[i], depthMap[i]));
         
         color += Lo;
 	}
 
     if (useSpotLight) {
-        color += calcSpotLight(tex, normal);
+        color += calcSpotLight(tex, vNormal);
     }
 
     // Final Calculation

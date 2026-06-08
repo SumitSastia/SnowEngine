@@ -8,7 +8,9 @@ uniform sampler2D gNormal;
 uniform sampler2D gTexture;
 uniform sampler2D gOcclusion;
 
-#include <deferred_lighting.glsl>
+uniform bool toggleAO;
+
+// #include <deferred_lighting.glsl>
 
 vec3 tone_mapping(vec3 color) {
 
@@ -28,8 +30,10 @@ void main() {
     float occlusion = texture(gOcclusion, vTexCords).r;
 
     vec3 tex = albedo.rgb;
+    // tex = vec3(0.95);
 
-    vec3 color = tex * occlusion;
+    vec3 color = tex;
+    if (toggleAO) color *= occlusion;
     vec3 normal = normalize(vNormal);
 
     // Directional Lighting
@@ -48,9 +52,9 @@ void main() {
     //     color += lightColor;
     // }
 
-    if (useSpotLight) {
-        color += calcSpotLight(vPos, tex, normal);
-    }
+    // if (useSpotLight) {
+    //     color += calcSpotLight(vPos, tex, normal);
+    // }
 
     // color = albedo.rgb;
     color = tone_mapping(color);

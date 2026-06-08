@@ -73,7 +73,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = false;
+    bool deferredRender = true;
 
     DebugMenu::log("Time taken to Initialize: " + running::globalTimer::getTime());
 
@@ -81,7 +81,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window) && isRunning) {
 
-        // Time //DebugMenu::endBox();
+        // Time
         float currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
@@ -152,23 +152,34 @@ int main() {
         }
         else {
 
+            // ************************************************************* //
+
+            // Shadow Pass
             mainScene->renderDirectShadow();
             mainScene->renderPointShadow();
 
+            scene2->renderDirectShadow();
+            scene2->renderPointShadow();
+
+            // ************************************************************* //
+
+            // Geometry Pass
             glViewport(0, 0, WIN_W, WIN_H);
             deferredFrame->bindFBO();
 
             glClearColor(0.0, 0.0, 0.0, 1.0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // Renderer::clear();
+            Renderer::clear();
 
-            mainScene->renderGbuffer();
+            // mainScene->renderGbuffer();
+            scene2->renderGbuffer();
+            // ************************************************************* //
 
-            // Occlusion 
+            // Occlusion Pass
             SSAO::bindFBO();
             glClear(GL_COLOR_BUFFER_BIT);
-
+            
             SSAO::shader->use();
 
             SSAO::shader->setInt("gPosition", 0);
@@ -185,15 +196,19 @@ int main() {
             SSAO::blurSSAO();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            Renderer::clear();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            // ************************************************************* //
 
-            mainScene->renderDeferred(*deferredFrame->getShader());
+            // Lighting Pass
+            // mainScene->renderDeferred(*deferredFrame->getShader());
             deferredFrame->render();
 
             Renderer::copyDepth(deferredFrame);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            mainScene->renderLight();
+            // mainScene->renderLight();
+            scene2->renderLight();
         }
 
         // Debug - UI

@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+uint8_t RenderSystem::lastTextureUnit = 0;
+
 void RenderSystem::bindCameraGlobals(const Shader* shader) {
 
     shader->setMat4("projection", Camera::instance().getPerspective());
@@ -20,6 +22,7 @@ void RenderSystem::bindCameraGlobals(const Shader* shader) {
 
 void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, const ComponentManager& componentManager) {
 
+    lastTextureUnit = 0;
     const uint32_t light_count = entityManager.emissiveEntities.size();
 
     for (const Shader* shader : componentManager.uniqueShaders) {
@@ -32,6 +35,7 @@ void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, con
         shader->setSpotLight("sl", DefaultLights::instance().flashlight);
 
         // ------------------------ Camera ------------------------- //
+        
         bindCameraGlobals(shader);
 
         // ----------------------- PointLight ---------------------- //
@@ -58,28 +62,38 @@ void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, con
 
         // ------------------------ DepthMap ----------------------- //
 
-        uint32_t shadowFrameUnit = 0;
-
         for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
 
-            shader->setInt(("depthMap[" + std::to_string(shadowFrameUnit) + "]").c_str() ,shadowFrameUnit);
-            pointShadow.frame->bindTexture(shadowFrameUnit);
-            shadowFrameUnit++;
+            shader->setInt(("depthMap[" + std::to_string(lastTextureUnit) + "]").c_str() ,lastTextureUnit);
+            pointShadow.frame->bindTexture(lastTextureUnit++);
         }
 
         // --------------------- Directional Light ----------------- //
 
         shader->setDirectionalLight("dl", DefaultLights::instance().sunlight);
-        // shader->setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
-        shader->setBool("useDirectionalLight", true);
+        shader->setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
+        // shader->setBool("useDirectionalLight", true);
 
-        shader->setInt("dl_depthMap", shadowFrameUnit);
-        componentManager.directShadowFrames[0].frame->bindTexture(shadowFrameUnit++);
+        shader->setInt("dl_depthMap", lastTextureUnit);
+        componentManager.directShadowFrames[0].frame->bindTexture(lastTextureUnit++);
 
         shader->setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
         
+        // ---------------------- Environment ---------------------- //
 
-        // shadowFrameUnit - last index = 2
+        shader->setInt("irradianceMap", lastTextureUnit);
+        entityManager.env->bindIrradiance(lastTextureUnit++);
+
+        // shader->setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
+        shader->setBool("useIrradiance", true);
+
+        shader->setInt("preFilterMap", lastTextureUnit);
+        // entityManager.env->bindPrefilter(lastTextureUnit++);
+        entityManager.env->bindTexture(lastTextureUnit++);
+
+        shader->setInt("brdfLUT", lastTextureUnit);
+        entityManager.env->bindBRDF(lastTextureUnit++);
+
     }
 }
 
@@ -163,7 +177,7 @@ void RenderSystem::draw(
 
     bindCameraGlobals(shader);
 
-    const uint32_t initialUnit = 3;
+    const uint32_t initialUnit = lastTextureUnit;
 
     if (material.albedo) {
         shader->setInt("albedo", initialUnit);
@@ -202,6 +216,8 @@ void RenderSystem::draw(
 ) {
     const Shader* shader = material.shader;
 
+    bindCameraGlobals(shader);
+
     shader->use();
     shader->setMat4("model",      transform.model);
     shader->setVec3("lightColor", pointlight.color);
@@ -216,7 +232,7 @@ void RenderSystem::draw(
 
     material.shader->use();
 
-    const uint32_t initialUnit = 3;
+    const uint32_t initialUnit = lastTextureUnit;
 
     if (material.albedo) {
         material.shader->setInt("albedo", initialUnit);
@@ -229,6 +245,138 @@ void RenderSystem::draw(
     }
 
     instance.draw();
+}
+
+void RenderSystem::drawGbuffer(
+    const MeshComponent&      mesh,
+    const TransformComponent& transform,
+    const MaterialComponent&  material
+) {
+    const Shader* shader = material.gbufferShader;
+
+    shader->use();
+    shader->setMat4("model",        transform.model);
+    shader->setMat3("normalMatrix", transform.model.getNormal());
+
+    bindCameraGlobals(shader);
+
+    const uint32_t initialUnit = lastTextureUnit;
+
+    if (material.albedo) {
+        shader->setInt("albedo", initialUnit);
+        material.albedo->bind(initialUnit);
+    }
+
+    if (material.normal) {
+        shader->setInt("normalMap", initialUnit+1);
+        material.normal->bind(initialUnit+1);
+    }
+
+    if (material.height) {
+        shader->setFloat("height_scale", 0.1);
+        shader->setInt("heightMap", initialUnit+2);
+        material.height->bind(initialUnit+2);
+    }
+
+    if (material.metallic) {
+        shader->setInt("metallicMap", initialUnit+3);
+        material.metallic->bind(initialUnit+3);
+    }
+
+    if (material.roughness) {
+        shader->setInt("roughnessMap", initialUnit+4);
+        material.roughness->bind(initialUnit+4);
+    }
+
+    mesh.shape.draw();
+}
+
+void RenderSystem::drawGbuffer(
+    const MeshComponent&       mesh,
+    const TransformComponent&  transform,
+    const MaterialComponent&   material,
+    const PointLightComponent& pointlight
+) {
+    const Shader* shader = material.gbufferShader;
+
+    shader->use();
+    bindCameraGlobals(shader);
+
+    shader->setMat4("model",      transform.model);
+    shader->setVec3("lightColor", pointlight.color);
+
+    mesh.shape.draw();
+}
+
+void RenderSystem::drawGbuffer(
+    const InstanceComponent& instance,
+    const MaterialComponent& material
+) {
+    const Shader* shader = material.gbufferShader;
+
+    shader->use();
+    bindCameraGlobals(shader);
+
+    const uint32_t initialUnit = 0;
+
+    if (material.albedo) {
+        shader->setInt("albedo", initialUnit);
+        material.albedo->bind(initialUnit);
+    }
+
+    if (material.normal) {
+        shader->setInt("normalMap", initialUnit+1);
+        material.albedo->bind(initialUnit+1);
+    }
+
+    instance.draw();
+}
+
+// ------------------------------------------------------------------------------------------------------- //
+
+void RenderSystem::renderGbuffer(const EntityManager& entityManager, const ComponentManager& componentManager) {
+
+    for (const Entity& entity : entityManager.visibleEntities) {
+
+        if (
+            componentManager.has_mesh[entity] &&
+            componentManager.has_transform[entity] &&
+            componentManager.has_material[entity]
+        ) {
+            const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
+            const TransformComponent& transform = componentManager.arr_transform[entity];
+            const MaterialComponent&  material  = componentManager.arr_material[entity];
+    
+            drawGbuffer(mesh, transform, material);
+        }
+
+        if (
+            componentManager.has_model[entity] &&
+            componentManager.has_transform[entity]
+        ) {
+            
+            const TransformComponent& transform = componentManager.arr_transform[entity];
+            const uint total_meshes = componentManager.arr_model[entity].meshes.size();
+
+            for (uint i = 0 ; i < total_meshes; i++) {
+
+                const MeshComponent&     mesh     = componentManager.arr_model[entity].meshes[i];
+                const MaterialComponent& material = componentManager.arr_model[entity].materials[i];
+
+                drawGbuffer(mesh, transform, material);
+            }
+        }
+
+        if (
+            componentManager.has_instance[entity] && 
+            componentManager.has_material[entity]
+        ) {
+            const InstanceComponent& instance = componentManager.arr_instance[entity];
+            const MaterialComponent& material = componentManager.arr_material[entity];
+
+            drawGbuffer(instance, material);
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------------------- //

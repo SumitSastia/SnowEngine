@@ -12,7 +12,6 @@ A custom game engine written in C++ and OpenGL, developed to explore modern rend
 * Image-Based Lighting (IBL)
 * SSAO (Screen Space Ambient Occlusion)
 * Shadow Mapping
-
   * Directional Shadows
   * Omnidirectional Point Shadows
 * Cubemaps & Skyboxes
@@ -27,10 +26,10 @@ A custom game engine written in C++ and OpenGL, developed to explore modern rend
 
 ### Engine Systems
 
-* Scene Management
+* Scene Management (In Progress)
+* Entity Component System (In Progress)
 <!-- * Material System -->
 <!-- * Asset Management -->
-* Entity Component System (In Progress)
 
 <!-- ## Screenshots -->
 
@@ -80,9 +79,9 @@ This project is being developed from scratch as a learning-focused engine to exp
 * ECS Architecture
 * Asset Pipeline
 * Multithreading
-<!-- * Animation System -->
 * Physics Integration
 * Vulkan Backend Exploration
+<!-- * Animation System -->
 
 <!-- ## License -->
 

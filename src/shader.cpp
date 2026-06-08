@@ -3,6 +3,7 @@
 #include <lights.h>
 #include <debug.h>
 #include <ecs/component.h>
+#include <ibl.h>
 
 #include <iostream>
 #include <fstream>
@@ -352,24 +353,28 @@ Shader* Shaders::directLightShadow_instanced = nullptr;
 
 std::vector <shader_paths> Shaders::path = {
 
-    shader_paths("ecs/generic3d.vert",  "ecs/test.frag"),
-    shader_paths("ecs/generic2d.vert",  "ecs/test.frag"),
-    shader_paths("lights/ecs.vert",     "lights/light.frag"),
-    shader_paths("ecs/generic3d.vert",  "ecs/albedo.frag"),
-    shader_paths("ecs/generic2d.vert",  "ecs/albedo.frag"),
-    shader_paths("ecs/generic3d.vert",  "ecs/phong.frag", true),
-    shader_paths("ecs/generic2d.vert",  "ecs/phong.frag", true),
-    shader_paths("ecs/instance3d.vert", "ecs/phong.frag", true),
-    shader_paths("ecs/instance2d.vert", "ecs/phong.frag", true),
-    shader_paths("ecs/norm3d.vert",     "ecs/normPhong.frag", true),
-    shader_paths("ecs/norm2d.vert",     "ecs/normPhong.frag", true),
-    shader_paths("ecs/p2d.vert",        "ecs/p2d.frag", true),
-    shader_paths("ecs/generic3d.vert",  "ecs/pbr.frag", true),
-    shader_paths("ecs/generic2d.vert",  "ecs/pbr.frag", true),
-    shader_paths("ecs/norm3d.vert",     "ecs/normPbr.frag", true),
-    shader_paths("ecs/norm2d.vert",     "ecs/normPbr.frag", true),
-    shader_paths("ecs/instance3d.vert", "ecs/pbr.frag", true),
-    shader_paths("ecs/instance2d.vert", "ecs/pbr.frag", true)
+    shader_paths("ecs/generic3d.vert",        "ecs/test.frag"),
+    shader_paths("ecs/generic2d.vert",        "ecs/test.frag"),
+    shader_paths("lights/ecs.vert",           "lights/light.frag"),
+    shader_paths("ecs/generic3d.vert",        "ecs/albedo.frag"),
+    shader_paths("ecs/generic2d.vert",        "ecs/albedo.frag"),
+    shader_paths("ecs/generic3d.vert",        "ecs/phong.frag", true),
+    shader_paths("ecs/generic2d.vert",        "ecs/phong.frag", true),
+    shader_paths("ecs/instance3d.vert",       "ecs/phong.frag", true),
+    shader_paths("ecs/instance2d.vert",       "ecs/phong.frag", true),
+    shader_paths("ecs/norm3d.vert",           "ecs/normPhong.frag", true),
+    shader_paths("ecs/norm2d.vert",           "ecs/normPhong.frag", true),
+    shader_paths("ecs/p2d.vert",              "ecs/p2d.frag", true),
+    shader_paths("ecs/generic3d.vert",        "ecs/pbr.frag", true),
+    shader_paths("ecs/generic2d.vert",        "ecs/pbr.frag", true),
+    shader_paths("ecs/norm3d.vert",           "ecs/normPbr.frag", true),
+    shader_paths("ecs/norm2d.vert",           "ecs/normPbr.frag", true),
+    shader_paths("ecs/instance3d.vert",       "ecs/pbr.frag", true),
+    shader_paths("ecs/instance2d.vert",       "ecs/pbr.frag", true),
+    shader_paths("cubeMap/env.vert",          "cubeMap/env.frag"),
+    shader_paths("deferred/gbuffer3d.vert",   "deferred/ecs_gbuffer.frag"),
+    shader_paths("deferred/gbuffer2d.vert",   "deferred/ecs_gbuffer.frag"),
+    shader_paths("deferred/gbufferInst.vert", "deferred/ecs_gbuffer.frag"),
 };
 
 bool Shaders::initShaders() {
@@ -511,6 +516,66 @@ void Skybox::draw() const {
 
 void Skybox::destroy() {
     delete _cubeMap;
+}
+
+Environment::Environment(const char* path, const uint16_t resolution) {
+
+    m_cubeMap = nullptr;
+    isVisible = true;
+    m_irradianceMap = nullptr;
+
+    iblFrame = new IBLFrame(path, resolution);
+}
+
+Environment::Environment(const std::vector <std::string>& textureFaces) {
+
+    m_cubeMap  = new CubeMap(textureFaces);
+    isVisible  = false;
+
+    // Not auto-generated currently
+    m_irradianceMap = nullptr;
+    iblFrame        = nullptr;
+}
+
+void Environment::setIrradianceMap(const std::vector <std::string>& textureFaces) {
+
+    if (m_irradianceMap) {
+    
+        m_irradianceMap->destroy();
+        delete m_irradianceMap;
+    }
+
+    m_irradianceMap = new CubeMap(textureFaces);
+}
+
+void Environment::bindTexture(const unsigned int textureUnit) const {
+   
+   if (m_cubeMap) m_cubeMap->bindTexture(textureUnit);
+   if (iblFrame) iblFrame->bindEnv(textureUnit);
+}
+
+void Environment::bindIrradiance(const unsigned int textureUnit) const {
+    if (m_irradianceMap) m_irradianceMap->bindTexture(textureUnit);
+    if (iblFrame) iblFrame->bindIrradianceMap(textureUnit);
+}
+
+void Environment::bindPrefilter(const unsigned int textureUnit) const {
+    iblFrame->bindPreFilterMap(textureUnit);
+}
+
+void Environment::bindBRDF(const unsigned int textureUnit) const {
+    iblFrame->bindBRDFLUT(textureUnit);
+}
+
+void Environment::draw() const {
+
+    glBindVertexArray(gfx::cubemap::Cube::getVAO());
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
+
+void Environment::destroy() {
+    delete m_cubeMap;
 }
 
 // ------------------------------ Shader Uniform Setter ------------------------------ //

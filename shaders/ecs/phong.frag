@@ -19,21 +19,30 @@ void main() {
     vec3 tex   = texture(albedo, vTexCords).rgb;
     vec3 color = 0.01 * tex; // Ambient
 
+    // if (useDirectionalLight) {
+
+        vec3 dirLightColor = calcDirectionalLight_OnlyDiffuse(tex, vNormal);
+
+        float shadow   = calcDirectShadow();
+        dirLightColor *= (1.0 - shadow);
+
+        color += dirLightColor;
+    // }
+
     // Point Shadow
-    for (int i = 0; i < light_count; i++) {
+    // for (int i = 0; i < light_count; i++) {
 
-        vec3 lightColor = vec3(0.0);
+    //     vec3 lightColor = vec3(0.0);
 
-        lightColor += calcPointLight(pl[i], tex, vNormal);
-        // lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
+    //     lightColor += calcPointLight(pl[i], tex, vNormal);
+    //     // lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
-        color += lightColor;
-        // color += vec3(1.0, 0.0, 0.0);
-    }
+    //     color += lightColor;
+    // }
 
-    if (useSpotLight) {
-        color += calcSpotLight(tex, vNormal);
-    }
+    // if (useSpotLight) {
+    //     color += calcSpotLight(tex, vNormal);
+    // }
 
     FragColor = vec4(color, 1.0);
 

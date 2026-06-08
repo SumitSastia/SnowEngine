@@ -84,9 +84,6 @@ public:
         this->init();
     }
 
-    const std::vector <PointShadowFrame*>& getFrames() const { return shadowFrames; }
-    DirectShadowFrame* getDirFrame() const { return directFrame; }
-
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
     void update(const float& delta_time) override;
@@ -113,13 +110,16 @@ class Scene2 : public Scene {
     Entity sphere;
     Entity brickWall;
     Entity sun;
+    Entity headcam;
 
     EntityManager    entityManager;
     ComponentManager componentManager;
 
+    Environment* env;
+
 public:
 
-    Scene2() {
+    Scene2(): env(nullptr) {
         init();
     }
 
@@ -127,7 +127,7 @@ public:
     void input(GLFWwindow* window, const float& delta_time) override;
     void update(const float& delta_time) override {}
     void render() const override;
-    void renderGbuffer() const override {}
+    void renderGbuffer() const override;
     void renderDeferred(const Shader& currentShader) const override {}
     void renderLight() const override;
     void renderDirectShadow() const override;

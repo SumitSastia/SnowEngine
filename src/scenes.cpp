@@ -850,7 +850,6 @@ void Scene2::init() {
     running::globalTimer::startInterval();
 
     wood_box  = entityManager.createEntity();
-    // box2      = entityManager.createEntity();
     floor     = entityManager.createEntity();
     wall      = entityManager.createEntity();
     light1    = entityManager.createEntity();
@@ -859,6 +858,7 @@ void Scene2::init() {
     sphere    = entityManager.createEntity();
     brickWall = entityManager.createEntity();
     sun       = entityManager.createEntity();
+    headcam   = entityManager.createEntity();
 
     entityManager.visibleEntities.push_back(wood_box);
     entityManager.visibleEntities.push_back(floor);
@@ -866,6 +866,7 @@ void Scene2::init() {
     entityManager.visibleEntities.push_back(cubes);
     entityManager.visibleEntities.push_back(sphere);
     entityManager.visibleEntities.push_back(brickWall);
+    entityManager.visibleEntities.push_back(headcam);
 
     entityManager.emissiveEntities.push_back(light1);
     entityManager.emissiveEntities.push_back(light2);
@@ -874,7 +875,7 @@ void Scene2::init() {
     float near_plane = 1.0f, far_plane = 10.0f, size = 10.0f;
     glm::mat4 lightProjection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
 
-    glm::vec3 dirLight_src = glm::vec3(2.0f, 4.0f, 1.0f);
+    glm::vec3 dirLight_src = glm::vec3(5.0f, 4.0f, 0.0f);
 
     glm::mat4 lightView = glm::lookAt(
         dirLight_src,
@@ -890,7 +891,22 @@ void Scene2::init() {
 
     componentManager.directShadowFrames.push_back(sunlight);
 
-    running::globalTimer::startInterval();
+    // Environment Map
+    std::vector <std::string> envFaces = {
+        
+        "assets/env/right.png",
+        "assets/env/left.png",
+        "assets/env/top.png",
+        "assets/env/bottom.png",
+        "assets/env/front.png",
+        "assets/env/back.png"
+    };
+
+    // env = new Environment(envFaces);
+    env = new Environment("assets/env/hdri-sky.hdr", 1024);
+    entityManager.env = env;
+
+    DebugMenu::log("HDR Environment: " + running::globalTimer::endInterval());
 
     // wood_box
     {
@@ -910,6 +926,8 @@ void Scene2::init() {
         material.shader = Shaders::get(NORMPBR3D);
         material.albedo = DefaultShapes::instance().cube.getAlbedo();
         material.normal = DefaultShapes::instance().advancedCube.getNormalMap();
+        
+        material.gbufferShader = Shaders::get(GBUFFER3D);
 
         DebugMenu::log("DefaultShapes (init): " + running::globalTimer::endInterval());
         
@@ -938,6 +956,8 @@ void Scene2::init() {
         material.shader = Shaders::get(NORMPBR2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
+
+        material.gbufferShader = Shaders::get(GBUFFER2D);
         
         componentManager.addComponent(floor, mesh);
         componentManager.addComponent(floor, transform);
@@ -961,6 +981,8 @@ void Scene2::init() {
         material.shader = Shaders::get(NORMPBR2D);
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
+
+        material.gbufferShader = Shaders::get(GBUFFER2D);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -986,6 +1008,7 @@ void Scene2::init() {
         MaterialComponent material;
         // material.shader = Shaders::get(NORM_PHONG2D);
         material.shader = Shaders::get(PARALLAX2D);
+        material.gbufferShader = Shaders::get(GBUFFER2D);
         
         material.albedo = new Texture2D();
         material.normal = new Texture2D();
@@ -1014,10 +1037,31 @@ void Scene2::init() {
 
         Shader* shader = Shaders::get(PBR3D);
         ModelComponent modelComponent;
-        modelComponent.init(sphereModel, shader);
+        modelComponent.init(sphereModel, shader, Shaders::get(GBUFFER3D));
         componentManager.addShader(shader);
 
         sphereModel->clean();
+
+        componentManager.addComponent(sphere, modelComponent);
+        componentManager.addComponent(sphere, transform);
+    }
+
+    // headcam
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(1.0f, 0.0f, 2.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(0.5f);
+        transform.computeModel();
+
+        Model3D* camModel = new Model3D("../assets/models/test_cube/colorCamera.obj");
+
+        Shader* shader = Shaders::get(PHONG3D);
+        ModelComponent modelComponent;
+        modelComponent.init(camModel, shader, Shaders::get(GBUFFER3D));
+        componentManager.addShader(shader);
+
+        camModel->clean();
 
         componentManager.addComponent(sphere, modelComponent);
         componentManager.addComponent(sphere, transform);
@@ -1032,7 +1076,7 @@ void Scene2::init() {
         material.albedo = new Texture2D();
         material.albedo->load("assets/textures/grunge-box-small.jpg", 1);
 
-        // DebugMenu::log("Image Loading: " + running::globalTimer::endInterval());
+        material.gbufferShader = Shaders::get(INSTANCE_GBUFFER3D);
         
         componentManager.addComponent(cubes, EntityShapes::instance().cubes);
         componentManager.addComponent(cubes, material);
@@ -1165,6 +1209,27 @@ void Scene2::render() const {
 void Scene2::renderLight() const {
     
     RenderSystem::renderLights(entityManager, componentManager);
+
+    static bool useEnv = true;
+
+    useEnv = Input::isKeyDown(GLFW_KEY_G)? !useEnv : useEnv;
+
+    if (useEnv) {
+
+        glDepthFunc(GL_LEQUAL);
+
+        const Shader& shader = *Shaders::get(ENVIRONMENT);
+        shader.use();
+
+        shader.setMat4("projection", Camera::instance().getPerspective());
+        shader.setMat4("view", glm::mat4(glm::mat3(Camera::instance().getView())));
+        
+        shader.setInt("environmentMap", 0);
+        env->bindTexture(0);
+
+        env->draw();
+        glDepthFunc(GL_LESS);
+    }
 }
 
 void Scene2::renderPointShadow() const {
@@ -1175,4 +1240,9 @@ void Scene2::renderPointShadow() const {
 void Scene2::renderDirectShadow() const {
 
     ShadowSystem::renderDirectional(entityManager, componentManager);
+}
+
+void Scene2::renderGbuffer() const {
+
+    RenderSystem::renderGbuffer(entityManager, componentManager);
 }

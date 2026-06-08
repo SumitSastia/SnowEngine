@@ -14,10 +14,10 @@ uniform sampler2D albedo;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 
-// uniform samplerCube irradianceMap;
-// uniform samplerCube preFilterMap;
-// uniform sampler2D brdfLUT;
-// uniform bool useIrradiance;
+uniform bool        useIrradiance;
+uniform samplerCube irradianceMap;
+uniform samplerCube preFilterMap;
+uniform sampler2D   brdfLUT;
 
 // uniform samplerCube env;
 
@@ -31,8 +31,8 @@ void main() {
     float metallic  = 0.01 * (tex.r + tex.g + tex.b);
     float roughness = 0.1 * (tex.r + tex.g + tex.b);
 
-    metallic = 0.8;
-    roughness = 0.2;
+    metallic = 0.2;
+    roughness = 0.1;
 
     // Ambient
     vec3 color = vec3(0.05) * tex;
@@ -57,22 +57,26 @@ void main() {
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, tex, metallic);
 
-    // vec3 kS  = fresnalSchlick(max(dot(vNormal,V), 0.0), F0);
-    // vec3 kD = (1.0 - kS);
+    if (useIrradiance) {
 
-    // IBL Diffuse
-    // vec3 envDiffuse = texture(irradianceMap, vNormal).rgb * tex * kD;
+        vec3 kS  = fresnalSchlick(max(dot(vNormal,V), 0.0), F0);
+        vec3 kD = (1.0 - kS);
+        
+        // IBL Diffuse
+        vec3 envDiffuse = texture(irradianceMap, vNormal).rgb * tex * kD;
+        
+        // IBL Specular
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(preFilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
 
-    // IBL Specular
-    // const float MAX_REFLECTION_LOD = 4.0;
-    // vec3 prefilteredColor = textureLod(preFilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
-
-    // vec3 F        = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    // vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    // vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
-
-    // if (useIrradiance) color = envDiffuse  + metallic * kS * reflected_color;
-    // if (useIrradiance) color = envDiffuse + kD * specular;
+        vec3 F        = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+        vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+        
+        // color = envDiffuse  + metallic * kS * reflected_color;
+        color = envDiffuse + kD * specular;
+        // color = envDiffuse;
+    }
 
     for (int i = 0; i < light_count; i++) { 
 

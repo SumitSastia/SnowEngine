@@ -16,7 +16,7 @@
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-// using Entity = uint32_t;
+class Environment;
 
 enum materialNames {
 
@@ -52,6 +52,8 @@ class EntityManager {
     uint32_t total_lights;
 
 public:
+
+    Environment* env;
 
     std::vector <Entity> visibleEntities;
     std::vector <Entity> emissiveEntities;

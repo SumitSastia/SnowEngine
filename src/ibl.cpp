@@ -158,8 +158,8 @@ void IBLFrame::convertCubeMap(const uint16_t resolution) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // this->createIrradiance(captureProjection, captureViews, 32);
-    // this->preFilter(captureProjection, captureViews);
+    this->createIrradiance(captureProjection, captureViews, 32);
+    this->preFilter(captureProjection, captureViews);
 }
 
 void IBLFrame::createIrradiance(const glm::mat4 captureProjection, const glm::mat4 captureViews[], const uint16_t resolution) {

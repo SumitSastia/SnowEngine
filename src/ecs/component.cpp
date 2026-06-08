@@ -224,7 +224,7 @@ void TransformComponent::computeModel() {
     model.matrix_4x4 = glm::scale(model.matrix_4x4, scale);
 }
 
-void ModelComponent::init(const Model3D* model, Shader* shader) {
+void ModelComponent::init(const Model3D* model, Shader* shader, Shader* gbufferShader) {
 
     for (const Mesh& mesh : model->meshes) {
         
@@ -237,6 +237,8 @@ void ModelComponent::init(const Model3D* model, Shader* shader) {
         MaterialComponent material;
         material.shader = shader;
         material.albedo = new Texture2D(mesh.textures[0].id);
+
+        material.gbufferShader = gbufferShader;
 
         meshes.push_back(meshComponent);
         materials.push_back(material);

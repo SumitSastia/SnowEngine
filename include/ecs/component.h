@@ -96,25 +96,6 @@ struct MaterialPhong {
     }
 };
 
-// PBR + IBL
-struct MaterialPBR {
-
-    Shader*    shader;    // 8-Bytes
-    Texture2D* albedo;    // 8-Bytes
-    Texture2D* normal;    // 8-Bytes
-
-    Texture2D* metallic;  // 8-Bytes
-    Texture2D* roughness; // 8-Bytes
-
-    MaterialPBR():
-        shader(nullptr),
-        albedo(nullptr),
-        normal(nullptr),
-        metallic(nullptr),
-        roughness(nullptr) {
-    }
-};
-
 struct DirectionalLight {
 
     glm::vec3 direction; // 12-Bytes
@@ -149,7 +130,8 @@ struct SpotLight {
 
 struct MaterialComponent {
 
-    Shader*    shader;
+    Shader* shader;
+    Shader* gbufferShader;
     
     Texture2D* albedo;
     Texture2D* normal;
@@ -166,7 +148,8 @@ struct MaterialComponent {
         height(nullptr),
         metallic(nullptr),
         roughness(nullptr),
-        ao(nullptr) {
+        ao(nullptr),
+        gbufferShader(nullptr) {
     }
 };
 
@@ -204,7 +187,7 @@ struct ModelComponent {
     std::vector <MeshComponent>     meshes;
     std::vector <MaterialComponent> materials;
 
-    void init(const Model3D* model, Shader* shader);
+    void init(const Model3D* model, Shader* shader, Shader* gbufferShader);
 };
 
 struct PointShadowData {

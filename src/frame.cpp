@@ -470,6 +470,11 @@ void Gbuffer::render() const {
     glBindTexture(GL_TEXTURE_2D, gTexture);
 
     SSAO::bindOcclusion(textureUnit + 3);
+
+    static bool toggleAO = false;
+
+    shader->setBool("toggleAO", toggleAO);
+    if (Input::isKeyDown(GLFW_KEY_J)) toggleAO = !toggleAO;
     
     glBindVertexArray(frameBuffers::get_defaultVAO());
     glDrawArrays(GL_TRIANGLES, 0, 6);
