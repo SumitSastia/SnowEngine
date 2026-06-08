@@ -3,6 +3,7 @@
 #include <renderer.h>
 #include <input.h>
 #include <ssao.h>
+#include <debug.h>
 
 #include <iostream>
 
@@ -449,7 +450,7 @@ void Gbuffer::render() const {
 
     Renderer::disableDepth();
 
-    const unsigned int textureUnit = 3;
+    const unsigned int textureUnit = 0; // 6
 
     shader->use();
     shader->setInt("gPosition",  textureUnit);
@@ -469,12 +470,11 @@ void Gbuffer::render() const {
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindTexture(GL_TEXTURE_2D, gTexture);
 
-    SSAO::bindOcclusion(textureUnit + 3);
+    if (SSAO::enable) {
+        SSAO::bindOcclusion(textureUnit + 3);
+    }
 
-    static bool toggleAO = false;
-
-    shader->setBool("toggleAO", toggleAO);
-    if (Input::isKeyDown(GLFW_KEY_J)) toggleAO = !toggleAO;
+    shader->setBool("toggleAO", SSAO::enable);
     
     glBindVertexArray(frameBuffers::get_defaultVAO());
     glDrawArrays(GL_TRIANGLES, 0, 6);

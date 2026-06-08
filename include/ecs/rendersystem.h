@@ -60,7 +60,7 @@ public:
     static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager);
 
     static void renderGbuffer(const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void lightningPass(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void lightningPass(const EntityManager& entityManager, const ComponentManager& componentManager, const Shader* shader);
 };
 
 class ShadowSystem {

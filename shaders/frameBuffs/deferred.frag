@@ -8,9 +8,15 @@ uniform sampler2D gNormal;
 uniform sampler2D gTexture;
 uniform sampler2D gOcclusion;
 
-uniform bool toggleAO;
+uniform samplerCube irradianceMap;
+uniform samplerCube preFilterMap;
+uniform sampler2D   brdfLUT;
 
-// #include <deferred_lighting.glsl>
+uniform bool toggleAO;
+uniform bool useIrradiance;
+uniform bool useDirectionalLight;
+
+#include <deferred_lighting.glsl>
 
 vec3 tone_mapping(vec3 color) {
 
@@ -27,34 +33,77 @@ void main() {
     vec3 vNormal = texture(gNormal, vTexCords).xyz;
     vec4 albedo  = texture(gTexture, vTexCords);
 
-    float occlusion = texture(gOcclusion, vTexCords).r;
+    float metallic  = albedo.r;
+    float roughness = albedo.g;
+
+    // metallic = 0.8;
+    // roughness = 0.2;
 
     vec3 tex = albedo.rgb;
     // tex = vec3(0.95);
 
-    vec3 color = tex;
-    if (toggleAO) color *= occlusion;
+    vec3 color = 0.05 * tex;
     vec3 normal = normalize(vNormal);
 
+    if (toggleAO) {
+
+        float occlusion = texture(gOcclusion, vTexCords).r;
+        color *= occlusion;
+    }
+
     // Directional Lighting
-    // vec3 dirColor = calcDirectionalLight(vPos, tex, normal);
-    // float shadow  = calcDirectShadow();
-    // dirColor *= (1.0 - shadow);
-    // color += dirColor;
+    if (useDirectionalLight) {
+
+        vec3 dirColor = calcDirectionalLight(vPos, tex, normal);
+        // Currently not usable (required: lightSpace_vPos through geometry pass)
+        // float shadow  = calcDirectShadow();
+        // dirColor *= (1.0 - shadow);
+        color += dirColor;
+    }
+
+    // PBR Lighting
+    vec3 N = vNormal;
+    vec3 V = normalize(camPos - vPos);
+    vec3 R = reflect(-V, vNormal);
+
+    vec3 F0 = vec3(0.04);
+    F0 = mix(F0, tex, metallic);
+
+    if (useIrradiance) {
+
+        vec3 kS  = fresnalSchlick(max(dot(vNormal,V), 0.0), F0);
+        vec3 kD = (1.0 - kS);
+        
+        // IBL Diffuse
+        vec3 envDiffuse = texture(irradianceMap, vNormal).rgb * tex * kD;
+        
+        // IBL Specular
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(preFilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+
+        vec3 F        = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+        vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+        
+        // color = envDiffuse  + metallic * kS * reflected_color;
+        color = envDiffuse + kD * specular;
+        // color = envDiffuse;
+    }
 
     // Point Shadow
-    // for (int i = 0; i < light_count; i++) {
+    for (int i = 0; i < light_count; i++) {
 
-    //     vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
-    //     const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
+        // vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
+        vec3 lightColor = calcPBR(pl[i], vPos, tex, vNormal, F0, metallic, roughness);
+        // const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
 
-    //     lightColor *= shadow;
-    //     color += lightColor;
-    // }
+        // lightColor *= shadow;
+        color += lightColor;
+    }
 
-    // if (useSpotLight) {
-    //     color += calcSpotLight(vPos, tex, normal);
-    // }
+    if (useSpotLight) {
+        color += calcSpotLight(vPos, tex, normal);
+    }
 
     // color = albedo.rgb;
     color = tone_mapping(color);

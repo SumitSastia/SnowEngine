@@ -26,7 +26,9 @@ class SSAO {
     }
 
 public:
-    
+
+    static bool enable;
+
     static Shader* shader;
 
     static void init();

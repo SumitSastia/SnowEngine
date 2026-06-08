@@ -267,6 +267,8 @@ enum shaderNames {
     GBUFFER3D,
     GBUFFER2D,
     INSTANCE_GBUFFER3D,
+    GBUFFERNORM_3D,
+    GBUFFERNORM_2D,
 
     SHADER_COUNT
 };

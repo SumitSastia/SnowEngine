@@ -128,7 +128,7 @@ public:
     void update(const float& delta_time) override {}
     void render() const override;
     void renderGbuffer() const override;
-    void renderDeferred(const Shader& currentShader) const override {}
+    void renderDeferred(const Shader& currentShader) const override;
     void renderLight() const override;
     void renderDirectShadow() const override;
     void renderPointShadow() const override;

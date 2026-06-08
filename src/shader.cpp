@@ -375,6 +375,9 @@ std::vector <shader_paths> Shaders::path = {
     shader_paths("deferred/gbuffer3d.vert",   "deferred/ecs_gbuffer.frag"),
     shader_paths("deferred/gbuffer2d.vert",   "deferred/ecs_gbuffer.frag"),
     shader_paths("deferred/gbufferInst.vert", "deferred/ecs_gbuffer.frag"),
+    
+    shader_paths("deferred/gbuffer_normalTex3d.vert",   "deferred/gbuffer_normalTex.frag"),
+    shader_paths("deferred/gbuffer_normalTex2d.vert",   "deferred/gbuffer_normalTex.frag")
 };
 
 bool Shaders::initShaders() {

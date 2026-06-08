@@ -89,6 +89,10 @@ int main() {
         DebugMenu::beginUI();
 
         // Inputs //
+        if (Input::isKeyDown(GLFW_KEY_H)) {
+            SSAO::enable = !SSAO::enable;
+        }
+
         Input::update();
         
         mainCamera.mouse_handler(window);
@@ -176,32 +180,36 @@ int main() {
             scene2->renderGbuffer();
             // ************************************************************* //
 
-            // Occlusion Pass
-            SSAO::bindFBO();
-            glClear(GL_COLOR_BUFFER_BIT);
-            
-            SSAO::shader->use();
+            if (SSAO::enable) {
 
-            SSAO::shader->setInt("gPosition", 0);
-            deferredFrame->bind_gPosition(0);
+                // Occlusion Pass
+                SSAO::bindFBO();
+                glClear(GL_COLOR_BUFFER_BIT);
+                
+                SSAO::shader->use();
 
-            SSAO::shader->setInt("gNormal", 1);
-            deferredFrame->bind_gNormal(1);
+                SSAO::shader->setInt("gPosition", 0);
+                deferredFrame->bind_gPosition(0);
 
-            SSAO::bindNoiseTex(2);
-            SSAO::shader->setMat4("projection", mainCamera.getPerspective());
-            SSAO::shader->setMat4("view", mainCamera.getView());
+                SSAO::shader->setInt("gNormal", 1);
+                deferredFrame->bind_gNormal(1);
 
-            frameBuffers::renderScreen();
-            SSAO::blurSSAO();
+                SSAO::bindNoiseTex(2);
+                SSAO::shader->setMat4("projection", mainCamera.getPerspective());
+                SSAO::shader->setMat4("view", mainCamera.getView());
+
+                frameBuffers::renderScreen();
+                SSAO::blurSSAO();
+            }
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+
             // ************************************************************* //
 
             // Lighting Pass
             // mainScene->renderDeferred(*deferredFrame->getShader());
+            scene2->renderDeferred(*deferredFrame->getShader());
             deferredFrame->render();
 
             Renderer::copyDepth(deferredFrame);

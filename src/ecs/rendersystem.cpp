@@ -84,8 +84,8 @@ void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, con
         shader->setInt("irradianceMap", lastTextureUnit);
         entityManager.env->bindIrradiance(lastTextureUnit++);
 
-        // shader->setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
-        shader->setBool("useIrradiance", true);
+        shader->setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
+        // shader->setBool("useIrradiance", true);
 
         shader->setInt("preFilterMap", lastTextureUnit);
         // entityManager.env->bindPrefilter(lastTextureUnit++);
@@ -347,7 +347,7 @@ void RenderSystem::renderGbuffer(const EntityManager& entityManager, const Compo
             const TransformComponent& transform = componentManager.arr_transform[entity];
             const MaterialComponent&  material  = componentManager.arr_material[entity];
     
-            drawGbuffer(mesh, transform, material);
+            if (material.gbufferShader) drawGbuffer(mesh, transform, material);
         }
 
         if (
@@ -363,7 +363,7 @@ void RenderSystem::renderGbuffer(const EntityManager& entityManager, const Compo
                 const MeshComponent&     mesh     = componentManager.arr_model[entity].meshes[i];
                 const MaterialComponent& material = componentManager.arr_model[entity].materials[i];
 
-                drawGbuffer(mesh, transform, material);
+                if (material.gbufferShader) drawGbuffer(mesh, transform, material);
             }
         }
 
@@ -374,9 +374,85 @@ void RenderSystem::renderGbuffer(const EntityManager& entityManager, const Compo
             const InstanceComponent& instance = componentManager.arr_instance[entity];
             const MaterialComponent& material = componentManager.arr_material[entity];
 
-            drawGbuffer(instance, material);
+            if (material.gbufferShader) drawGbuffer(instance, material);
         }
     }
+}
+
+void RenderSystem::lightningPass(const EntityManager& entityManager, const ComponentManager& componentManager, const Shader* shader) {
+
+    lastTextureUnit = 4;
+    const uint32_t light_count = entityManager.emissiveEntities.size();
+
+    shader->use();
+
+    // ----------------------- SpotLight ----------------------- //
+
+    shader->setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
+    shader->setSpotLight("sl", DefaultLights::instance().flashlight);
+
+    // ------------------------ Camera ------------------------- //
+    
+    bindCameraGlobals(shader);
+
+    // ----------------------- PointLight ---------------------- //
+
+    shader->setInt("light_count", light_count);
+    shader->setFloat("far_plane", 25.0f);
+
+    for (uint32_t entity = 0; entity < light_count; entity++) {
+
+        const Entity& light = entityManager.emissiveEntities[entity];
+        
+        const PointLightComponent& pointlight  = componentManager.arr_light[light];
+        const TransformComponent&  transform   = componentManager.arr_transform[light];
+
+        const std::string e  = "pl[" + std::to_string(entity) + "]";
+
+        shader->setVec3((e + ".position").c_str(), transform.position);
+        shader->setVec3((e + ".color").c_str(),    pointlight.color);
+
+        shader->setFloat((e + ".constant").c_str(),  pointlight.constant);
+        shader->setFloat((e + ".linear").c_str(),    pointlight.linear);
+        shader->setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
+    }
+
+    // ------------------------ DepthMap ----------------------- //
+
+    int index = 0;
+    for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
+
+        shader->setInt(("depthMap[" + std::to_string(index++) + "]").c_str() ,lastTextureUnit);
+        pointShadow.frame->bindTexture(lastTextureUnit++);
+    }
+
+    // --------------------- Directional Light ----------------- //
+
+    shader->setDirectionalLight("dl", DefaultLights::instance().sunlight);
+    shader->setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
+    // shader->setBool("useDirectionalLight", true);
+
+    shader->setInt("dl_depthMap", lastTextureUnit);
+    componentManager.directShadowFrames[0].frame->bindTexture(lastTextureUnit++);
+
+    shader->setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
+    
+    // ---------------------- Environment ---------------------- //
+
+    shader->setInt("irradianceMap", lastTextureUnit);
+    entityManager.env->bindIrradiance(lastTextureUnit++);
+
+    shader->setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
+    // shader->setBool("useIrradiance", true);
+
+    shader->setInt("preFilterMap", lastTextureUnit);
+    // entityManager.env->bindPrefilter(lastTextureUnit++);
+    entityManager.env->bindTexture(lastTextureUnit++);
+
+    shader->setInt("brdfLUT", lastTextureUnit);
+    entityManager.env->bindBRDF(lastTextureUnit++);
+    
+    // DebugMenu::log((unsigned int)lastTextureUnit);
 }
 
 // ------------------------------------------------------------------------------------------------------- //

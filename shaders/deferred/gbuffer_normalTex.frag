@@ -9,18 +9,18 @@ in vec2 vTexCords;
 
 in mat3 TBN;
 
-uniform sampler2D texture0;
-uniform sampler2D texture1;
+uniform sampler2D albedo;
+uniform sampler2D normalMap;
 
 void main() {
 
 	gPosition = vPos;
-	gTexture  = texture(texture0, vTexCords);
+	gTexture  = texture(albedo, vTexCords);
 
-    vec3 normal = texture(texture1, vTexCords).xyz;
+    vec3 normal = texture(normalMap, vTexCords).xyz;
     
     normal = (normal * 2.0 - 1.0);
     gNormal = normalize(TBN * normal);
 
-	gTexture = vec4(vec3(0.95), 1.0);
+	// gTexture = vec4(vec3(0.95), 1.0);
 }

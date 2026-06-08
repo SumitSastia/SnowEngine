@@ -68,40 +68,40 @@ vec3 calcDirectionalLight(vec3 vPos, vec3 tex, vec3 normal) {
     return (diffuseLight + specularLight);
 }
 
-// float calcDirectShadow() {
+float calcDirectShadow(vec4 lightSpace_vPos) {
 
-//     if (lightSpace_vPos.w <= 0.0) {
-//         return 0.0;
-//     }
+    if (lightSpace_vPos.w <= 0.0) {
+        return 0.0;
+    }
 
-//     vec3 shadowCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
-//     shadowCords      = shadowCords * 0.5 + 0.5;
+    vec3 shadowCords = lightSpace_vPos.xyz / lightSpace_vPos.w;
+    shadowCords      = shadowCords * 0.5 + 0.5;
 
-//     if (shadowCords.x < 0.0 || shadowCords.x > 1.0 ||
-//         shadowCords.y < 0.0 || shadowCords.y > 1.0 ||
-//         shadowCords.z > 1.0 || shadowCords.z < 0.0) {
-//         return 0.0;
-//     }
+    if (shadowCords.x < 0.0 || shadowCords.x > 1.0 ||
+        shadowCords.y < 0.0 || shadowCords.y > 1.0 ||
+        shadowCords.z > 1.0 || shadowCords.z < 0.0) {
+        return 0.0;
+    }
 
-//     float shadow = 0.0;
-//     float bias   = 0.0025;
+    float shadow = 0.0;
+    float bias   = 0.0025;
 
-//     // Filtering
-//     shadow = 0.0;
-//     vec2 texelSize = 1.0 / textureSize(dl_depthMap, 0);
+    // Filtering
+    shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(dl_depthMap, 0);
 
-//     for (int x = -1; x <= 1; x++) {
-//         for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
 
-//             float PCFdepth = texture(dl_depthMap, shadowCords.xy + vec2(x,y) * texelSize).r;
-//             shadow += shadowCords.z - bias > PCFdepth ? 1.0 : 0.0;
-//         }
-//     }
+            float PCFdepth = texture(dl_depthMap, shadowCords.xy + vec2(x,y) * texelSize).r;
+            shadow += shadowCords.z - bias > PCFdepth ? 1.0 : 0.0;
+        }
+    }
 
-//     shadow /= 9.0;
+    shadow /= 9.0;
 
-//     return shadow;
-// }
+    return shadow;
+}
 
 vec3 calcPointLight(pointLight light, vec3 vPos, vec3 tex, vec3 normal) {
 
@@ -251,4 +251,46 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 vec3 fresnalSchlick(float cosTheta, vec3 F0) {
 
 	return F0 +	(1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+// Global Variables
+// 1. vPos, 2. camPos
+vec3 calcPBR(pointLight light, vec3 vPos, vec3 tex, vec3 normal, vec3 F0, float metallic, float roughness) {
+
+    vec3 Lo = vec3(0.0);
+
+    vec3 N  = normal;
+    vec3 V  = normalize(camPos - vPos);
+
+    // calculate per-light radiance
+    vec3 L = normalize(light.position - vPos);
+    vec3 H = normalize(V + L);
+
+    float distance0   = length(light.position - vPos);
+    float attenuation = 1.0 / (distance0 * distance0);
+    vec3  radiance    = 10.0 * light.color * attenuation;
+
+    // cook-torrance BRDF
+    float NDF  = distributionGGX(N, H, roughness);
+    float G    = geometrySmith(N, V, L, roughness);
+    vec3  F    = fresnalSchlick(max(dot(H, V), 0.0), F0);
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+
+    vec3  numerator   = NDF * G * F;
+    float denominator = 4.0 * max(dot(N,V), 0.0) * max(dot(N,L), 0.0) + 0.0001;
+    vec3  specular    = numerator / denominator;
+    
+    // add specular to outgoing radiance
+    float NdotL = max(dot(N,L), 0.0);
+    Lo += (kD * tex / pi + specular) * radiance * NdotL;
+
+    return Lo;
+}
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }

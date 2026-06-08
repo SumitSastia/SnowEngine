@@ -650,8 +650,9 @@ void Scene1::renderDeferred(const Shader& currentShader) const {
     // 0 - gPosition
     // 1 - gNormal
     // 2 - gTexture
+    // 3 - gOcclusion
 
-    unsigned int loadedTextures = 0;
+    unsigned int loadedTextures = 4;
 
     currentShader.use();
 
@@ -927,7 +928,7 @@ void Scene2::init() {
         material.albedo = DefaultShapes::instance().cube.getAlbedo();
         material.normal = DefaultShapes::instance().advancedCube.getNormalMap();
         
-        material.gbufferShader = Shaders::get(GBUFFER3D);
+        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
 
         DebugMenu::log("DefaultShapes (init): " + running::globalTimer::endInterval());
         
@@ -957,7 +958,7 @@ void Scene2::init() {
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
 
-        material.gbufferShader = Shaders::get(GBUFFER2D);
+        material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
         
         componentManager.addComponent(floor, mesh);
         componentManager.addComponent(floor, transform);
@@ -982,7 +983,7 @@ void Scene2::init() {
         material.albedo = DefaultShapes::instance().square.getAlbedo();
         material.normal = DefaultShapes::instance().square.getNormalMap();
 
-        material.gbufferShader = Shaders::get(GBUFFER2D);
+        material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -1008,7 +1009,7 @@ void Scene2::init() {
         MaterialComponent material;
         // material.shader = Shaders::get(NORM_PHONG2D);
         material.shader = Shaders::get(PARALLAX2D);
-        material.gbufferShader = Shaders::get(GBUFFER2D);
+        // material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
         
         material.albedo = new Texture2D();
         material.normal = new Texture2D();
@@ -1245,4 +1246,9 @@ void Scene2::renderDirectShadow() const {
 void Scene2::renderGbuffer() const {
 
     RenderSystem::renderGbuffer(entityManager, componentManager);
+}
+
+void Scene2::renderDeferred(const Shader& currentShader) const {
+
+    RenderSystem::lightningPass(entityManager, componentManager, &currentShader);
 }

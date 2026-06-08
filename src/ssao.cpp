@@ -16,6 +16,8 @@ unsigned int SSAO::colorBuffer_blur = 0;
 Shader* SSAO::shader     = nullptr;
 Shader* SSAO::shaderBlur = nullptr;
 
+bool SSAO::enable = false;
+
 // ----------------------------------------------------------------------------------- //
 
 void SSAO::init() {
