@@ -58,8 +58,8 @@ int main() {
 
     running::core::timer t;
 
-    Scene1* scene1 = new Scene1();
-    Scene* mainScene = scene1;
+    // Scene1* scene1 = new Scene1();
+    // Scene* mainScene = scene1;
     DebugMenu::log("Time taken to initialize - scene1: " + t.end());
 
     // running::time::startInterval();
@@ -73,7 +73,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = true;
+    bool deferredRender = false;
 
     DebugMenu::log("Time taken to Initialize: " + running::globalTimer::getTime());
 
@@ -115,7 +115,7 @@ int main() {
         scene2->input(window, deltaTime);
         
         mainCamera.update(deltaTime);
-        mainScene->update(deltaTime);
+        // mainScene->update(deltaTime);
 
         ImGui::End();
 
@@ -125,8 +125,8 @@ int main() {
         // Scene
         if (!deferredRender) {
 
-            mainScene->renderDirectShadow();
-            mainScene->renderPointShadow();
+            // mainScene->renderDirectShadow();
+            // mainScene->renderPointShadow();
 
             scene2->renderDirectShadow();
             scene2->renderPointShadow();
@@ -136,9 +136,11 @@ int main() {
 
             Renderer::clear();
 
-            if (Input::isKeyPressed(GLFW_KEY_O))
-                mainScene->render();
+            // if (Input::isKeyPressed(GLFW_KEY_O))
+            //     mainScene->render();
             
+            // Renderer::enableDepth();
+            // Renderer::disableCulling();
             scene2->render();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -149,8 +151,8 @@ int main() {
             Renderer::copyDepth(hdrFrame);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            if (Input::isKeyPressed(GLFW_KEY_O))
-                mainScene->renderLight();
+            // if (Input::isKeyPressed(GLFW_KEY_O))
+            //     mainScene->renderLight();
             
             scene2->renderLight();
         }
@@ -159,8 +161,8 @@ int main() {
             // ************************************************************* //
 
             // Shadow Pass
-            mainScene->renderDirectShadow();
-            mainScene->renderPointShadow();
+            // mainScene->renderDirectShadow();
+            // mainScene->renderPointShadow();
 
             scene2->renderDirectShadow();
             scene2->renderPointShadow();
@@ -178,6 +180,7 @@ int main() {
 
             // mainScene->renderGbuffer();
             scene2->renderGbuffer();
+            
             // ************************************************************* //
 
             if (SSAO::enable) {
@@ -229,7 +232,7 @@ int main() {
 
     // ---------- Termination ----------------- //
 
-    mainScene->destroy();
+    // mainScene->destroy();
 
     DebugMenu::instance().destroy();
     Renderer::instance().terminate();

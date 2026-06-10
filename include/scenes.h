@@ -10,6 +10,10 @@
 #include <s_time.h>
 #include <ecs/rendersystem.h>
 
+namespace scene_var {
+    const float speed = 3.0f;
+};
+
 class Scene {
 
 protected:

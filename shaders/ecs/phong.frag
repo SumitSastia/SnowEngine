@@ -35,7 +35,7 @@ void main() {
     //     vec3 lightColor = vec3(0.0);
 
     //     lightColor += calcPointLight(pl[i], tex, vNormal);
-    //     // lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
+    //     lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
     //     color += lightColor;
     // }

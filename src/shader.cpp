@@ -2,7 +2,6 @@
 #include <renderer.h>
 #include <lights.h>
 #include <debug.h>
-#include <ecs/component.h>
 #include <ibl.h>
 
 #include <iostream>

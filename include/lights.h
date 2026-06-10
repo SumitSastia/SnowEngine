@@ -1,7 +1,6 @@
 #pragma once
 
 #include <s_math.h>
-#include <ecs/component.h>
 
 class Shape;
 

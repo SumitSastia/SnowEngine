@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
 
-
 set(TARGET_NAME SnowEngine)
 set(CMAKE_BUILD_TYPE Debug)
 
 project(${TARGET_NAME})
 
-set(IMGUI_SRC
+set(
+    IMGUI_SRC
 
     include/imgui/imgui.cpp
     include/imgui/imgui_draw.cpp
@@ -17,14 +17,23 @@ set(IMGUI_SRC
     include/imgui/imgui_impl_opengl3.cpp
 )
 
-set(ECS_SRC
+set(
+    ECS_SRC
 
     src/ecs/entity.cpp
     src/ecs/component.cpp
     src/ecs/rendersystem.cpp
 )
 
-add_executable(${TARGET_NAME}
+set(
+    SCENES_SRC
+
+    src/scenes/scene1.cpp
+    src/scenes/scene2.cpp
+)
+
+add_executable(
+    ${TARGET_NAME}
 
     src/glad.c
     src/s_math.cpp
@@ -36,7 +45,6 @@ add_executable(${TARGET_NAME}
     src/renderer.cpp
     src/debug.cpp
     src/input.cpp
-    src/scenes.cpp
     src/entity.cpp
     src/lights.cpp
     src/frame.cpp
@@ -44,7 +52,7 @@ add_executable(${TARGET_NAME}
     src/ibl.cpp
     src/text.cpp
     src/ssao.cpp
-    # src/entity.cpp
+    ${SCENES_SRC}
     ${ECS_SRC}
 )
 

@@ -11,7 +11,6 @@
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-#define MAX_ENTITIES 25
 #define MAX_LIGHTS   10
 
 // ------------------------------ Foward Declarations -------------------------------- //

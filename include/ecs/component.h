@@ -11,6 +11,7 @@
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
+#define MAX_ENTITIES 25
 #define TOTAL_COMPONENTS 10
 #define MAX_INSTANCES 100
 
@@ -219,9 +220,51 @@ struct DirectShadowData {
     }
 };
 
-class ComponentManager {
+template <typename Component>
+class ComponentPool {
     
+    std::vector <Component> data;
+    std::vector <bool> hasData;
+
 public:
+
+    ComponentPool():
+        data(MAX_ENTITIES),
+        hasData(MAX_ENTITIES, false) {
+    }
+
+    void addComponent(const Entity entity, const Component& component) {
+        data[entity] = component;
+        hasData[entity] = true;
+    }
+
+    void removeComponent(const Entity entity) {}
+
+    const bool hasComponent(const Entity entity) const {
+        return hasData[entity];
+    }
+
+    const Component& getComponent(const Entity entity) const {
+        return data[entity];
+    }
+
+    Component& getComponent(const Entity entity) {
+        return data[entity];
+    }
+};
+
+class ComponentManager {
+
+public:
+
+    // Component Pools
+    ComponentPool <TransformComponent>  transforms;
+    ComponentPool <MeshComponent>       meshes;
+    ComponentPool <MaterialComponent>   materials;
+    ComponentPool <InstanceComponent>   instances;
+    ComponentPool <ModelComponent>      models;
+    ComponentPool <PointLightComponent> pointlights;
+    ComponentPool <DirectionalLight>    directlights;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);
@@ -253,8 +296,34 @@ public:
     std::vector <bool> has_light;
     std::vector <bool> has_directionalLight;
 
-    ComponentManager();
+    template <typename Component>
+    ComponentPool<Component>& getPool();
 
     template <typename Component>
-    void addComponent(const Entity& entity, const Component& component);
+    const ComponentPool<Component>& getPool() const;
+
+    ComponentManager();
+
+    // template <typename Component>
+    // void addComponent(const Entity& entity, const Component& component);
+
+    template <typename Component>
+    void addComponent(const Entity& entity, const Component& component) {
+        getPool<Component>().addComponent(entity, component);
+    }
+
+    template <typename Component>
+    bool has(const Entity& entity) const {
+        return getPool<Component>().hasComponent(entity);
+    }
+
+    template <typename Component>
+    const Component& get(const Entity& entity) const {
+        return getPool<Component>().getComponent(entity);
+    }
+
+    template <typename Component>
+    Component& get(const Entity& entity) {
+        return getPool<Component>().getComponent(entity);
+    }
 };

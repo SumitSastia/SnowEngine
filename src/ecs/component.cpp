@@ -247,6 +247,78 @@ void ModelComponent::init(const Model3D* model, Shader* shader, Shader* gbufferS
 
 // ------------------------------ Components ----------------------------------------- //
 
+template <>
+ComponentPool<TransformComponent>& ComponentManager::getPool() {
+    return transforms;
+}
+
+template <>
+ComponentPool<MeshComponent>& ComponentManager::getPool() {
+    return meshes;
+}
+
+template <>
+ComponentPool<MaterialComponent>& ComponentManager::getPool() {
+    return materials;
+}
+
+template <>
+ComponentPool<InstanceComponent>& ComponentManager::getPool() {
+    return instances;
+}
+
+template <>
+ComponentPool<ModelComponent>& ComponentManager::getPool() {
+    return models;
+}
+
+template <>
+ComponentPool<PointLightComponent>& ComponentManager::getPool() {
+    return pointlights;
+}
+
+template <>
+ComponentPool<DirectionalLight>& ComponentManager::getPool() {
+    return directlights;
+}
+
+template <>
+const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
+    return transforms;
+}
+
+template <>
+const ComponentPool<MeshComponent>& ComponentManager::getPool() const {
+    return meshes;
+}
+
+template <>
+const ComponentPool<MaterialComponent>& ComponentManager::getPool() const {
+    return materials;
+}
+
+template <>
+const ComponentPool<InstanceComponent>& ComponentManager::getPool() const {
+    return instances;
+}
+
+template <>
+const ComponentPool<ModelComponent>& ComponentManager::getPool() const {
+    return models;
+}
+
+template <>
+const ComponentPool<PointLightComponent>& ComponentManager::getPool() const {
+    return pointlights;
+}
+
+template <>
+const ComponentPool<DirectionalLight>& ComponentManager::getPool() const {
+    return directlights;
+}
+
+// ------------------------------ Components ----------------------------------------- //
+
 ComponentManager::ComponentManager():
 
     arr_mesh(MAX_ENTITIES),
@@ -278,55 +350,53 @@ void ComponentManager::addShader(Shader* shader) {
     }
 }
 
-template <typename Component>
-void ComponentManager::addComponent(const Entity& entity, const Component& component) {
-    DebugMenu::log("ERROR::THIS COMPONENT IS NOT INITIALIZED IN THE COMPONENT MANAGER!");
-}
+// template <>
+// void ComponentManager::addComponent<TransformComponent>(const Entity& entity, const TransformComponent& component) {
 
-template <>
-void ComponentManager::addComponent<TransformComponent>(const Entity& entity, const TransformComponent& component) {
+//     arr_transform[entity] = component;
+//     has_transform[entity] = true;
+// }
 
-    arr_transform[entity] = component;
-    has_transform[entity] = true;
-}
+// template <>
+// void ComponentManager::addComponent<MeshComponent>(const Entity& entity, const MeshComponent& component) {
 
-template <>
-void ComponentManager::addComponent<MeshComponent>(const Entity& entity, const MeshComponent& component) {
-
-    arr_mesh[entity] = component;
-    has_mesh[entity] = true;
-}
+//     arr_mesh[entity] = component;
+//     has_mesh[entity] = true;
+// }
 
 template <>
 void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
 
-    arr_material[entity] = component;
-    has_material[entity] = true;
+    // arr_material[entity] = component;
+    // has_material[entity] = true;
 
+    materials.addComponent(entity, component);
     addShader(component.shader);
 }
 
 template <>
 void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
 
-    arr_light[entity] = component;
-    has_light[entity] = true;
+    // arr_light[entity] = component;
+    // has_light[entity] = true;
+
+    pointlights.addComponent(entity, component);
 
     pointShadowFrames.push_back(
         PointShadowData(entity, new PointShadowFrame())
     );
 }
 
-template <>
-void ComponentManager::addComponent<InstanceComponent>(const Entity& entity, const InstanceComponent& component) {
+// template <>
+// void ComponentManager::addComponent<InstanceComponent>(const Entity& entity, const InstanceComponent& component) {
 
-    arr_instance[entity] = component;
-    has_instance[entity] = true;
-}
+//     arr_instance[entity] = component;
+//     has_instance[entity] = true;
+// }
 
-template <>
-void ComponentManager::addComponent<ModelComponent>(const Entity& entity, const ModelComponent& component) {
+// template <>
+// void ComponentManager::addComponent<ModelComponent>(const Entity& entity, const ModelComponent& component) {
 
-    arr_model[entity] = component;
-    has_model[entity] = true;
-}
+//     arr_model[entity] = component;
+//     has_model[entity] = true;
+// }

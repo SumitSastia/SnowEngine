@@ -22,12 +22,14 @@ void RenderSystem::bindCameraGlobals(const Shader* shader) {
 
 void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, const ComponentManager& componentManager) {
 
-    lastTextureUnit = 0;
     const uint32_t light_count = entityManager.emissiveEntities.size();
 
+    // Global Textures Binding
+    
     for (const Shader* shader : componentManager.uniqueShaders) {
-
+        
         shader->use();
+        lastTextureUnit = 0;
 
         // ----------------------- SpotLight ----------------------- //
 
@@ -43,28 +45,38 @@ void RenderSystem::bindPointLightGlobals(const EntityManager& entityManager, con
         shader->setInt("light_count", light_count);
         shader->setFloat("far_plane", 25.0f);
 
-        for (uint32_t entity = 0; entity < light_count; entity++) {
+        for (uint32_t index = 0; index < light_count; index++) {
 
-            const Entity& light = entityManager.emissiveEntities[entity];
-            
-            const PointLightComponent& pointlight  = componentManager.arr_light[light];
-            const TransformComponent&  transform   = componentManager.arr_transform[light];
+            const Entity& entity = entityManager.emissiveEntities[index];
 
-            const std::string e  = "pl[" + std::to_string(entity) + "]";
+            if (
+                componentManager.has<PointLightComponent>(entity) &&
+                componentManager.has<TransformComponent>(entity)
+            ) {
+                const PointLightComponent& pointlight  = componentManager.get<PointLightComponent>(entity);
+                const TransformComponent&  transform   = componentManager.get<TransformComponent>(entity);
 
-            shader->setVec3((e + ".position").c_str(), transform.position);
-            shader->setVec3((e + ".color").c_str(),    pointlight.color);
+                const std::string e  = "pl[" + std::to_string(index) + "]";
 
-            shader->setFloat((e + ".constant").c_str(),  pointlight.constant);
-            shader->setFloat((e + ".linear").c_str(),    pointlight.linear);
-            shader->setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
+                shader->setVec3((e + ".position").c_str(), transform.position);
+                shader->setVec3((e + ".color").c_str(),    pointlight.color);
+
+                shader->setFloat((e + ".constant").c_str(),  pointlight.constant);
+                shader->setFloat((e + ".linear").c_str(),    pointlight.linear);
+                shader->setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
+
+                // DebugMenu::log("bindig");
+            }
         }
 
         // ------------------------ DepthMap ----------------------- //
 
+        int index = 0;
         for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
 
-            shader->setInt(("depthMap[" + std::to_string(lastTextureUnit) + "]").c_str() ,lastTextureUnit);
+            // DebugMenu::log((uint)lastTextureUnit);
+
+            shader->setInt(("depthMap[" + std::to_string(index++) + "]").c_str(), lastTextureUnit);
             pointShadow.frame->bindTexture(lastTextureUnit++);
         }
 
@@ -107,43 +119,85 @@ void RenderSystem::render(const EntityManager& entityManager, const ComponentMan
 
     for (const Entity& entity : entityManager.visibleEntities) {
 
+        // if (
+        //     componentManager.has_mesh[entity] &&
+        //     componentManager.has_transform[entity] &&
+        //     componentManager.has_material[entity]
+        // ) {
+        //     const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
+        //     const TransformComponent& transform = componentManager.arr_transform[entity];
+        //     const MaterialComponent&  material  = componentManager.arr_material[entity];
+    
+        //     draw(mesh, transform, material);
+        // }
+
+        // if (
+        //     componentManager.has_model[entity] &&
+        //     componentManager.has_transform[entity]
+        // ) {
+            
+        //     const TransformComponent& transform = componentManager.arr_transform[entity];
+        //     const uint total_meshes = componentManager.arr_model[entity].meshes.size();
+
+        //     for (uint i = 0 ; i < total_meshes; i++) {
+
+        //         const MeshComponent&     mesh     = componentManager.arr_model[entity].meshes[i];
+        //         const MaterialComponent& material = componentManager.arr_model[entity].materials[i];
+
+        //         draw(mesh, transform, material);
+        //     }
+        // }
+
+        // if (
+        //     componentManager.has_instance[entity] && 
+        //     componentManager.has_material[entity]
+        // ) {
+        //     const InstanceComponent& instance = componentManager.arr_instance[entity];
+        //     const MaterialComponent& material = componentManager.arr_material[entity];
+
+        //     draw(instance, material);
+        // }
+
         if (
-            componentManager.has_mesh[entity] &&
-            componentManager.has_transform[entity] &&
-            componentManager.has_material[entity]
+            componentManager.has<MeshComponent>(entity) &&
+            componentManager.has<TransformComponent>(entity) &&
+            componentManager.has<MaterialComponent>(entity)
         ) {
-            const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
-            const TransformComponent& transform = componentManager.arr_transform[entity];
-            const MaterialComponent&  material  = componentManager.arr_material[entity];
+            const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
     
             draw(mesh, transform, material);
         }
 
         if (
-            componentManager.has_model[entity] &&
-            componentManager.has_transform[entity]
+            componentManager.has<InstanceComponent>(entity) && 
+            componentManager.has<MaterialComponent>(entity)
         ) {
-            
-            const TransformComponent& transform = componentManager.arr_transform[entity];
-            const uint total_meshes = componentManager.arr_model[entity].meshes.size();
+            const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
+            const MaterialComponent& material = componentManager.get<MaterialComponent>(entity);
 
-            for (uint i = 0 ; i < total_meshes; i++) {
-
-                const MeshComponent&     mesh     = componentManager.arr_model[entity].meshes[i];
-                const MaterialComponent& material = componentManager.arr_model[entity].materials[i];
-
-                draw(mesh, transform, material);
-            }
+            draw(instance, material);
         }
 
         if (
-            componentManager.has_instance[entity] && 
-            componentManager.has_material[entity]
+            componentManager.has<ModelComponent>(entity) &&
+            componentManager.has<TransformComponent>(entity)
         ) {
-            const InstanceComponent& instance = componentManager.arr_instance[entity];
-            const MaterialComponent& material = componentManager.arr_material[entity];
+            
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
 
-            draw(instance, material);
+            for (uint i = 0 ; i < total_meshes; i++) {
+
+                // const MeshComponent&     mesh     = componentManager.arr_model[entity].meshes[i];
+                // const MaterialComponent& material = componentManager.arr_model[entity].materials[i];
+
+                const MeshComponent&     mesh     = componentManager.get<ModelComponent>(entity).meshes[i];
+                const MaterialComponent& material = componentManager.get<ModelComponent>(entity).materials[i];
+
+                draw(mesh, transform, material);
+            }
         }
     }
 }
@@ -152,12 +206,22 @@ void RenderSystem::renderLights(const EntityManager& entityManager, const Compon
 
     for (const Entity& entity : entityManager.emissiveEntities) {
 
-        if (componentManager.has_light[entity]) {
+        // if (componentManager.has_light[entity]) {
 
-            const MeshComponent&       mesh       = componentManager.arr_mesh[entity];
-            const TransformComponent&  transform  = componentManager.arr_transform[entity];
-            const MaterialComponent&   material   = componentManager.arr_material[entity];
-            const PointLightComponent& pointlight = componentManager.arr_light[entity];
+        //     const MeshComponent&       mesh       = componentManager.arr_mesh[entity];
+        //     const TransformComponent&  transform  = componentManager.arr_transform[entity];
+        //     const MaterialComponent&   material   = componentManager.arr_material[entity];
+        //     const PointLightComponent& pointlight = componentManager.arr_light[entity];
+            
+        //     draw(mesh, transform, material, pointlight);
+        // }
+
+        if (componentManager.has<PointLightComponent>(entity)) {
+
+            const MeshComponent&       mesh       = componentManager.get<MeshComponent>(entity);
+            const TransformComponent&  transform  = componentManager.get<TransformComponent>(entity);
+            const MaterialComponent&   material   = componentManager.get<MaterialComponent>(entity);
+            const PointLightComponent& pointlight = componentManager.get<PointLightComponent>(entity);
             
             draw(mesh, transform, material, pointlight);
         }
@@ -479,7 +543,8 @@ void ShadowSystem::render(const EntityManager& entityManager, const ComponentMan
     for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
 
         // Preparing each Frame of each PointLight Entity
-        const glm::vec3& lightPos = componentManager.arr_transform[pointShadow.entity].position;
+        // const glm::vec3& lightPos = componentManager.arr_transform[pointShadow.entity].position;
+        const glm::vec3& lightPos = componentManager.get<TransformComponent>(pointShadow.entity).position;
         
         const std::vector <glm::mat4> shadowMatrices = {
 
@@ -508,21 +573,21 @@ void ShadowSystem::render(const EntityManager& entityManager, const ComponentMan
 
         // Rendering meshes of VisibleEntities
         for (const Entity& entity : entityManager.visibleEntities) {
-            
+
             if (
-                componentManager.has_mesh[entity] &&
-                componentManager.has_transform[entity]
+                componentManager.has<MeshComponent>(entity) &&
+                componentManager.has<TransformComponent>(entity)
             ) {
-                const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
-                const TransformComponent& transform = componentManager.arr_transform[entity];
+                const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
+                const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
                 
                 drawShadow(shader[0], mesh, transform);
             }
 
             if (
-                componentManager.has_instance[entity]
+                componentManager.has<InstanceComponent>(entity)
             ) {
-                const InstanceComponent& instance = componentManager.arr_instance[entity];
+                const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
 
                 drawShadowInstanced(shader[1], instance);
             }
@@ -557,19 +622,19 @@ void ShadowSystem::renderDirectional(const EntityManager& entityManager, const C
         for (const Entity& entity : entityManager.visibleEntities) {
             
             if (
-                componentManager.has_mesh[entity] &&
-                componentManager.has_transform[entity]
+                componentManager.has<MeshComponent>(entity) &&
+                componentManager.has<TransformComponent>(entity)
             ) {
-                const MeshComponent&      mesh      = componentManager.arr_mesh[entity];
-                const TransformComponent& transform = componentManager.arr_transform[entity];
+                const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
+                const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
                 
                 drawShadow(shader[0], mesh, transform);
             }
 
             if (
-                componentManager.has_instance[entity]
+                componentManager.has<InstanceComponent>(entity)
             ) {
-                const InstanceComponent& instance = componentManager.arr_instance[entity];
+                const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
 
                 drawShadowInstanced(shader[1], instance);
             }
