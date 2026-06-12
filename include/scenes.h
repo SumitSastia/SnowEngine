@@ -116,8 +116,9 @@ class Scene2 : public Scene {
     Entity sun;
     Entity headcam;
 
-    EntityManager    entityManager;
-    ComponentManager componentManager;
+    // EntityManager    entityManager;
+    // ComponentManager componentManager;
+    ECS ecs;
 
     Environment* env;
 

@@ -349,26 +349,8 @@ void ComponentManager::addShader(Shader* shader) {
         uniqueShaders.push_back(shader);
     }
 }
-
-// template <>
-// void ComponentManager::addComponent<TransformComponent>(const Entity& entity, const TransformComponent& component) {
-
-//     arr_transform[entity] = component;
-//     has_transform[entity] = true;
-// }
-
-// template <>
-// void ComponentManager::addComponent<MeshComponent>(const Entity& entity, const MeshComponent& component) {
-
-//     arr_mesh[entity] = component;
-//     has_mesh[entity] = true;
-// }
-
 template <>
 void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
-
-    // arr_material[entity] = component;
-    // has_material[entity] = true;
 
     materials.addComponent(entity, component);
     addShader(component.shader);
@@ -377,26 +359,9 @@ void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, con
 template <>
 void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
 
-    // arr_light[entity] = component;
-    // has_light[entity] = true;
-
     pointlights.addComponent(entity, component);
 
     pointShadowFrames.push_back(
         PointShadowData(entity, new PointShadowFrame())
     );
 }
-
-// template <>
-// void ComponentManager::addComponent<InstanceComponent>(const Entity& entity, const InstanceComponent& component) {
-
-//     arr_instance[entity] = component;
-//     has_instance[entity] = true;
-// }
-
-// template <>
-// void ComponentManager::addComponent<ModelComponent>(const Entity& entity, const ModelComponent& component) {
-
-//     arr_model[entity] = component;
-//     has_model[entity] = true;
-// }

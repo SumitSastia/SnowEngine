@@ -6,18 +6,21 @@
 
 void Scene2::init() {
 
+    EntityManager&    entityManager    = ecs.entityManager;
+    ComponentManager& componentManager = ecs.componentManager;
+
     running::globalTimer::startInterval();
 
-    wood_box  = entityManager.createEntity();
-    floor     = entityManager.createEntity();
-    wall      = entityManager.createEntity();
-    light1    = entityManager.createEntity();
-    light2    = entityManager.createEntity();
-    cubes     = entityManager.createEntity();
-    sphere    = entityManager.createEntity();
-    brickWall = entityManager.createEntity();
-    headcam   = entityManager.createEntity();
-    sun       = entityManager.createEntity();
+    wood_box  = ecs.entityManager.createEntity();
+    floor     = ecs.entityManager.createEntity();
+    wall      = ecs.entityManager.createEntity();
+    light1    = ecs.entityManager.createEntity();
+    light2    = ecs.entityManager.createEntity();
+    cubes     = ecs.entityManager.createEntity();
+    sphere    = ecs.entityManager.createEntity();
+    brickWall = ecs.entityManager.createEntity();
+    headcam   = ecs.entityManager.createEntity();
+    sun       = ecs.entityManager.createEntity();
 
     entityManager.visibleEntities.push_back(wood_box);
     entityManager.visibleEntities.push_back(floor);
@@ -307,11 +310,11 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
     const  float   move_speed    = scene_var::speed * delta_time;
 
     // Model of the Object to move
-    const Entity& entity = entityManager.visibleEntities[model_counter];
+    const Entity& entity = ecs.entityManager.visibleEntities[model_counter];
 
-    if (componentManager.has<TransformComponent>(entity)) {
+    if (ecs.componentManager.has<TransformComponent>(entity)) {
 
-        Matrix4& movableModel = componentManager.get<TransformComponent>(entity).model;
+        Matrix4& movableModel = ecs.componentManager.get<TransformComponent>(entity).model;
 
         if (glfwGetKey(window, GLFW_KEY_KP_8)) {
             movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
@@ -338,7 +341,7 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
         }
 
         if (Input::isKeyDown(GLFW_KEY_KP_1)) {
-            model_counter = (model_counter + 1) % entityManager.visibleEntities.size();
+            model_counter = (model_counter + 1) % ecs.entityManager.visibleEntities.size();
         }
     }
 
@@ -347,8 +350,8 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
         const float rotation_speed = 2.0f;
 
         TransformComponent* transforms[2] = {
-            &componentManager.get<TransformComponent>(light1),
-            &componentManager.get<TransformComponent>(light2)
+            &ecs.componentManager.get<TransformComponent>(light1),
+            &ecs.componentManager.get<TransformComponent>(light2)
         };
 
         Matrix4 t_matrix {};
@@ -364,12 +367,12 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
 void Scene2::render() const {
 
     Renderer::disableCulling();
-    RenderSystem::render(entityManager, componentManager);
+    RenderSystem::render(ecs);
 }
 
 void Scene2::renderLight() const {
     
-    RenderSystem::renderLights(entityManager, componentManager);
+    RenderSystem::renderLights(ecs);
 
     static bool useEnv = true;
 
@@ -399,20 +402,20 @@ void Scene2::renderPointShadow() const {
     glDepthFunc(GL_LESS);
     Renderer::disableCulling();
 
-    ShadowSystem::render(entityManager, componentManager);
+    ShadowSystem::render(ecs);
 }
 
 void Scene2::renderDirectShadow() const {
 
-    ShadowSystem::renderDirectional(entityManager, componentManager);
+    ShadowSystem::renderDirectional(ecs);
 }
 
 void Scene2::renderGbuffer() const {
 
-    RenderSystem::renderGbuffer(entityManager, componentManager);
+    RenderSystem::renderGbuffer(ecs);
 }
 
 void Scene2::renderDeferred(const Shader& currentShader) const {
 
-    RenderSystem::lightningPass(entityManager, componentManager, &currentShader);
+    RenderSystem::lightningPass(ecs, &currentShader);
 }

@@ -75,28 +75,6 @@ struct MeshComponent {
     ShapeComponent shape;
 };
 
-// Light
-struct MaterialLight {
-
-    Shader* shader; // 8-Bytes
-};
-
-// Phong
-struct MaterialPhong {
-
-    Shader*    shader; // 8-Bytes
-    Texture2D* albedo; // 8-Bytes
-    Texture2D* normal; // 8-Bytes
-
-    glm::vec3 color;   // 12-Bytes
-
-    MaterialPhong():
-        shader(nullptr),
-        albedo(nullptr),
-        normal(nullptr) {
-    }
-};
-
 struct DirectionalLight {
 
     glm::vec3 direction; // 12-Bytes
@@ -303,9 +281,6 @@ public:
     const ComponentPool<Component>& getPool() const;
 
     ComponentManager();
-
-    // template <typename Component>
-    // void addComponent(const Entity& entity, const Component& component);
 
     template <typename Component>
     void addComponent(const Entity& entity, const Component& component) {

@@ -5,7 +5,7 @@
 class RenderSystem {
 
     static void bindCameraGlobals(const Shader* shader);
-    static void bindPointLightGlobals(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void bindPointLightGlobals(const ECS& ecs);
     // static void bindFlashLightGlobals(const ComponentManager& componentManager);
 
     static void draw(
@@ -56,11 +56,11 @@ public:
 
     static void update(const float deltaTime);
 
-    static void render      (const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void renderLights(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void render      (const ECS& ecs);
+    static void renderLights(const ECS& ecs);
 
-    static void renderGbuffer(const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void lightningPass(const EntityManager& entityManager, const ComponentManager& componentManager, const Shader* shader);
+    static void renderGbuffer(const ECS& ecs);
+    static void lightningPass(const ECS& ecs, const Shader* shader);
 };
 
 class ShadowSystem {
@@ -82,6 +82,6 @@ public:
 
     static bool init();
 
-    static void render           (const EntityManager& entityManager, const ComponentManager& componentManager);
-    static void renderDirectional(const EntityManager& entityManager, const ComponentManager& componentManager);
+    static void render           (const ECS& ecs);
+    static void renderDirectional(const ECS& ecs);
 };
