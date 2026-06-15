@@ -73,7 +73,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = true;
+    bool deferredRender = false;
 
     DebugMenu::log("Time taken to Initialize: " + running::globalTimer::getTime());
 

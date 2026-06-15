@@ -99,6 +99,8 @@ class Model3D {
 
     uint16_t total_mesh;
     std::string directory;
+
+    float radius;
     
     void loadModel(const std::string& path);
     
@@ -112,7 +114,7 @@ public:
     std::vector <Mesh> meshes;
     std::vector <MeshTexture> loadedTextures;
 
-    Model3D(const char* path) : directory(""), total_mesh(0) {
+    Model3D(const char* path) : directory(""), total_mesh(0), radius(0.0f) {
         loadModel(path);
     }
 
@@ -123,5 +125,5 @@ public:
     void destroy();
 
     // Cleans meshes, loadedTextures after converting them to ECS Component.
-    void clean();
+    float clean();
 };

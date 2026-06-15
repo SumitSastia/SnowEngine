@@ -1,0 +1,4 @@
+1. In BoundingSphereComponent, local center for all objects is assumed to be (0.0, 0.0, 0.0)
+
+2. Frustum Culling for instances is under progress. Right now, I am unable to decide how will the center and radius of all instance will be computed.
+-> Should I compute it for each instance?

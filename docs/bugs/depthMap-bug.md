@@ -1,8 +1,4 @@
-# Deferred Rendering / Shadow Mapping Bug Investigation
-
-## Symptoms
-
-![Broken Capture](images/shadow-bug1.png)
+# Deferred Rendering / Shadow Mapping Bug
 
 Objects rendered through the GBuffer became completely black when:
 
@@ -15,7 +11,9 @@ gOcclusion = 3
 
 and point shadows were enabled.
 
-Surprisingly, shifting the GBuffer bindings by one:
+![Broken Capture](images/shadow-bug1.png)
+
+Shifting the GBuffer bindings by one:
 
 ```text
 gPosition  = 1
@@ -25,7 +23,6 @@ gOcclusion = 4
 ```
 
 made the problem disappear.
-
 Disabling shadows also fixed the issue.
 
 This initially suggested a texture binding order issue, but the root cause was elsewhere.
@@ -42,8 +39,6 @@ Several possibilities were explored:
 * Corrupted depth maps
 * Sampler array indexing bugs
 * OpenGL state leakage
-
-RenderDoc was eventually used to inspect the deferred lighting pass.
 
 ---
 

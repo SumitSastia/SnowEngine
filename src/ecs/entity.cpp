@@ -144,6 +144,15 @@ EntityShapes::EntityShapes() {
 
     cubeNormalMapped.bindVertices3D_Normal(verticesCubeNormalMapped, sizeof(verticesCubeNormalMapped), indicesCube, sizeof(indicesCube));
 
+    cube.center = glm::vec3(0.0f);
+    cube.radius = 0.5f;
+
+    square.center = glm::vec3(0.0f);
+    square.radius = 0.5f;
+
+    cubeNormalMapped.center = glm::vec3(0.0f);
+    cubeNormalMapped.radius = 0.5f;
+
     // Instance Cubes
     glm::vec3 cubePositions[] = {
 

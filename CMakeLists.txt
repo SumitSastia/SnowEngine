@@ -50,6 +50,7 @@ add_executable(
     src/core/text.cpp
     src/core/ssao.cpp
     src/debug/debug.cpp
+    src/core/frustum.cpp
     ${SCENES_SRC}
     ${ECS_SRC}
     ${IMGUI_SRC}

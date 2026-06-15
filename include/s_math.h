@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <string>
+
 struct Matrix4 {
 
     glm::mat4 matrix_4x4;
@@ -25,5 +27,13 @@ struct Matrix4 {
 
     operator const glm::mat4&() const { return matrix_4x4; }
 };
+
+// std::string str = std::to_string(vec.x);
+// str += "," + std::to_string(vec.y);
+// str += "," + std::to_string(vec.z);
+
+// return str;
+
+std::string vec3Str(const glm::vec3& vec);
 
 glm::vec3 randomPosition(float min = -100.0f, float max = 100.0f);

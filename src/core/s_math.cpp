@@ -30,3 +30,8 @@ glm::vec3 randomPosition(float min, float max)
         dist(gen)
     );
 }
+
+std::string vec3Str(const glm::vec3& vec) {
+    
+    return {std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z)};
+}

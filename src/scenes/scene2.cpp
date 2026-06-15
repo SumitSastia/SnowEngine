@@ -96,43 +96,56 @@ void Scene2::init() {
         
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
+        // DebugMenu::log("Box center: " + vec3Str(boundingSphere.center));
+        // DebugMenu::log("Box radius: " + std::to_string(boundingSphere.radius));
         
         componentManager.addComponent(wood_box, mesh);
         componentManager.addComponent(wood_box, transform);
         componentManager.addComponent(wood_box, material);
+        componentManager.addComponent(wood_box, boundingSphere);
     }
 
     DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
-    // for (uint32_t i = 0; i < 1000; i++) {
+    for (uint32_t i = 0; i < 1000; i++) {
 
-    //     crowd[i] = entityManager.createEntity();
+        crowd[i] = entityManager.createEntity();
 
-    //     TransformComponent transform;
-    //     transform.position = randomPosition(-20.0f, 20.0f);
-    //     transform.rotation = glm::vec3(0.0f);
-    //     transform.scale    = glm::vec3(1.0f);
-    //     transform.computeModel();
+        TransformComponent transform;
+        transform.position = randomPosition(-20.0f, 20.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
         
-    //     MeshComponent mesh;
-    //     // mesh.shape = EntityShapes::instance().cube;
-    //     mesh.shape = EntityShapes::instance().cubeNormalMapped;
+        MeshComponent mesh;
+        // mesh.shape = EntityShapes::instance().cube;
+        mesh.shape = EntityShapes::instance().cubeNormalMapped;
         
-    //     MaterialComponent material;
-    //     material.shader = Shaders::get(NORMPBR3D);
+        MaterialComponent material;
+        material.shader = Shaders::get(NORMPBR3D);
         
-    //     material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
-    //     material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
+        material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
+        material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
         
-    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
-    //     material.metallic  = material.albedo;
-    //     material.roughness = material.albedo;
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
-    //     componentManager.addComponent(crowd[i], mesh);
-    //     componentManager.addComponent(crowd[i], transform);
-    //     componentManager.addComponent(crowd[i], material);
-    // }
+        componentManager.addComponent(crowd[i], mesh);
+        componentManager.addComponent(crowd[i], transform);
+        componentManager.addComponent(crowd[i], material);
+        componentManager.addComponent(crowd[i], boundingSphere);
+    }
 
     DebugMenu::log("crowd: " + running::globalTimer::endInterval());
 
@@ -154,10 +167,15 @@ void Scene2::init() {
         material.normal = new Texture2D("assets/textures/brickwall_normal.png");
 
         material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
         componentManager.addComponent(floor, mesh);
         componentManager.addComponent(floor, transform);
         componentManager.addComponent(floor, material);
+        componentManager.addComponent(floor, boundingSphere);
     }
 
     DebugMenu::log("Floor: " + running::globalTimer::endInterval());
@@ -182,10 +200,15 @@ void Scene2::init() {
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
         componentManager.addComponent(wall, mesh);
         componentManager.addComponent(wall, transform);
         componentManager.addComponent(wall, material);
+        componentManager.addComponent(wall, boundingSphere);
     }
 
     DebugMenu::log("Wall: " + running::globalTimer::endInterval());
@@ -209,10 +232,15 @@ void Scene2::init() {
         material.albedo = new Texture2D("assets/textures/parallax_maps/bricks2.jpg", 1);
         material.normal = new Texture2D("assets/textures/parallax_maps/bricks2_normal.jpg");
         material.height = new Texture2D("assets/textures/parallax_maps/bricks2_disp.jpg");
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
         componentManager.addComponent(brickWall, mesh);
         componentManager.addComponent(brickWall, transform);
         componentManager.addComponent(brickWall, material);
+        componentManager.addComponent(brickWall, boundingSphere);
     }
 
     DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::globalTimer::endInterval());
@@ -232,10 +260,15 @@ void Scene2::init() {
         modelComponent.init(sphereModel, shader, Shaders::get(GBUFFER3D));
         componentManager.addShader(shader);
 
-        sphereModel->clean();
+        float localRadius = sphereModel->clean();
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = localRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         componentManager.addComponent(sphere, modelComponent);
         componentManager.addComponent(sphere, transform);
+        componentManager.addComponent(sphere, boundingSphere);
     }
 
     // headcam
@@ -253,10 +286,15 @@ void Scene2::init() {
         modelComponent.init(camModel, shader, Shaders::get(GBUFFER3D));
         componentManager.addShader(shader);
 
-        camModel->clean();
+        float localRadius = camModel->clean();
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = localRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         componentManager.addComponent(headcam, modelComponent);
         componentManager.addComponent(headcam, transform);
+        componentManager.addComponent(headcam, boundingSphere);
     }
 
     DebugMenu::log("Sphere (Model3D to ECS): " + running::globalTimer::endInterval());
@@ -295,10 +333,15 @@ void Scene2::init() {
         pointlight.linear    = DefaultLights::instance().cubelight.linear;
         pointlight.quadratic = DefaultLights::instance().cubelight.quadratic;
 
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
         componentManager.addComponent(light1, mesh);
         componentManager.addComponent(light1, transform);
         componentManager.addComponent(light1, material);
         componentManager.addComponent(light1, pointlight);
+        componentManager.addComponent(light1, boundingSphere);
     }
 
     DebugMenu::log("Light1: " + running::globalTimer::endInterval());
@@ -323,10 +366,15 @@ void Scene2::init() {
         pointlight.linear    = DefaultLights::instance().cubelight.linear;
         pointlight.quadratic = DefaultLights::instance().cubelight.quadratic;
 
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
         componentManager.addComponent(light2, mesh);
         componentManager.addComponent(light2, transform);
         componentManager.addComponent(light2, material);
         componentManager.addComponent(light2, pointlight);
+        componentManager.addComponent(light2, boundingSphere);
     }
 
     DebugMenu::log("Light2: " + running::globalTimer::endInterval());

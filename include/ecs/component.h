@@ -31,9 +31,12 @@ struct ShapeComponent {
     uint VAO, VBO, EBO;
     uint indicesCount;
 
+    glm::vec3 center;
+    float radius;
+
     ShapeComponent():
         VAO(0), VBO(0), EBO(0),
-        indicesCount(0) {
+        indicesCount(0), center(0.0f), radius(0.0f) {
     }
 
     ShapeComponent(uint VAO, uint VBO, uint EBO, uint indicesCount):
@@ -72,6 +75,7 @@ struct TransformComponent {
 };
 
 struct MeshComponent {
+
     ShapeComponent shape;
 };
 
@@ -166,6 +170,8 @@ struct ModelComponent {
     std::vector <MeshComponent>     meshes;
     std::vector <MaterialComponent> materials;
 
+    float radius;
+
     void init(const Model3D* model, Shader* shader, Shader* gbufferShader);
 };
 
@@ -196,6 +202,11 @@ struct DirectShadowData {
     DirectShadowData(Entity entity, Matrix4 matrix, DirectShadowFrame* frame):
         entity(entity), lightSpaceMatrix(matrix), frame(frame) {
     }
+};
+
+struct BoundingSphereComponent {
+    glm::vec3 center;
+    float radius;
 };
 
 template <typename Component>
@@ -236,27 +247,17 @@ class ComponentManager {
 public:
 
     // Component Pools
-    ComponentPool <TransformComponent>  transforms;
-    ComponentPool <MeshComponent>       meshes;
-    ComponentPool <MaterialComponent>   materials;
-    ComponentPool <InstanceComponent>   instances;
-    ComponentPool <ModelComponent>      models;
-    ComponentPool <PointLightComponent> pointlights;
-    ComponentPool <DirectionalLight>    directlights;
+    ComponentPool <TransformComponent>      transforms;
+    ComponentPool <MeshComponent>           meshes;
+    ComponentPool <MaterialComponent>       materials;
+    ComponentPool <InstanceComponent>       instances;
+    ComponentPool <ModelComponent>          models;
+    ComponentPool <PointLightComponent>     pointlights;
+    ComponentPool <DirectionalLight>        directlights;
+    ComponentPool <BoundingSphereComponent> boundingSpheres;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);
-    
-    // For Renderable Objects
-    std::vector <MeshComponent>      arr_mesh;
-    std::vector <TransformComponent> arr_transform;
-    std::vector <MaterialComponent>  arr_material;
-    std::vector <InstanceComponent>  arr_instance;
-    std::vector <ModelComponent>     arr_model;
-
-    // For Light Sources
-    std::vector <PointLightComponent> arr_light;
-    std::vector <DirectionalLight>    arr_directionalLight;
 
     // For Objects to be lit by PointLights
     std::vector <Shader*> uniqueShaders;

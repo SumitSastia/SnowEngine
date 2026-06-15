@@ -147,6 +147,9 @@ Mesh Model3D::processMesh(aiMesh* _Mesh, const aiScene* scene) {
             _Mesh->mVertices[i].z
         );
 
+        float vertex_length = glm::length(temp_Vertex.position - glm::vec3(0.0f));
+        radius = std::max(radius, vertex_length);
+
         if (_Mesh->HasNormals()) {
 
             temp_Vertex.normal = glm::vec3(
@@ -251,7 +254,7 @@ void Mesh::clean() {
     textures.clear();
 }
 
-void Model3D::clean() {
+float Model3D::clean() {
 
     for (unsigned int i = 0; i < total_mesh; i++) {
         meshes[i].clean();
@@ -259,4 +262,6 @@ void Model3D::clean() {
 
     meshes.clear();
     loadedTextures.clear();
+
+    return radius;
 }

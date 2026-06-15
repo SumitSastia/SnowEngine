@@ -4,6 +4,7 @@
 #include <model.h>
 #include <shader.h>
 #include <frame.h>
+#include <camera.h>
 
 // ------------------------------ Components ----------------------------------------- //
 
@@ -283,6 +284,11 @@ ComponentPool<DirectionalLight>& ComponentManager::getPool() {
 }
 
 template <>
+ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() {
+    return boundingSpheres;
+}
+
+template <>
 const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
     return transforms;
 }
@@ -317,17 +323,14 @@ const ComponentPool<DirectionalLight>& ComponentManager::getPool() const {
     return directlights;
 }
 
+template <>
+const ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() const {
+    return boundingSpheres;
+}
+
 // ------------------------------ Components ----------------------------------------- //
 
 ComponentManager::ComponentManager():
-
-    arr_mesh(MAX_ENTITIES),
-    arr_transform(MAX_ENTITIES),
-    arr_material(MAX_ENTITIES),
-    arr_light(MAX_ENTITIES),
-    arr_directionalLight(MAX_ENTITIES),
-    arr_instance(MAX_ENTITIES),
-    arr_model(MAX_ENTITIES),
     
     has_mesh(MAX_ENTITIES, false),
     has_transform(MAX_ENTITIES, false),
