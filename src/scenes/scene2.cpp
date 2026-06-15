@@ -204,6 +204,9 @@ void Scene2::init() {
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
+        DebugMenu::log("wall center: " + vec3Str(boundingSphere.center));
+        DebugMenu::log("wall radius: " + std::to_string(boundingSphere.radius));
         
         componentManager.addComponent(wall, mesh);
         componentManager.addComponent(wall, transform);

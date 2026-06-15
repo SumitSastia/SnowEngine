@@ -7,6 +7,7 @@
 #include <lights.h>
 #include <frame.h>
 #include <input.h>
+#include <frustum.h>
 
 #include <iostream>
 
@@ -121,17 +122,28 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
     const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
+    // Frustum
+    Frustum frustum(Camera::instance().getPerspective() * Camera::instance().getView());
+
+    int totalRenderCalls = 0;
     for (const Entity& entity : objects) {
 
         // Temporary Fix: Prevents Light Meshes to render
         if (componentManager.has<PointLightComponent>(entity)) continue;
+
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
 
         draw(mesh, transform, material);
+        totalRenderCalls++;
     }
+
+    DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
 
     for (const Entity& entity : instances) {
 

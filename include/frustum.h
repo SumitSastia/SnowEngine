@@ -12,8 +12,7 @@ namespace gfx::internal {
     };
 
     struct Plane {
-        glm::vec3 normal;
-        float distance;
+        glm::vec4 normal;
     };
 };
 
