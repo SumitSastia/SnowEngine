@@ -183,6 +183,7 @@ public:
 	void init() override {}
 	void render() const override;
 
+	// for SSAO
 	void bind_gPosition(const unsigned int textureUnit) const;
 	void bind_gNormal(const unsigned int textureUnit) const;
 };

@@ -1,6 +1,5 @@
 #include <ecs/rendersystem.h>
 
-#include <camera.h>
 #include <shader.h>
 #include <shapes.h>
 #include <renderer.h>
@@ -10,8 +9,6 @@
 #include <input.h>
 
 #include <iostream>
-
-uint8_t RenderSystem::lastTextureUnit = 0;
 
 void RenderSystem::bindCameraGlobals(const Shader* shader) {
 
@@ -32,6 +29,7 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
     for (const Shader* shader : componentManager.uniqueShaders) {
         
         shader->use();
+
         lastTextureUnit = 0;
 
         // ----------------------- SpotLight ----------------------- //
@@ -74,13 +72,10 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
         // ------------------------ DepthMap ----------------------- //
 
-        int index = 0;
-        for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
+        for (uint8_t i = 0; i < MAX_LIGHTS; i++) {
 
-            // DebugMenu::log((uint)lastTextureUnit);
-
-            shader->setInt(("depthMap[" + std::to_string(index++) + "]").c_str(), lastTextureUnit);
-            pointShadow.frame->bindTexture(lastTextureUnit++);
+            if (i < light_count) componentManager.pointShadowFrames[i].frame->bindTexture(lastTextureUnit);
+            shader->setInt(("depthMap[" + std::to_string(i) + "]").c_str(), lastTextureUnit++);
         }
 
         // --------------------- Directional Light ----------------- //
@@ -108,7 +103,6 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
         shader->setInt("brdfLUT", lastTextureUnit);
         entityManager.env->bindBRDF(lastTextureUnit++);
-
     }
 }
 
@@ -127,8 +121,10 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
     const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
-    // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
     for (const Entity& entity : objects) {
+
+        // Temporary Fix: Prevents Light Meshes to render
+        if (componentManager.has<PointLightComponent>(entity)) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
@@ -361,6 +357,8 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
     for (const Entity& entity : objects) {
 
+        if (componentManager.has<PointLightComponent>(entity)) continue;
+
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
@@ -396,7 +394,7 @@ void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
     const EntityManager&    entityManager    = ecs.entityManager;
     const ComponentManager& componentManager = ecs.componentManager;
 
-    lastTextureUnit = 4;
+    lastTextureUnit = 5;
     const uint32_t light_count = entityManager.emissiveEntities.size();
 
     shader->use();
@@ -439,11 +437,10 @@ void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
 
     // ------------------------ DepthMap ----------------------- //
 
-    int index = 0;
-    for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
+    for (uint8_t i = 0; i < MAX_LIGHTS; i++) {
 
-        shader->setInt(("depthMap[" + std::to_string(index++) + "]").c_str(), lastTextureUnit);
-        pointShadow.frame->bindTexture(lastTextureUnit++);
+        if (i < light_count) componentManager.pointShadowFrames[i].frame->bindTexture(lastTextureUnit);
+        shader->setInt(("depthMap[" + std::to_string(i) + "]").c_str(), lastTextureUnit++);
     }
 
     // --------------------- Directional Light ----------------- //
@@ -474,8 +471,6 @@ void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
 }
 
 // ------------------------------------------------------------------------------------------------------- //
-
-glm::mat4 ShadowSystem::shadowProj = glm::mat4(1.0f);
 
 bool ShadowSystem::init() {
 

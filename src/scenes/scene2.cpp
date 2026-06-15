@@ -86,9 +86,9 @@ void Scene2::init() {
         
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR3D);
-        // material.shader = Shaders::get(ALBEDO3D);
-        material.albedo = DefaultShapes::instance().cube.getAlbedo();
-        material.normal = DefaultShapes::instance().advancedCube.getNormalMap();
+        
+        material.albedo = new Texture2D("assets/textures/wood_box.png", 1);
+        material.normal = new Texture2D("assets/textures/wood_box_normal.png");
         
         material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
@@ -104,6 +104,38 @@ void Scene2::init() {
 
     DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
+    // for (uint32_t i = 0; i < 1000; i++) {
+
+    //     crowd[i] = entityManager.createEntity();
+
+    //     TransformComponent transform;
+    //     transform.position = randomPosition(-20.0f, 20.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
+        
+    //     MeshComponent mesh;
+    //     // mesh.shape = EntityShapes::instance().cube;
+    //     mesh.shape = EntityShapes::instance().cubeNormalMapped;
+        
+    //     MaterialComponent material;
+    //     material.shader = Shaders::get(NORMPBR3D);
+        
+    //     material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
+    //     material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
+        
+    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+        
+    //     material.metallic  = material.albedo;
+    //     material.roughness = material.albedo;
+        
+    //     componentManager.addComponent(crowd[i], mesh);
+    //     componentManager.addComponent(crowd[i], transform);
+    //     componentManager.addComponent(crowd[i], material);
+    // }
+
+    DebugMenu::log("crowd: " + running::globalTimer::endInterval());
+
     // floor
     {
         TransformComponent transform;
@@ -117,8 +149,9 @@ void Scene2::init() {
 
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
-        material.albedo = DefaultShapes::instance().square.getAlbedo();
-        material.normal = DefaultShapes::instance().square.getNormalMap();
+
+        material.albedo = new Texture2D("assets/textures/brickwall.jpg", 1);
+        material.normal = new Texture2D("assets/textures/brickwall_normal.png");
 
         material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
         
@@ -142,8 +175,8 @@ void Scene2::init() {
 
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
-        material.albedo = DefaultShapes::instance().square.getAlbedo();
-        material.normal = DefaultShapes::instance().square.getNormalMap();
+        material.albedo = componentManager.get<MaterialComponent>(floor).albedo;
+        material.normal = componentManager.get<MaterialComponent>(floor).normal;
 
         material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
 
@@ -173,13 +206,9 @@ void Scene2::init() {
         material.shader = Shaders::get(PARALLAX2D);
         // material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
         
-        material.albedo = new Texture2D();
-        material.normal = new Texture2D();
-        material.height = new Texture2D();
-
-        material.albedo->load("assets/textures/parallax_maps/bricks2.jpg",        1);
-        material.normal->load("assets/textures/parallax_maps/bricks2_normal.jpg", 1);
-        material.height->load("assets/textures/parallax_maps/bricks2_disp.jpg",   1);
+        material.albedo = new Texture2D("assets/textures/parallax_maps/bricks2.jpg", 1);
+        material.normal = new Texture2D("assets/textures/parallax_maps/bricks2_normal.jpg");
+        material.height = new Texture2D("assets/textures/parallax_maps/bricks2_disp.jpg");
         
         componentManager.addComponent(brickWall, mesh);
         componentManager.addComponent(brickWall, transform);
@@ -236,8 +265,7 @@ void Scene2::init() {
     {
         MaterialComponent material;
         material.shader = Shaders::get(INSTANCEPBR3D);
-        material.albedo = new Texture2D();
-        material.albedo->load("assets/textures/grunge-box-small.jpg", 1);
+        material.albedo = new Texture2D("assets/textures/grunge-box-small.jpg", 1);
 
         material.gbufferShader = Shaders::get(INSTANCE_GBUFFER3D);
         
@@ -306,57 +334,59 @@ void Scene2::init() {
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {
 
-    static uint8_t model_counter = 0;
+    static Entity  entity = 0;
     const  float   move_speed    = scene_var::speed * delta_time;
 
     // Model of the Object to move
-    const Entity& entity = ecs.entityManager.visibleEntities[model_counter];
+
+    if (
+        Input::isKeyDown(GLFW_KEY_KP_1) ||
+        (!ecs.componentManager.has<TransformComponent>(entity))
+    ) {
+        entity = (entity + 1) % ecs.entityManager.total_entities();
+    }
 
     if (ecs.componentManager.has<TransformComponent>(entity)) {
 
         Matrix4& movableModel = ecs.componentManager.get<TransformComponent>(entity).model;
-
+        
         if (glfwGetKey(window, GLFW_KEY_KP_8)) {
             movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f,-1.0f));
         }
-
+        
         if (glfwGetKey(window, GLFW_KEY_KP_2)) {
             movableModel.translate(move_speed * glm::vec3( 0.0f, 0.0f, 1.0f));
         }
-
+        
         if (glfwGetKey(window, GLFW_KEY_KP_4)) {
             movableModel.translate(move_speed * glm::vec3(-1.0f, 0.0f, 0.0f));
         }
-
+        
         if (glfwGetKey(window, GLFW_KEY_KP_6)) {
             movableModel.translate(move_speed * glm::vec3( 1.0f, 0.0f, 0.0f));
         }
-
+        
         if (glfwGetKey(window, GLFW_KEY_KP_9)) {
             movableModel.translate(move_speed * glm::vec3( 0.0f, 1.0f, 0.0f));
         }
-
+        
         if (glfwGetKey(window, GLFW_KEY_KP_7)) {
-            movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
-        }
-
-        if (Input::isKeyDown(GLFW_KEY_KP_1)) {
-            model_counter = (model_counter + 1) % ecs.entityManager.visibleEntities.size();
+        movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
         }
     }
-
+    
     if (Input::isKeyPressed(GLFW_KEY_KP_5)) {
-
+        
         const float rotation_speed = 2.0f;
-
+        
         TransformComponent* transforms[2] = {
             &ecs.componentManager.get<TransformComponent>(light1),
             &ecs.componentManager.get<TransformComponent>(light2)
         };
-
+        
         Matrix4 t_matrix {};
         t_matrix.rotate(rotation_speed, glm::vec3(0.0f, 1.0f, 0.0f));
-
+        
         for (uint8_t i = 0; i < 2; i++) {
             transforms[i]->model.setMatrix(t_matrix.getMatrix() * transforms[i]->model.getMatrix());
             transforms[i]->computePosition();
@@ -367,12 +397,12 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
 void Scene2::render() const {
 
     Renderer::disableCulling();
-    RenderSystem::render(ecs);
+    RenderSystem::instance().render(ecs);
 }
 
 void Scene2::renderLight() const {
     
-    RenderSystem::renderLights(ecs);
+    RenderSystem::instance().renderLights(ecs);
 
     static bool useEnv = true;
 
@@ -402,20 +432,20 @@ void Scene2::renderPointShadow() const {
     glDepthFunc(GL_LESS);
     Renderer::disableCulling();
 
-    ShadowSystem::render(ecs);
+    ShadowSystem::instance().render(ecs);
 }
 
 void Scene2::renderDirectShadow() const {
 
-    ShadowSystem::renderDirectional(ecs);
+    ShadowSystem::instance().renderDirectional(ecs);
 }
 
 void Scene2::renderGbuffer() const {
 
-    RenderSystem::renderGbuffer(ecs);
+    RenderSystem::instance().renderGbuffer(ecs);
 }
 
 void Scene2::renderDeferred(const Shader& currentShader) const {
 
-    RenderSystem::lightningPass(ecs, &currentShader);
+    RenderSystem::instance().lightningPass(ecs, &currentShader);
 }

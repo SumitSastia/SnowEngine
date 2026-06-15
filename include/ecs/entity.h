@@ -6,12 +6,14 @@
 
 #include <cstdint>
 #include <vector>
+#include <iostream>
 
 #include <ecs/component.h>
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-#define MAX_LIGHTS   10
+// WARNING: SHOULD BE SAME AS THAT DEFINED IN GLSL SHADER
+#define MAX_LIGHTS 4
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
@@ -59,7 +61,14 @@ public:
 
     EntityManager();
 
-    Entity createEntity() { return nextEntity++; }
+    Entity createEntity() {
+
+        if (nextEntity >= MAX_ENTITIES) {
+            std::cerr << "ERROR::MAX ENTITIES REACHED!" << std::endl;
+        }
+
+        return nextEntity++;
+    }
     const Entity& total_entities() const { return nextEntity; }
 };
 
@@ -67,15 +76,6 @@ struct ECS {
 
     EntityManager    entityManager;
     ComponentManager componentManager;
-
-    // template <typename Component0>
-    // const std::vector<Entity>& view() const;
-
-    // template <typename Component0, typename Component1>
-    // const std::vector<Entity>& view() const;
-    
-    // template <typename Component0, typename Component1, typename Component2>
-    // const std::vector<Entity>& view() const;
 
     template <typename Component0>
     const std::vector<Entity> view() const {

@@ -35,25 +35,24 @@ set(
 add_executable(
     ${TARGET_NAME}
 
-    src/glad.c
-    src/s_math.cpp
-    ${IMGUI_SRC}
-    src/main.cpp
-    src/shader.cpp
-    src/camera.cpp
-    src/shapes.cpp
-    src/renderer.cpp
-    src/debug.cpp
-    src/input.cpp
-    src/entity.cpp
-    src/lights.cpp
-    src/frame.cpp
-    src/model.cpp
-    src/ibl.cpp
-    src/text.cpp
-    src/ssao.cpp
+    src/core/glad.c
+    src/core/s_math.cpp
+    src/core/main.cpp
+    src/core/shader.cpp
+    src/core/camera.cpp
+    src/core/shapes.cpp
+    src/core/renderer.cpp
+    src/core/input.cpp
+    src/core/lights.cpp
+    src/core/frame.cpp
+    src/core/model.cpp
+    src/core/ibl.cpp
+    src/core/text.cpp
+    src/core/ssao.cpp
+    src/debug/debug.cpp
     ${SCENES_SRC}
     ${ECS_SRC}
+    ${IMGUI_SRC}
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)

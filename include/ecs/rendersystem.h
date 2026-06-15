@@ -1,87 +1,102 @@
 #pragma once
 
+#include <iostream>
 #include <ecs/entity.h>
+#include <camera.h>
 
 class RenderSystem {
 
-    static void bindCameraGlobals(const Shader* shader);
-    static void bindPointLightGlobals(const ECS& ecs);
-    // static void bindFlashLightGlobals(const ComponentManager& componentManager);
+    void bindCameraGlobals(const Shader* shader);
+    void bindPointLightGlobals(const ECS& ecs);
 
-    static void draw(
+    void draw(
         const MeshComponent&      mesh,
         const TransformComponent& transform,
         const MaterialComponent&  material
     );
 
-    static void draw(
+    void draw(
         const MeshComponent&       mesh,
         const TransformComponent&  transform,
         const MaterialComponent&   material,
         const PointLightComponent& pointlight
     );
 
-    static void draw(
+    void draw(
         const InstanceComponent& instance,
         const MaterialComponent& material
     );
 
-    static void drawGbuffer(
+    void drawGbuffer(
         const MeshComponent&      mesh,
         const TransformComponent& transform,
         const MaterialComponent&  material
     );
 
-    static void drawGbuffer(
+    void drawGbuffer(
         const MeshComponent&       mesh,
         const TransformComponent&  transform,
         const MaterialComponent&   material,
         const PointLightComponent& pointlight
     );
 
-    static void drawGbuffer(
+    void drawGbuffer(
         const InstanceComponent& instance,
         const MaterialComponent& material
     );
 
-    static uint8_t lastTextureUnit;
+    uint32_t lastTextureUnit;
 
 public:
 
-    static RenderSystem& instance() {
+    RenderSystem(const Camera& camera):
+        lastTextureUnit(0) {
+    }
 
-        static RenderSystem instance {};
+    static RenderSystem& instance() {
+        static RenderSystem instance(Camera::instance());
         return instance;
     }
 
-    static void update(const float deltaTime);
+    void update(const float deltaTime);
 
-    static void render      (const ECS& ecs);
-    static void renderLights(const ECS& ecs);
+    void render      (const ECS& ecs);
+    void renderLights(const ECS& ecs);
 
-    static void renderGbuffer(const ECS& ecs);
-    static void lightningPass(const ECS& ecs, const Shader* shader);
+    void renderGbuffer(const ECS& ecs);
+    void lightningPass(const ECS& ecs, const Shader* shader);
 };
 
 class ShadowSystem {
 
-    static glm::mat4 shadowProj;
+    glm::mat4 shadowProj;
 
-    static void drawShadow(
+    void drawShadow(
         const Shader&             shader,
         const MeshComponent&      mesh,
         const TransformComponent& transform
     );
 
-    static void drawShadowInstanced(
+    void drawShadowInstanced(
         const Shader&            shader,
         const InstanceComponent& instance
     );
 
 public:
 
-    static bool init();
+    ShadowSystem() {
+        if (!init()) {
+            std::cerr << "ERROR::FAILED TO INITIALIZE SHADOW-SYSTEM!" << std::endl;
+        }
+    }
 
-    static void render           (const ECS& ecs);
-    static void renderDirectional(const ECS& ecs);
+    static ShadowSystem& instance() {
+        static ShadowSystem instance {};
+        return instance;
+    }
+
+    bool init();
+
+    void render           (const ECS& ecs);
+    void renderDirectional(const ECS& ecs);
 };

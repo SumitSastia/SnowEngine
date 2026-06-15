@@ -181,7 +181,6 @@ PointShadowFrame::PointShadowFrame(const uint16_t& shadow_size) {
 void PointShadowFrame::bindTexture(const unsigned int textureUnit) const {
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
 }
 
@@ -448,38 +447,30 @@ Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
 void Gbuffer::render() const {
 
-    Renderer::disableDepth();
-
-    const unsigned int textureUnit = 0; // 6
+    const int textureUnit = 0;
 
     shader->use();
     shader->setInt("gPosition",  textureUnit);
     shader->setInt("gNormal",    textureUnit + 1);
     shader->setInt("gTexture",   textureUnit + 2);
     shader->setInt("gOcclusion", textureUnit + 3);
-    
+
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindTexture(GL_TEXTURE_2D, gPosition);
     
-    glActiveTexture(GL_TEXTURE1 + textureUnit);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 1);
     glBindTexture(GL_TEXTURE_2D, gNormal);
     
-    glActiveTexture(GL_TEXTURE2 + textureUnit);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glActiveTexture(GL_TEXTURE0 + textureUnit + 2);
     glBindTexture(GL_TEXTURE_2D, gTexture);
-
+    
     if (SSAO::enable) {
         SSAO::bindOcclusion(textureUnit + 3);
     }
 
     shader->setBool("toggleAO", SSAO::enable);
     
-    glBindVertexArray(frameBuffers::get_defaultVAO());
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    Renderer::enableDepth();
+    frameBuffers::renderScreen();
 }
 
 void Gbuffer::bind_gPosition(const unsigned int textureUnit) const {

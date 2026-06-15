@@ -116,11 +116,10 @@ class Scene2 : public Scene {
     Entity sun;
     Entity headcam;
 
-    // EntityManager    entityManager;
-    // ComponentManager componentManager;
     ECS ecs;
-
     Environment* env;
+
+    Entity crowd[1000];
 
 public:
 

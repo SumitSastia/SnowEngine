@@ -35,8 +35,11 @@ void main() {
     vNormal = normalize(vNormal * 2.0 - 1.0);
     vNormal = normalize(TBN * vNormal);
 
-    metallic = 0.8;
-    roughness = 0.2;
+    // metallic = 0.8;
+    // roughness = 0.2;
+
+    metallic  = tex.r;
+    roughness = tex.g;
 
     // Ambient
     vec3 color = vec3(0.05) * tex;

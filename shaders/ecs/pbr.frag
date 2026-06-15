@@ -31,8 +31,11 @@ void main() {
     float metallic  = 0.01 * (tex.r + tex.g + tex.b);
     float roughness = 0.1 * (tex.r + tex.g + tex.b);
 
-    metallic = 0.2;
-    roughness = 0.1;
+    // metallic = 0.2;
+    // roughness = 0.1;
+
+    metallic  = tex.r;
+    roughness = tex.g;
 
     // Ambient
     vec3 color = vec3(0.05) * tex;

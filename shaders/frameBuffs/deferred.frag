@@ -15,6 +15,7 @@ uniform sampler2D   brdfLUT;
 uniform bool toggleAO;
 uniform bool useIrradiance;
 uniform bool useDirectionalLight;
+uniform bool useShadow;
 
 #include <deferred_lighting.glsl>
 
@@ -95,9 +96,9 @@ void main() {
 
         // vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
         vec3 lightColor = calcPBR(pl[i], vPos, tex, vNormal, F0, metallic, roughness);
-        // const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
+        const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
 
-        // lightColor *= shadow;
+        lightColor *= shadow;
         color += lightColor;
     }
 

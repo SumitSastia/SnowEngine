@@ -36,7 +36,7 @@ int main() {
     DebugMenu::init(window);
     Text::init("../assets/fonts/BlockBlueprint.ttf");
     SSAO::init();
-    ShadowSystem::init();
+    // ShadowSystem::init();
     Shaders::initShaders();
 
     glEnable(GL_MULTISAMPLE);
@@ -73,7 +73,7 @@ int main() {
 
     Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
-    bool deferredRender = false;
+    bool deferredRender = true;
 
     DebugMenu::log("Time taken to Initialize: " + running::globalTimer::getTime());
 
@@ -121,15 +121,15 @@ int main() {
 
         // Rendering //
 
+        scene2->renderDirectShadow();
+        scene2->renderPointShadow();
+
 
         // Scene
         if (!deferredRender) {
 
             // mainScene->renderDirectShadow();
             // mainScene->renderPointShadow();
-
-            scene2->renderDirectShadow();
-            scene2->renderPointShadow();
             
             glViewport(0, 0, WIN_W, WIN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
@@ -157,15 +157,6 @@ int main() {
             scene2->renderLight();
         }
         else {
-
-            // ************************************************************* //
-
-            // Shadow Pass
-            // mainScene->renderDirectShadow();
-            // mainScene->renderPointShadow();
-
-            scene2->renderDirectShadow();
-            scene2->renderPointShadow();
 
             // ************************************************************* //
 

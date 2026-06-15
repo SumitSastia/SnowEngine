@@ -7,7 +7,56 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Camera{
+#include <vector>
+
+namespace gfx::internal {
+
+    struct AABB {
+        glm::vec3 min;
+        glm::vec3 max;
+    };
+
+    struct BoundingSphere {
+        glm::vec3 center;
+        float radius;
+    };
+
+    struct Plane {
+        glm::vec3 normal;
+        float distance;
+    };
+};
+
+class Frustum {
+
+    // 0 - Left
+    // 1 - Right
+    // 2 - Top
+    // 3 - Bottom
+    // 4 - Near
+    // 5 - Far
+
+    std::vector <gfx::internal::Plane> faces;
+
+    void init(const glm::mat4& viewProj);
+
+public:
+
+    Frustum(const glm::mat4& viewProj):
+        faces(6)
+    {
+        init(viewProj);
+    }
+
+    bool isMeshInside(const gfx::internal::BoundingSphere& sphere);
+
+    // Extracts 6 Faces(Planes) of the Frustum
+    void update(const glm::mat4& viewProj);
+};
+
+//***************************************************************************//
+
+class Camera {
 
     glm::vec3 position;
     glm::vec3 direction;
@@ -37,6 +86,8 @@ class Camera{
     // Player Movements
     bool Uturn;
 
+    Frustum* frustum;
+
 public:
 
     Camera();
@@ -61,4 +112,10 @@ public:
     glm::mat4 getView() const { return viewMatrix; }
     glm::mat4 getPerspective() const { return projection; }
     glm::vec3 getTarget() const { return target; }
+
+    bool isMeshInside(const gfx::internal::BoundingSphere& sphere) {
+        return frustum->isMeshInside(sphere);
+    }
 };
+
+

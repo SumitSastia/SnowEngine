@@ -25,3 +25,5 @@ struct Matrix4 {
 
     operator const glm::mat4&() const { return matrix_4x4; }
 };
+
+glm::vec3 randomPosition(float min = -100.0f, float max = 100.0f);

@@ -6,8 +6,9 @@
 
 #include <iostream>
 
-Camera::Camera() {
-
+Camera::Camera():
+    frustum(nullptr)
+{
     position  = glm::vec3(0.0f, 0.0f, 3.0f);
     target    = glm::vec3(0.0f, 0.0f, -1.0f);
     direction = glm::normalize(position - target);
@@ -24,7 +25,9 @@ Camera::Camera() {
 
     aspectRatio = (float)WIN_W / (float)WIN_H;
 
-    projection  = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    viewMatrix = glm::lookAt(position, position + target, up_axis);
+
     mouseEnabled = true;
 
     yaw   = -90.0f;
@@ -32,6 +35,9 @@ Camera::Camera() {
 
     // Player Movements
     Uturn = false;
+
+    // Frustum Culling
+    frustum = new Frustum(projection * viewMatrix);
 }
 
 Camera& Camera::instance() {
@@ -62,6 +68,7 @@ void Camera::update(const float& delta_time) {
     target = glm::normalize(new_direction);
 
     look_at();
+    frustum->update(projection * viewMatrix);
 
     ImGui::Text("Camera FOV: %.1f", fov);
 }
@@ -193,4 +200,57 @@ void Camera::scroll_handler(float &scrollOffset){
     
     set_fov(fov - scrollOffset);
     scrollOffset = 0.0f;
+}
+
+//***************************************************************************//
+
+void Frustum::init(const glm::mat4& viewProj) {
+
+    // Extract 6 Faces of frustum from 'viewProj'
+    const glm::vec4 col0 = viewProj[0];
+    const glm::vec4 col1 = viewProj[1];
+    const glm::vec4 col2 = viewProj[2];
+    const glm::vec4 col3 = viewProj[3];
+
+    faces[0].normal = col3 + col0;
+    faces[1].normal = col3 - col0;
+    faces[2].normal = col3 - col1;
+    faces[3].normal = col3 + col1;
+    faces[4].normal = col3 + col2;
+    faces[5].normal = col3 - col2;
+
+    for (auto& plane : faces) {
+        plane.normal = glm::normalize(plane.normal);
+    }
+}
+
+bool Frustum::isMeshInside(const gfx::internal::BoundingSphere& sphere) {
+
+    for (uint8_t plane = 0; plane < 6; plane++) {
+
+        float d = glm::dot(faces[plane].normal, sphere.center) + faces[plane].distance;
+        if (d < -sphere.radius) return false;
+    }
+    
+    return true;
+}
+
+void Frustum::update(const glm::mat4& viewProj) {
+
+    // Extract 6 Faces of frustum from 'viewProj'
+    const glm::vec4 col0 = viewProj[0];
+    const glm::vec4 col1 = viewProj[1];
+    const glm::vec4 col2 = viewProj[2];
+    const glm::vec4 col3 = viewProj[3];
+
+    faces[0].normal = col3 + col0;
+    faces[1].normal = col3 - col0;
+    faces[2].normal = col3 - col1;
+    faces[3].normal = col3 + col1;
+    faces[4].normal = col3 + col2;
+    faces[5].normal = col3 - col2;
+
+    for (auto& plane : faces) {
+        plane.normal = glm::normalize(plane.normal);
+    }
 }

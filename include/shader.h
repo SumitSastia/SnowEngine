@@ -119,6 +119,10 @@ public:
         textureID(textureID) {
     }
 
+    Texture2D(const char* path, const bool format = 0) {
+        load(path, format);
+    }
+
     /*
     Loads the image and allocate it into the Memory.
     NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
