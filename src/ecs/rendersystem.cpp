@@ -122,6 +122,9 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
     const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
+    const std::vector<Entity> objects_with_LOD = ecs.view<MeshLODComponent, TransformComponent, MaterialComponent>();
+    const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
+
     // Frustum
     Frustum frustum(Camera::instance().getPerspective() * Camera::instance().getView());
 
@@ -143,7 +146,7 @@ void RenderSystem::render(const ECS& ecs) {
         totalRenderCalls++;
     }
 
-    DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
+    // DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
 
     for (const Entity& entity : instances) {
 
@@ -155,6 +158,10 @@ void RenderSystem::render(const ECS& ecs) {
 
     for (const Entity& entity : models) {
 
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
+
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
 
@@ -162,6 +169,44 @@ void RenderSystem::render(const ECS& ecs) {
 
             const MeshComponent&     mesh     = componentManager.get<ModelComponent>(entity).meshes[i];
             const MaterialComponent& material = componentManager.get<ModelComponent>(entity).materials[i];
+
+            draw(mesh, transform, material);
+        }
+    }
+    
+    // LOD System
+    for (const Entity& entity : objects_with_LOD) {
+
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
+
+        const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+        const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
+        
+        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
+
+        draw(mesh, transform, material);
+    }
+
+    for (const Entity& entity : models_with_LOD) {
+
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
+
+        const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+        
+        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
+
+        const uint total_meshes = model.meshes.size();
+
+        for (uint i = 0 ; i < total_meshes; i++) {
+
+            const MeshComponent&     mesh     = model.meshes[i];
+            const MaterialComponent& material = model.materials[i];
 
             draw(mesh, transform, material);
         }
@@ -228,7 +273,8 @@ void RenderSystem::draw(
         material.roughness->bind(initialUnit+4);
     }
 
-    mesh.shape.draw();
+    // mesh.shape.draw();
+    mesh.draw();
 }
 
 void RenderSystem::draw(
@@ -245,7 +291,8 @@ void RenderSystem::draw(
     shader->setMat4("model",      transform.model);
     shader->setVec3("lightColor", pointlight.color);
 
-    mesh.shape.draw();
+    // mesh.shape.draw();
+    mesh.draw();
 }
 
 void RenderSystem::draw(
@@ -311,7 +358,7 @@ void RenderSystem::drawGbuffer(
         material.roughness->bind(initialUnit+4);
     }
 
-    mesh.shape.draw();
+    mesh.draw();
 }
 
 void RenderSystem::drawGbuffer(
@@ -328,7 +375,7 @@ void RenderSystem::drawGbuffer(
     shader->setMat4("model",      transform.model);
     shader->setVec3("lightColor", pointlight.color);
 
-    mesh.shape.draw();
+    mesh.draw();
 }
 
 void RenderSystem::drawGbuffer(
@@ -366,10 +413,17 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
     const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
+    // Frustum
+    Frustum frustum(Camera::instance().getPerspective() * Camera::instance().getView());
+
     // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
     for (const Entity& entity : objects) {
 
         if (componentManager.has<PointLightComponent>(entity)) continue;
+
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
@@ -599,6 +653,9 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
         const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
         const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
+        const std::vector<Entity> objects_with_LOD = ecs.view<MeshLODComponent, TransformComponent, MaterialComponent>();
+        const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
+
         // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
         for (const Entity& entity : objects) {
 
@@ -625,6 +682,32 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
                 drawShadow(shader[0], mesh, transform);
             }
         }
+
+        // LOD System
+        for (const Entity& entity : objects_with_LOD) {
+
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            
+            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
+
+            drawShadow(shader[0], mesh, transform);
+        }
+
+        for (const Entity& entity : models_with_LOD) {
+
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
+
+            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            const ModelComponent& mesh = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
+
+            for (uint i = 0 ; i < total_meshes; i++) {
+
+                const MeshComponent& mesh = componentManager.get<ModelComponent>(entity).meshes[i];
+                drawShadow(shader[0], mesh, transform);
+            }
+        }
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -637,7 +720,7 @@ void ShadowSystem::drawShadow(
 ) {
     shader.use();
     shader.setMat4("model", transform.model);
-    mesh.shape.draw();
+    mesh.draw();
 }
 
 void ShadowSystem::drawShadowInstanced(

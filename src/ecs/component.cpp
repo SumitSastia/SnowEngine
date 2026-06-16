@@ -225,24 +225,152 @@ void TransformComponent::computeModel() {
     model.matrix_4x4 = glm::scale(model.matrix_4x4, scale);
 }
 
-void ModelComponent::init(const Model3D* model, Shader* shader, Shader* gbufferShader) {
+void MeshComponent::loadMesh2D(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
+) {
+    indicesCount = indices.size();
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // TextureCords
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+
+void MeshComponent::loadMesh3D(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
+) {
+    indicesCount = indices.size();
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // TextureCords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void MeshComponent::loadMesh3DNormal(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
+) {
+    indicesCount = indices.size();
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // // TextureCords
+    // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    // glEnableVertexAttribArray(2);
+
+    // // Tangent
+    // glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+    // glEnableVertexAttribArray(3);
+
+    // Tangent
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // TextureCords
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void MeshComponent::draw() const {
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)0);
+    glBindVertexArray(0);
+}
+
+const MeshComponent& MeshLODComponent::getMesh(const float distance) const {
+
+    if (distance < 5.0f)  return high;
+    if (distance < 10.0f) return moderate;
+    return low;
+}
+
+const ModelComponent& ModelLODComponent::getMesh(const float distance) const {
+
+    if (distance < 5.0f)  return high;
+    if (distance < 10.0f) return moderate;
+    return low;
+}
+
+void ModelComponent::init(const Model3D* model, const MaterialComponent material) {
 
     for (const Mesh& mesh : model->meshes) {
-        
-        MeshComponent meshComponent;
-        meshComponent.shape = ShapeComponent(
+
+        MeshComponent meshComponent = {
             mesh.VAO, mesh.VBO, mesh.EBO,
-            mesh.indices.size()
-        );
+            static_cast<uint>(mesh.indices.size())
+        };
 
-        MaterialComponent material;
-        material.shader = shader;
-        material.albedo = new Texture2D(mesh.textures[0].id);
-
-        material.gbufferShader = gbufferShader;
+        MaterialComponent mat = material;
+        mat.albedo = new Texture2D(mesh.textures[0].id);
 
         meshes.push_back(meshComponent);
-        materials.push_back(material);
+        materials.push_back(mat);
     }
 }
 
@@ -289,6 +417,16 @@ ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() {
 }
 
 template <>
+ComponentPool<MeshLODComponent>& ComponentManager::getPool() {
+    return meshLODs;
+}
+
+template <>
+ComponentPool<ModelLODComponent>& ComponentManager::getPool() {
+    return modelLODs;
+}
+
+template <>
 const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
     return transforms;
 }
@@ -328,18 +466,17 @@ const ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() const 
     return boundingSpheres;
 }
 
-// ------------------------------ Components ----------------------------------------- //
-
-ComponentManager::ComponentManager():
-    
-    has_mesh(MAX_ENTITIES, false),
-    has_transform(MAX_ENTITIES, false),
-    has_material(MAX_ENTITIES, false),
-    has_light(MAX_ENTITIES, false),
-    has_directionalLight(MAX_ENTITIES, false),
-    has_instance(MAX_ENTITIES, false),
-    has_model(MAX_ENTITIES, false) {
+template <>
+const ComponentPool<MeshLODComponent>& ComponentManager::getPool() const {
+    return meshLODs;
 }
+
+template <>
+const ComponentPool<ModelLODComponent>& ComponentManager::getPool() const {
+    return modelLODs;
+}
+
+// ------------------------------ Components ----------------------------------------- //
 
 void ComponentManager::addShader(Shader* shader) {
 

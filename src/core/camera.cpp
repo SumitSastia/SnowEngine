@@ -28,7 +28,7 @@ Camera::Camera() {
     projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
     viewMatrix = glm::lookAt(position, position + target, up_axis);
 
-    mouseEnabled = true;
+    mouseEnabled = false;
 
     yaw   = -90.0f;
     pitch = 0.0f;

@@ -76,7 +76,61 @@ struct TransformComponent {
 
 struct MeshComponent {
 
-    ShapeComponent shape;
+    uint VAO, VBO, EBO;
+    uint indicesCount;
+
+    float radius;
+
+    MeshComponent() = default;
+
+    MeshComponent(uint VAO, uint VBO, uint EBO, uint indicesCount):
+        VAO(VAO), VBO(VBO), EBO(EBO),
+        indicesCount(indicesCount) {
+    }
+
+    /*
+    vertices format:
+    2f = aPos
+    2f = aTexCords
+    */
+    void loadMesh2D(
+        const std::vector<float>& vertices,
+        const std::vector<uint>&  indices
+    );
+
+    /*
+    vertices format:
+    3f = aPos
+    3f = aNormal
+    2f = aTexCords
+    */
+    void loadMesh3D(
+        const std::vector<float>& vertices,
+        const std::vector<uint>&  indices
+    );
+
+    /*
+    vertices format:
+    3f = aPos
+    3f = aNormal
+    3f = aTangent
+    2f = aTexCords
+    */
+    void loadMesh3DNormal(
+        const std::vector<float>& vertices,
+        const std::vector<uint>&  indices
+    );
+
+    void draw() const;
+};
+
+struct MeshLODComponent {
+
+    MeshComponent high;
+    MeshComponent moderate;
+    MeshComponent low;
+
+    const MeshComponent& getMesh(const float distance) const;
 };
 
 struct DirectionalLight {
@@ -172,7 +226,22 @@ struct ModelComponent {
 
     float radius;
 
-    void init(const Model3D* model, Shader* shader, Shader* gbufferShader);
+    ModelComponent() = default;
+
+    ModelComponent(const Model3D* model, const MaterialComponent material) {
+        init(model, material);
+    }
+
+    void init(const Model3D* model, const MaterialComponent material);
+};
+
+struct ModelLODComponent {
+
+    ModelComponent high;
+    ModelComponent moderate;
+    ModelComponent low;
+
+    const ModelComponent& getMesh(const float distance) const;
 };
 
 struct PointShadowData {
@@ -255,25 +324,18 @@ public:
     ComponentPool <PointLightComponent>     pointlights;
     ComponentPool <DirectionalLight>        directlights;
     ComponentPool <BoundingSphereComponent> boundingSpheres;
+    ComponentPool <MeshLODComponent>        meshLODs;
+    ComponentPool <ModelLODComponent>       modelLODs;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);
 
-    // For Objects to be lit by PointLights
+    // For Global uniform Bindings
     std::vector <Shader*> uniqueShaders;
 
     // For ShadowPass
     std::vector <PointShadowData>  pointShadowFrames;
     std::vector <DirectShadowData> directShadowFrames;
-
-    // Verifiers
-    std::vector <bool> has_mesh;
-    std::vector <bool> has_transform;
-    std::vector <bool> has_material;
-    std::vector <bool> has_instance;
-    std::vector <bool> has_model;
-    std::vector <bool> has_light;
-    std::vector <bool> has_directionalLight;
 
     template <typename Component>
     ComponentPool<Component>& getPool();
@@ -281,7 +343,7 @@ public:
     template <typename Component>
     const ComponentPool<Component>& getPool() const;
 
-    ComponentManager();
+    ComponentManager() = default;
 
     template <typename Component>
     void addComponent(const Entity& entity, const Component& component) {

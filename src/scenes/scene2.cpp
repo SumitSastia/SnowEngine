@@ -79,8 +79,7 @@ void Scene2::init() {
         transform.computeModel();
         
         MeshComponent mesh;
-        // mesh.shape = EntityShapes::instance().cube;
-        mesh.shape = EntityShapes::instance().cubeNormalMapped;
+        mesh = EntityShapes::instance().cubeNorm;
         
         DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
         
@@ -99,7 +98,7 @@ void Scene2::init() {
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         // DebugMenu::log("Box center: " + vec3Str(boundingSphere.center));
         // DebugMenu::log("Box radius: " + std::to_string(boundingSphere.radius));
@@ -112,40 +111,40 @@ void Scene2::init() {
 
     DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
-    for (uint32_t i = 0; i < 1000; i++) {
+    // for (uint32_t i = 0; i < 1000; i++) {
 
-        crowd[i] = entityManager.createEntity();
+    //     crowd[i] = entityManager.createEntity();
 
-        TransformComponent transform;
-        transform.position = randomPosition(-20.0f, 20.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
-        transform.computeModel();
+    //     TransformComponent transform;
+    //     transform.position = randomPosition(-20.0f, 20.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
         
-        MeshComponent mesh;
-        // mesh.shape = EntityShapes::instance().cube;
-        mesh.shape = EntityShapes::instance().cubeNormalMapped;
+    //     MeshComponent mesh;
+    //     // mesh.shape = EntityShapes::instance().cube;
+    //     mesh.shape = EntityShapes::instance().cubeNormalMapped;
         
-        MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR3D);
+    //     MaterialComponent material;
+    //     material.shader = Shaders::get(NORMPBR3D);
         
-        material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
-        material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
+    //     material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
+    //     material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
         
-        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
-        material.metallic  = material.albedo;
-        material.roughness = material.albedo;
+    //     material.metallic  = material.albedo;
+    //     material.roughness = material.albedo;
 
-        BoundingSphereComponent boundingSphere;
-        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+    //     BoundingSphereComponent boundingSphere;
+    //     boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    //     boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
-        componentManager.addComponent(crowd[i], mesh);
-        componentManager.addComponent(crowd[i], transform);
-        componentManager.addComponent(crowd[i], material);
-        componentManager.addComponent(crowd[i], boundingSphere);
-    }
+    //     componentManager.addComponent(crowd[i], mesh);
+    //     componentManager.addComponent(crowd[i], transform);
+    //     componentManager.addComponent(crowd[i], material);
+    //     componentManager.addComponent(crowd[i], boundingSphere);
+    // }
 
     DebugMenu::log("crowd: " + running::globalTimer::endInterval());
 
@@ -158,7 +157,7 @@ void Scene2::init() {
         transform.computeModel();
 
         MeshComponent mesh;
-        mesh.shape = EntityShapes::instance().square;
+        mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
@@ -170,7 +169,7 @@ void Scene2::init() {
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
         componentManager.addComponent(floor, mesh);
         componentManager.addComponent(floor, transform);
@@ -189,7 +188,7 @@ void Scene2::init() {
         transform.computeModel();
 
         MeshComponent mesh;
-        mesh.shape = EntityShapes::instance().square;
+        mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
@@ -203,10 +202,7 @@ void Scene2::init() {
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
-
-        DebugMenu::log("wall center: " + vec3Str(boundingSphere.center));
-        DebugMenu::log("wall radius: " + std::to_string(boundingSphere.radius));
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
         componentManager.addComponent(wall, mesh);
         componentManager.addComponent(wall, transform);
@@ -225,7 +221,7 @@ void Scene2::init() {
         transform.computeModel();
 
         MeshComponent mesh;
-        mesh.shape = EntityShapes::instance().square;
+        mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
         // material.shader = Shaders::get(NORM_PHONG2D);
@@ -238,7 +234,7 @@ void Scene2::init() {
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
         
         componentManager.addComponent(brickWall, mesh);
         componentManager.addComponent(brickWall, transform);
@@ -249,6 +245,7 @@ void Scene2::init() {
     DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::globalTimer::endInterval());
 
     // sphere
+    float sphereRadius = 0.0f;
     {
         TransformComponent transform;
         transform.position = glm::vec3(6.0f, 0.0f, 3.0f);
@@ -256,22 +253,49 @@ void Scene2::init() {
         transform.scale    = glm::vec3(1.0f);
         transform.computeModel();
 
-        Model3D* sphereModel = new Model3D("../assets/models/test_cube/sphere.obj");
+        Model3D* sphere0 = new Model3D("../assets/models/sphere/sphereHD.obj");
+        Model3D* sphere1 = new Model3D("../assets/models/sphere/sphere.obj");
+        Model3D* sphere2 = new Model3D("../assets/models/sphere/sphereSD.obj");
 
-        Shader* shader = Shaders::get(PBR3D);
-        ModelComponent modelComponent;
-        modelComponent.init(sphereModel, shader, Shaders::get(GBUFFER3D));
-        componentManager.addShader(shader);
+        MaterialComponent material;
+        material.shader = Shaders::get(PBR3D);
+        material.gbufferShader = Shaders::get(GBUFFER3D);
+        componentManager.addShader(material.shader);
 
-        float localRadius = sphereModel->clean();
+        ModelComponent model0 (sphere0, material);
+        ModelComponent model1 (sphere1, material);
+        ModelComponent model2 (sphere2, material);
+        
+        ModelLODComponent meshLOD { {sphere0, material}, model1, model2 };
+        
+        sphereRadius = sphere0->clean();
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = localRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
-        componentManager.addComponent(sphere, modelComponent);
+        componentManager.addComponent(sphere, meshLOD);
         componentManager.addComponent(sphere, transform);
         componentManager.addComponent(sphere, boundingSphere);
+    }
+
+    for (uint32_t i = 0; i < 100; i++) {
+
+        crowd[i] = entityManager.createEntity();
+
+        TransformComponent transform;
+        transform.position = randomPosition(-20.0f, 20.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
+
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
+        componentManager.addComponent(crowd[i], componentManager.get<ModelLODComponent>(sphere));
+        componentManager.addComponent(crowd[i], transform);
+        componentManager.addComponent(crowd[i], boundingSphere);
     }
 
     // headcam
@@ -284,10 +308,13 @@ void Scene2::init() {
 
         Model3D* camModel = new Model3D("../assets/models/test_cube/colorCamera.obj");
 
-        Shader* shader = Shaders::get(PHONG3D);
+        MaterialComponent material;
+        material.shader = Shaders::get(PHONG3D);
+        material.gbufferShader = Shaders::get(GBUFFER3D);
+        componentManager.addShader(material.shader);
+
         ModelComponent modelComponent;
-        modelComponent.init(camModel, shader, Shaders::get(GBUFFER3D));
-        componentManager.addShader(shader);
+        modelComponent.init(camModel, material);
 
         float localRadius = camModel->clean();
 
@@ -325,7 +352,7 @@ void Scene2::init() {
         transform.computeModel();
 
         MeshComponent mesh;
-        mesh.shape = EntityShapes::instance().cube;
+        mesh = EntityShapes::instance().cube;
 
         MaterialComponent material;
         material.shader = Shaders::get(LIGHT3D);
@@ -338,7 +365,7 @@ void Scene2::init() {
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         componentManager.addComponent(light1, mesh);
         componentManager.addComponent(light1, transform);
@@ -358,7 +385,7 @@ void Scene2::init() {
         transform.computeModel();
 
         MeshComponent mesh;
-        mesh.shape = EntityShapes::instance().cube;
+        mesh = EntityShapes::instance().cube;
 
         MaterialComponent material;
         material.shader = Shaders::get(LIGHT3D);
@@ -371,7 +398,7 @@ void Scene2::init() {
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = mesh.shape.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         componentManager.addComponent(light2, mesh);
         componentManager.addComponent(light2, transform);

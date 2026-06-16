@@ -30,7 +30,7 @@ int main() {
     GLFWwindow* window = Renderer::instance().getWindow();
 
     // Hides the cursor at the Startup
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     Input::init();
     DebugMenu::init(window);

@@ -32,9 +32,13 @@ class EntityShapes {
     
 public:
 
-    ShapeComponent cube;
-    ShapeComponent square;
-    ShapeComponent cubeNormalMapped;
+    // ShapeComponent cube;
+    // ShapeComponent square;
+    // ShapeComponent cubeNormalMapped;
+
+    MeshComponent cube;
+    MeshComponent square;
+    MeshComponent cubeNorm;
     
     InstanceComponent cubes;
     
