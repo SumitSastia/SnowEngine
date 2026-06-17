@@ -8,6 +8,7 @@
 #include <cstdint>
 
 #include <s_math.h>
+#include <model.h>
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
@@ -79,7 +80,12 @@ struct MeshComponent {
     uint VAO, VBO, EBO;
     uint indicesCount;
 
+    // local Radius
     float radius;
+
+    // AABB
+    glm::vec3 minCorner;
+    glm::vec3 maxCorner;
 
     MeshComponent() = default;
 
@@ -278,6 +284,35 @@ struct BoundingSphereComponent {
     float radius;
 };
 
+struct BoundingAABBComponent {
+    
+    glm::vec3 center;
+
+    glm::vec3 local_min;
+    glm::vec3 local_max;
+
+    glm::vec3 min;
+    glm::vec3 max;
+
+    // @note Define local_min & local_max with min & max
+    // @warning AVOID USING THIS!!
+    BoundingAABBComponent():
+        min(FLT_MAX), max(-FLT_MAX) {
+    }
+
+    BoundingAABBComponent(
+        const glm::vec3& center,
+        const glm::vec3& min,
+        const glm::vec3& max
+    ):
+        center(center),
+        min(min), max(max),
+        local_min(min), local_max(max) {
+    }
+
+    void recompute(const glm::mat4& model);
+};
+
 template <typename Component>
 class ComponentPool {
     
@@ -324,6 +359,7 @@ public:
     ComponentPool <PointLightComponent>     pointlights;
     ComponentPool <DirectionalLight>        directlights;
     ComponentPool <BoundingSphereComponent> boundingSpheres;
+    ComponentPool <BoundingAABBComponent>   boundingAABBs;
     ComponentPool <MeshLODComponent>        meshLODs;
     ComponentPool <ModelLODComponent>       modelLODs;
     

@@ -147,7 +147,7 @@ Mesh Model3D::processMesh(aiMesh* _Mesh, const aiScene* scene) {
             _Mesh->mVertices[i].z
         );
 
-        float vertex_length = glm::length(temp_Vertex.position - glm::vec3(0.0f));
+        float vertex_length = glm::length(temp_Vertex.position);
         radius = std::max(radius, vertex_length);
 
         if (_Mesh->HasNormals()) {

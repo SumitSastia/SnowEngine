@@ -374,6 +374,31 @@ void ModelComponent::init(const Model3D* model, const MaterialComponent material
     }
 }
 
+void BoundingAABBComponent::recompute(const glm::mat4& model) {
+
+    glm::vec3 corners[8] = {
+        {local_min.x, local_min.y, local_min.z},
+        {local_min.x, local_min.y, local_max.z},
+        {local_min.x, local_max.y, local_min.z},
+        {local_min.x, local_max.y, local_max.z},
+        {local_max.x, local_min.y, local_min.z},
+        {local_max.x, local_min.y, local_max.z},
+        {local_max.x, local_max.y, local_min.z},
+        {local_max.x, local_max.y, local_max.z}
+    };
+
+    min = glm::vec3(FLT_MAX);
+    max = glm::vec3(-FLT_MAX);
+
+    for (glm::vec3& corner : corners) {
+
+        corner = glm::vec3(model * glm::vec4(corner, 1.0f));
+        
+        min = glm::min(min, corner);
+        max = glm::max(max, corner);
+    }
+}
+
 // ------------------------------ Components ----------------------------------------- //
 
 template <>
@@ -414,6 +439,11 @@ ComponentPool<DirectionalLight>& ComponentManager::getPool() {
 template <>
 ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() {
     return boundingSpheres;
+}
+
+template <>
+ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() {
+    return boundingAABBs;
 }
 
 template <>
@@ -467,6 +497,11 @@ const ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() const 
 }
 
 template <>
+const ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() const {
+    return boundingAABBs;
+}
+
+template <>
 const ComponentPool<MeshLODComponent>& ComponentManager::getPool() const {
     return meshLODs;
 }
@@ -489,6 +524,7 @@ void ComponentManager::addShader(Shader* shader) {
         uniqueShaders.push_back(shader);
     }
 }
+
 template <>
 void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
 

@@ -116,8 +116,25 @@ int main() {
         
         mainCamera.update(deltaTime);
         // mainScene->update(deltaTime);
-
+        
         ImGui::End();
+
+        if (Input::isKeyPressed(GLFW_KEY_GRAVE_ACCENT)) {
+
+            ImGui::Begin("Key Bindings");
+
+            ImGui::TextWrapped("E: Toggle Cursor");
+            ImGui::TextWrapped("T: Toggle Flashlight");
+            ImGui::TextWrapped("G: Toggle Skybox/ENV");
+            ImGui::TextWrapped("X: Rotate180");
+            ImGui::TextWrapped("P: Toggle Rendering Method");
+            ImGui::TextWrapped("L: Sunlight");
+            ImGui::TextWrapped("B: Skybox/ENV Light");
+            ImGui::TextWrapped("H: Toggle SSAO");
+            ImGui::TextWrapped("Y: Toggle Wireframe");
+
+            ImGui::End();
+        }
 
         // Rendering //
 

@@ -51,6 +51,7 @@ add_executable(
     src/core/ssao.cpp
     src/debug/debug.cpp
     src/core/frustum.cpp
+    src/utils/wireframe.cpp
     ${SCENES_SRC}
     ${ECS_SRC}
     ${IMGUI_SRC}

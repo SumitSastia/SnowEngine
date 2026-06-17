@@ -143,6 +143,12 @@ void RenderSystem::render(const ECS& ecs) {
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
 
         draw(mesh, transform, material);
+        // drawWireframe(Wireframes::instance().sphere, boundingSphere);
+
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+            drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
+        }
+
         totalRenderCalls++;
     }
 
@@ -210,6 +216,8 @@ void RenderSystem::render(const ECS& ecs) {
 
             draw(mesh, transform, material);
         }
+        
+        drawWireframe(Wireframes::instance().sphere, boundingSphere);
     }
 }
 
@@ -229,6 +237,54 @@ void RenderSystem::renderLights(const ECS& ecs) {
             
             draw(mesh, transform, material, pointlight);
         }
+    }
+}
+
+void RenderSystem::drawWireframe(
+    const gfx::internal::Wireframe& wireframe,
+    const BoundingSphereComponent&  sphere
+) {
+
+    static bool toggle = false;
+    if (Input::isKeyDown(GLFW_KEY_Y)) toggle = !toggle;
+
+    if (toggle) {
+        const Shader& shader = *Shaders::get(WIREFRAME);
+    
+        shader.use();
+        bindCameraGlobals(&shader);
+    
+        Matrix4 model;
+        model.translate(sphere.center);
+        model.scale(glm::vec3(sphere.radius + 0.01f));
+    
+        shader.setMat4("model", model);
+    
+        wireframe.draw();
+    }
+}
+
+void RenderSystem::drawWireframe(
+    const gfx::internal::Wireframe& wireframe,
+    const BoundingAABBComponent&    AABB
+) {
+
+    static bool toggle = false;
+    if (Input::isKeyDown(GLFW_KEY_Y)) toggle = !toggle;
+
+    if (toggle) {
+        const Shader& shader = *Shaders::get(WIREFRAME);
+    
+        shader.use();
+        bindCameraGlobals(&shader);
+    
+        Matrix4 model;
+        model.translate(AABB.center);
+        model.scale(AABB.max - AABB.min);
+    
+        shader.setMat4("model", model);
+    
+        wireframe.draw();
     }
 }
 

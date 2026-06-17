@@ -110,6 +110,9 @@ class Model3D {
     std::vector<MeshTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& type_str) const;
     
 public:
+
+    glm::vec3 minCorner;
+    glm::vec3 maxCorner;
     
     std::vector <Mesh> meshes;
     std::vector <MeshTexture> loadedTextures;

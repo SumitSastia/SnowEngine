@@ -26,6 +26,10 @@ struct Matrix4 {
     const glm::vec3 getPos()    const { return matrix_4x4[3]; }
 
     operator const glm::mat4&() const { return matrix_4x4; }
+
+    glm::vec4 operator*(const glm::vec4 vec) const {
+        return matrix_4x4 * vec;
+    }
 };
 
 // std::string str = std::to_string(vec.x);

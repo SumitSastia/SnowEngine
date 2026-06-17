@@ -6,11 +6,6 @@
 
 namespace gfx::internal {
 
-    struct AABB {
-        glm::vec3 min;
-        glm::vec3 max;
-    };
-
     struct Plane {
         glm::vec4 normal;
     };
@@ -38,6 +33,7 @@ public:
     }
 
     bool isMeshInside(const BoundingSphereComponent& sphere);
+    bool isMeshInside(const BoundingAABBComponent&   AABB);
 
     // Extracts 6 Faces(Planes) of the Frustum
     void update(const glm::mat4& viewProj);

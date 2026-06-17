@@ -273,6 +273,7 @@ enum shaderNames {
     INSTANCE_GBUFFER3D,
     GBUFFERNORM_3D,
     GBUFFERNORM_2D,
+    WIREFRAME,
 
     SHADER_COUNT
 };

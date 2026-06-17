@@ -3,6 +3,7 @@
 #include <iostream>
 #include <ecs/entity.h>
 #include <camera.h>
+#include <utils/wireframe.h>
 
 class RenderSystem {
 
@@ -43,6 +44,16 @@ class RenderSystem {
     void drawGbuffer(
         const InstanceComponent& instance,
         const MaterialComponent& material
+    );
+
+    void drawWireframe(
+        const gfx::internal::Wireframe& wireframe,
+        const BoundingSphereComponent& sphere
+    );
+
+    void drawWireframe(
+        const gfx::internal::Wireframe& wireframe,
+        const BoundingAABBComponent&    AABB
     );
 
     uint32_t lastTextureUnit;
