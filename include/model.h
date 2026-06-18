@@ -117,7 +117,13 @@ public:
     std::vector <Mesh> meshes;
     std::vector <MeshTexture> loadedTextures;
 
-    Model3D(const char* path) : directory(""), total_mesh(0), radius(0.0f) {
+    Model3D(const char* path):
+        directory(""), 
+        total_mesh(0),
+        radius(0.0f),
+        minCorner(FLT_MAX),
+        maxCorner(-FLT_MAX)
+    {
         loadModel(path);
     }
 

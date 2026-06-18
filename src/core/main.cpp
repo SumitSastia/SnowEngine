@@ -88,18 +88,20 @@ int main() {
         
         DebugMenu::beginUI();
 
+        // Events //
+        Input::update();
+        glfwPollEvents();
+
         // Inputs //
         if (Input::isKeyDown(GLFW_KEY_H)) {
             SSAO::enable = !SSAO::enable;
         }
 
-        Input::update();
+        // Input::update();
         
         mainCamera.mouse_handler(window);
         mainCamera.scroll_handler(scrollOffset);
         
-        // Events //
-        glfwPollEvents();
 
         if (Input::isKeyDown(GLFW_KEY_P)) {
             deferredRender = !deferredRender;

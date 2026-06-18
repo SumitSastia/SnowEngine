@@ -49,33 +49,30 @@ void Frustum::init(const glm::mat4& viewProj) {
     }
 }
 
-bool Frustum::isMeshInside(const BoundingSphereComponent& sphere) {
+bool Frustum::isMeshInside(const BoundingSphereComponent& sphere) const {
 
-    for (uint8_t plane = 0; plane < 6; plane++) {
+    for (const auto& plane : faces) {
 
-        float d = glm::dot(glm::vec3(faces[plane].normal), sphere.center) + faces[plane].normal.w;
+        float d = glm::dot(glm::vec3(plane.normal), sphere.center) + plane.normal.w;
         if (d < -sphere.radius) return false;
     }
     
     return true;
 }
 
-void Frustum::update(const glm::mat4& viewProj) {
+bool Frustum::isMeshInside(const BoundingAABBComponent& AABB) const {
 
-    // Extract 6 Faces of frustum from 'viewProj'
-    const glm::vec4 col0 = viewProj[0];
-    const glm::vec4 col1 = viewProj[1];
-    const glm::vec4 col2 = viewProj[2];
-    const glm::vec4 col3 = viewProj[3];
+    glm::vec3 positive;
+    
+    for (const auto& plane : faces) {
 
-    faces[0].normal = col3 + col0;
-    faces[1].normal = col3 - col0;
-    faces[2].normal = col3 - col1;
-    faces[3].normal = col3 + col1;
-    faces[4].normal = col3 + col2;
-    faces[5].normal = col3 - col2;
-
-    for (auto& plane : faces) {
-        plane.normal = glm::normalize(plane.normal);
+        positive.x = (plane.normal.x >= 0.0f)? AABB.max.x : AABB.min.x;
+        positive.y = (plane.normal.y >= 0.0f)? AABB.max.y : AABB.min.y;
+        positive.z = (plane.normal.z >= 0.0f)? AABB.max.z : AABB.min.z;
+    
+        float d = glm::dot(glm::vec3(plane.normal), positive) + plane.normal.w;
+        if (d < 0.0f) return false;
     }
+    
+    return true;
 }

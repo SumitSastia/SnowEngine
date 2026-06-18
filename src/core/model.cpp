@@ -147,8 +147,12 @@ Mesh Model3D::processMesh(aiMesh* _Mesh, const aiScene* scene) {
             _Mesh->mVertices[i].z
         );
 
+        // Frustum Culling - Data
         float vertex_length = glm::length(temp_Vertex.position);
         radius = std::max(radius, vertex_length);
+
+        minCorner = glm::min(minCorner, temp_Vertex.position);
+        maxCorner = glm::max(maxCorner, temp_Vertex.position);
 
         if (_Mesh->HasNormals()) {
 

@@ -21,7 +21,8 @@ class Frustum {
     // 5 - Far
 
     std::vector <gfx::internal::Plane> faces;
-
+    
+    // Extracts 6 Faces(Planes) of the Frustum
     void init(const glm::mat4& viewProj);
 
 public:
@@ -32,9 +33,6 @@ public:
         init(viewProj);
     }
 
-    bool isMeshInside(const BoundingSphereComponent& sphere);
-    bool isMeshInside(const BoundingAABBComponent&   AABB);
-
-    // Extracts 6 Faces(Planes) of the Frustum
-    void update(const glm::mat4& viewProj);
+    bool isMeshInside(const BoundingSphereComponent& sphere) const;
+    bool isMeshInside(const BoundingAABBComponent&   AABB) const;
 };

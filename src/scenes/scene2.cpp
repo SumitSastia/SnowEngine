@@ -308,6 +308,14 @@ void Scene2::init() {
         ModelComponent model2 (sphere2, material);
         
         ModelLODComponent meshLOD { model0, model1, model2 };
+
+        BoundingAABBComponent AABB {
+            transform.position,
+            sphere0->minCorner,
+            sphere0->maxCorner
+        };
+        
+        AABB.recompute(transform.model);
         
         sphereRadius = sphere0->clean();
 
@@ -318,26 +326,33 @@ void Scene2::init() {
         componentManager.addComponent(sphere, meshLOD);
         componentManager.addComponent(sphere, transform);
         componentManager.addComponent(sphere, boundingSphere);
+        componentManager.addComponent(sphere, AABB);
     }
 
-    for (uint32_t i = 0; i < 100; i++) {
+    // for (uint32_t i = 0; i < 100; i++) {
 
-        crowd[100 + i] = entityManager.createEntity();
+    //     crowd[100 + i] = entityManager.createEntity();
 
-        TransformComponent transform;
-        transform.position = randomPosition(-20.0f, 20.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
-        transform.computeModel();
+    //     TransformComponent transform;
+    //     transform.position = randomPosition(-20.0f, 20.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
 
-        BoundingSphereComponent boundingSphere;
-        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+    //     BoundingAABBComponent AABB = componentManager.get<BoundingAABBComponent>(sphere);
 
-        componentManager.addComponent(crowd[100 + i], componentManager.get<ModelLODComponent>(sphere));
-        componentManager.addComponent(crowd[100 + i], transform);
-        componentManager.addComponent(crowd[100 + i], boundingSphere);
-    }
+    //     AABB.center = transform.position;
+    //     AABB.recompute(transform.model);
+
+    //     BoundingSphereComponent boundingSphere;
+    //     boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    //     boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
+    //     componentManager.addComponent(crowd[100 + i], componentManager.get<ModelLODComponent>(sphere));
+    //     componentManager.addComponent(crowd[100 + i], transform);
+    //     componentManager.addComponent(crowd[100 + i], boundingSphere);
+    //     componentManager.addComponent(crowd[100 + i], AABB);
+    // }
 
     // headcam
     {
@@ -357,23 +372,27 @@ void Scene2::init() {
         ModelComponent modelComponent;
         modelComponent.init(camModel, material);
 
+        BoundingAABBComponent AABB {
+            transform.position,
+            camModel->minCorner,
+            camModel->maxCorner
+        };
+
+        AABB.recompute(transform.model);
+
         float localRadius = camModel->clean();
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         boundingSphere.radius = localRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
-        // BoundingAABBComponent AABB;
-        // AABB.center = transform.position;
-        // AABB.min    = mesh.minCorner;
-        // AABB.max    = mesh.maxCorner;
-
         componentManager.addComponent(headcam, modelComponent);
         componentManager.addComponent(headcam, transform);
         componentManager.addComponent(headcam, boundingSphere);
+        componentManager.addComponent(headcam, AABB);
     }
 
-    DebugMenu::log("Sphere (Model3D to ECS): " + running::globalTimer::endInterval());
+    // DebugMenu::log("Sphere (Model3D to ECS): " + running::globalTimer::endInterval());
 
     // cubes
     {
@@ -382,8 +401,10 @@ void Scene2::init() {
         material.albedo = new Texture2D("assets/textures/grunge-box-small.jpg", 1);
 
         material.gbufferShader = Shaders::get(INSTANCE_GBUFFER3D);
+
+        const InstanceComponent& instance = EntityShapes::instance().cubes;
         
-        componentManager.addComponent(cubes, EntityShapes::instance().cubes);
+        componentManager.addComponent(cubes, instance);
         componentManager.addComponent(cubes, material);
     }
 

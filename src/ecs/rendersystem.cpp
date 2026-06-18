@@ -136,7 +136,10 @@ void RenderSystem::render(const ECS& ecs) {
 
         // Frustum Culling
         const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        if (!frustum.isMeshInside(boundingSphere)) continue;
+        const BoundingAABBComponent&   boundingAABB   = componentManager.get<BoundingAABBComponent>(entity);
+
+        // if (!frustum.isMeshInside(boundingSphere)) continue;
+        if (!frustum.isMeshInside(boundingAABB)) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
@@ -152,12 +155,16 @@ void RenderSystem::render(const ECS& ecs) {
         totalRenderCalls++;
     }
 
-    // DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
+    DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
 
     for (const Entity& entity : instances) {
 
         const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
         const MaterialComponent& material = componentManager.get<MaterialComponent>(entity);
+
+        // for (const TransformComponent& transform : instance.transforms) {
+
+        // }
 
         draw(instance, material);
     }
@@ -177,6 +184,10 @@ void RenderSystem::render(const ECS& ecs) {
             const MaterialComponent& material = componentManager.get<ModelComponent>(entity).materials[i];
 
             draw(mesh, transform, material);
+        }
+
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+            drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
         }
     }
     
@@ -217,7 +228,11 @@ void RenderSystem::render(const ECS& ecs) {
             draw(mesh, transform, material);
         }
         
-        drawWireframe(Wireframes::instance().sphere, boundingSphere);
+        // drawWireframe(Wireframes::instance().sphere, boundingSphere);
+
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+            drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
+        }
     }
 }
 
