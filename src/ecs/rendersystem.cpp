@@ -155,17 +155,34 @@ void RenderSystem::render(const ECS& ecs) {
         totalRenderCalls++;
     }
 
-    DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
+    // DebugMenu::log("Total Render Calls: " + std::to_string(totalRenderCalls));
 
     for (const Entity& entity : instances) {
 
-        const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
+        // Without Frustum Culling
+        // const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
+        // const MaterialComponent& material = componentManager.get<MaterialComponent>(entity);
+
+        // draw(instance, material);
+
+        // With Frustum Culling
+        InstanceComponent instance = componentManager.get<InstanceComponent>(entity);
         const MaterialComponent& material = componentManager.get<MaterialComponent>(entity);
 
-        // for (const TransformComponent& transform : instance.transforms) {
+        instance.visibleInstances.clear();
 
-        // }
+        for (uint32_t i = 0; i < instance.count; i++) {
 
+            if (frustum.isMeshInside(instance.AABBs[i])) {
+                instance.visibleInstances.push_back(&instance.transforms[i]);
+            }
+
+            drawWireframe(Wireframes::instance().cube, instance.AABBs[i]);
+        }
+
+        instance.updateModels();
+
+        DebugMenu::log("Instances: " + std::to_string(instance.visibleCount));
         draw(instance, material);
     }
 
@@ -344,7 +361,11 @@ void RenderSystem::draw(
         material.roughness->bind(initialUnit+4);
     }
 
-    // mesh.shape.draw();
+    if (material.specular) {
+        shader->setInt("specularMap", initialUnit+5);
+        material.specular->bind(initialUnit+5);
+    }
+
     mesh.draw();
 }
 

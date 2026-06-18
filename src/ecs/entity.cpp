@@ -290,33 +290,43 @@ EntityShapes::EntityShapes() {
     // Instance Cubes
     glm::vec3 cubePositions[] = {
 
-        glm::vec3(5.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
+        glm::vec3( 5.0f, 0.0f, 0.0f),
+        glm::vec3( 2.0f, 5.0f,-15.0f),
+        glm::vec3(-1.5f,-2.2f,-2.5f),
+        glm::vec3(-3.8f,-2.0f,-12.3f),
+        glm::vec3( 2.4f,-0.4f,-3.5f),
+        glm::vec3(-1.7f, 3.0f,-7.5f),
+        glm::vec3( 1.3f,-2.0f,-2.5f),
+        glm::vec3( 1.5f, 2.0f,-2.5f),
+        glm::vec3( 1.5f, 0.2f,-1.5f),
+        glm::vec3(-1.3f, 1.0f,-1.5f)
     };
 
     cubes.count = 10;
+    cubes.mesh.minCorner = glm::vec3(-0.5f);
+    cubes.mesh.maxCorner = glm::vec3( 0.5f);
+    
+    cubes.transforms.resize(cubes.count);
+    cubes.AABBs.resize(cubes.count);
 
     for (uint32_t i = 0; i < 10; i++) {
-
+        
         cubes.transforms[i].position = cubePositions[i];
         cubes.transforms[i].rotation = (i * 12.0f * glm::vec3(1.0f, 2.0f, 3.0f));
         cubes.transforms[i].scale    = glm::vec3(0.8);
-
+        
         cubes.transforms[i].computeModel();
+
+        cubes.AABBs[i] = BoundingAABBComponent {
+            cubes.transforms[i].position,
+            cubes.mesh.minCorner,
+            cubes.mesh.maxCorner
+        };
+
+        cubes.AABBs[i].recompute(cubes.transforms[i].model);
     }
 
-    cubes.bindVertices(
-        verticesCube, sizeof(verticesCube), 
-        indicesCube,  sizeof(indicesCube)
-    );
+    cubes.bind(vertices, indices);
 }
 
 EntityManager::EntityManager(): nextEntity(0) {

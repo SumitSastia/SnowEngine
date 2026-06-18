@@ -179,6 +179,7 @@ struct MaterialComponent {
     Texture2D* albedo;
     Texture2D* normal;
     Texture2D* height;
+    Texture2D* specular;
 
     Texture2D* metallic;
     Texture2D* roughness;
@@ -189,6 +190,7 @@ struct MaterialComponent {
         albedo(nullptr),
         normal(nullptr),
         height(nullptr),
+        specular(nullptr),
         metallic(nullptr),
         roughness(nullptr),
         ao(nullptr),
@@ -196,31 +198,67 @@ struct MaterialComponent {
     }
 };
 
+struct BoundingSphereComponent {
+    glm::vec3 center;
+    float radius;
+};
+
+struct BoundingAABBComponent {
+    
+    glm::vec3 center;
+
+    glm::vec3 local_min;
+    glm::vec3 local_max;
+
+    glm::vec3 min;
+    glm::vec3 max;
+
+    // @note Define local_min & local_max with min & max
+    // @warning AVOID USING THIS!!
+    BoundingAABBComponent():
+        min(FLT_MAX), max(-FLT_MAX) {
+    }
+
+    BoundingAABBComponent(
+        const glm::vec3& center,
+        const glm::vec3& min,
+        const glm::vec3& max
+    ):
+        center(center),
+        min(min), max(max),
+        local_min(min), local_max(max) {
+    }
+
+    void recompute(const glm::mat4& model);
+};
+
 struct InstanceComponent {
 
-    uint VAO, VBO, EBO;
+    MeshComponent mesh;
     uint modelVBO, normalVBO;
 
-    uint indicesCount;
     uint count;
+    uint visibleCount;
 
-    std::vector <TransformComponent> transforms;
+    std::vector <TransformComponent>    transforms;
+    std::vector <BoundingAABBComponent> AABBs;
+
+    std::vector <const TransformComponent*> visibleInstances;
 
     InstanceComponent():
-        count(0), indicesCount(0),
+        count(0),
         transforms(MAX_INSTANCES) {
     }
 
-    void bindVertices(
-        const float*        vertices, const size_t& size_v,
-        const unsigned int* indices,  const size_t& size_i
+    // Setups Mesh
+    // @warning CALL ONLY ONCE!
+    void bind(
+        const std::vector<float>& vertices,
+        const std::vector<uint>&  indices
     );
 
-    // To be implemented for Dynamic Entities
-    void updateModels(
-        const glm::mat4* models,  const size_t& size_m,
-        const glm::mat3* normals, const size_t& size_n
-    ) {}
+    // @note 'transforms' must be changed before calling this method.
+    void updateModels();
 
     void draw() const;
 };
@@ -277,40 +315,6 @@ struct DirectShadowData {
     DirectShadowData(Entity entity, Matrix4 matrix, DirectShadowFrame* frame):
         entity(entity), lightSpaceMatrix(matrix), frame(frame) {
     }
-};
-
-struct BoundingSphereComponent {
-    glm::vec3 center;
-    float radius;
-};
-
-struct BoundingAABBComponent {
-    
-    glm::vec3 center;
-
-    glm::vec3 local_min;
-    glm::vec3 local_max;
-
-    glm::vec3 min;
-    glm::vec3 max;
-
-    // @note Define local_min & local_max with min & max
-    // @warning AVOID USING THIS!!
-    BoundingAABBComponent():
-        min(FLT_MAX), max(-FLT_MAX) {
-    }
-
-    BoundingAABBComponent(
-        const glm::vec3& center,
-        const glm::vec3& min,
-        const glm::vec3& max
-    ):
-        center(center),
-        min(min), max(max),
-        local_min(min), local_max(max) {
-    }
-
-    void recompute(const glm::mat4& model);
 };
 
 template <typename Component>

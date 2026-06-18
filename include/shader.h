@@ -274,6 +274,7 @@ enum shaderNames {
     GBUFFERNORM_3D,
     GBUFFERNORM_2D,
     WIREFRAME,
+    NORMPBR2D_BACKFACE,
 
     SHADER_COUNT
 };

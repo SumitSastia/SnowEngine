@@ -6,7 +6,7 @@
 #include <frame.h>
 #include <camera.h>
 
-// ------------------------------ Components ----------------------------------------- //
+// ------------------------------ Temporary ------------------------------------------ //
 
 void ShapeComponent::bindVertices2D(
     const float* vertices, const size_t& size_v,
@@ -118,25 +118,28 @@ void ShapeComponent::draw() const {
     glBindVertexArray(0);
 }
 
-void InstanceComponent::bindVertices(
-    const float*        vertices, const size_t& size_v,
-    const unsigned int* indices,  const size_t& size_i
+// ------------------------------ Components ----------------------------------------- //
+
+void InstanceComponent::bind(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
 ) {
-    indicesCount = size_i / sizeof(u_int);
+    mesh.indicesCount = indices.size();
+    visibleCount = count;
 
     if (!count) DebugMenu::log("ERROR::TRANSFORMCOMPONENTS NOT INITIALIZED!");
 
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &mesh.VBO);
+    glGenBuffers(1, &mesh.EBO);
+    glGenVertexArrays(1, &mesh.VAO);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(mesh.VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
     // Position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -162,7 +165,7 @@ void InstanceComponent::bindVertices(
     // InstancedModel
     glGenBuffers(1, &modelVBO);
     glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat4), &models[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat4), models.data(), GL_STATIC_DRAW);
 
     std::size_t vec4Size = sizeof(glm::vec4);
     glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
@@ -186,7 +189,7 @@ void InstanceComponent::bindVertices(
     // InstancedNormal
     glGenBuffers(1, &normalVBO);
     glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat3), &normals[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::mat3), normals.data(), GL_STATIC_DRAW);
 
     std::size_t vec3Size = sizeof(glm::vec3);
     glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
@@ -207,10 +210,37 @@ void InstanceComponent::bindVertices(
     glBindVertexArray(0);
 }
 
+void InstanceComponent::updateModels() {
+
+    visibleCount = visibleInstances.size();
+
+    std::vector <glm::mat4> models(visibleCount);
+    std::vector <glm::mat3> normals(visibleCount);
+    
+    for (uint32_t i = 0; i < visibleCount; i++) {
+        
+        models[i]  = visibleInstances[i]->model;
+        normals[i] = visibleInstances[i]->model.getNormal();
+    }
+    
+    glBindVertexArray(mesh.VAO);
+
+    // InstancedModel
+    glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, visibleCount * sizeof(glm::mat4), models.data());
+    
+    // InstancedNormal
+    glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, visibleCount * sizeof(glm::mat3), normals.data());
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 void InstanceComponent::draw() const {
 
-    glBindVertexArray(VAO);
-    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, count);
+    glBindVertexArray(mesh.VAO);
+    glDrawElementsInstanced(GL_TRIANGLES, mesh.indicesCount, GL_UNSIGNED_INT, nullptr, visibleCount);
     glBindVertexArray(0);
 }
 
@@ -315,14 +345,6 @@ void MeshComponent::loadMesh3DNormal(
     // Normal
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    // // TextureCords
-    // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
-    // glEnableVertexAttribArray(2);
-
-    // // Tangent
-    // glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
-    // glEnableVertexAttribArray(3);
 
     // Tangent
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));

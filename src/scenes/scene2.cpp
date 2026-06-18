@@ -176,8 +176,9 @@ void Scene2::init() {
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
 
-        material.albedo = new Texture2D("assets/textures/brickwall.jpg", 1);
-        material.normal = new Texture2D("assets/textures/brickwall_normal.png");
+        material.albedo   = new Texture2D("assets/textures/brickwall.jpg", 1);
+        material.normal   = new Texture2D("assets/textures/brickwall_normal.png");
+        material.specular = new Texture2D("assets/textures/stone_floor.jpg", 1);
 
         material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
 
@@ -214,9 +215,10 @@ void Scene2::init() {
         mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR2D);
-        material.albedo = componentManager.get<MaterialComponent>(floor).albedo;
-        material.normal = componentManager.get<MaterialComponent>(floor).normal;
+        material.shader   = Shaders::get(NORMPBR2D);
+        material.albedo   = componentManager.get<MaterialComponent>(floor).albedo;
+        material.normal   = componentManager.get<MaterialComponent>(floor).normal;
+        material.specular = componentManager.get<MaterialComponent>(floor).specular;
 
         material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
 
