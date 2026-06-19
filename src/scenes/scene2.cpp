@@ -3,6 +3,7 @@
 #include <renderer.h>
 #include <debug.h>
 #include <input.h>
+#include <systems/update.h>
 
 void Scene2::init() {
 
@@ -364,6 +365,10 @@ void Scene2::init() {
         transform.scale    = glm::vec3(0.5f);
         transform.computeModel();
 
+        transform.local_position = glm::vec3(1.0f, 0.0f, 0.0f);
+        transform.local_rotation = glm::vec3(0.0f);
+        transform.local_scale = glm::vec3(1.0f);
+
         Model3D* camModel = new Model3D("../assets/models/test_cube/colorCamera.obj");
 
         MaterialComponent material;
@@ -401,9 +406,9 @@ void Scene2::init() {
         componentManager.addComponent(headcam, cameraComponent);
     }
 
-    // Camera::activeCamera = &componentManager.get<CameraComponent>(headcam).camera;
-
-    // DebugMenu::log("Sphere (Model3D to ECS): " + running::globalTimer::endInterval());
+    ChildComponent children;
+    children.children = { headcam };
+    componentManager.addComponent(wood_box, children);
 
     // cubes
     {
@@ -548,6 +553,11 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
             transforms[i]->computePosition();
         }
     }
+}
+
+void Scene2::update(const float deltaTime) {
+
+    updateTransform(ecs);
 }
 
 void Scene2::render() const {

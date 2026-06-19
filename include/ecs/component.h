@@ -70,7 +70,12 @@ struct TransformComponent {
     glm::vec3 rotation;
     glm::vec3 scale;
 
-    Matrix4   model;
+    glm::vec3 local_position;
+    glm::vec3 local_rotation;
+    glm::vec3 local_scale;
+
+    Matrix4 model;
+    Matrix4 localModel;
 
     void computeModel();
     void computePosition() { position = model.getMatrix()[3]; }
@@ -324,6 +329,11 @@ struct DirectShadowData {
     }
 };
 
+struct ChildComponent {
+
+    std::vector <Entity> children;
+};
+
 template <typename Component>
 class ComponentPool {
     
@@ -374,6 +384,7 @@ public:
     ComponentPool <MeshLODComponent>        meshLODs;
     ComponentPool <ModelLODComponent>       modelLODs;
     ComponentPool <CameraComponent>         cameras;
+    ComponentPool <ChildComponent>          childrens;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);

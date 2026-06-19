@@ -115,6 +115,7 @@ int main() {
             Camera::activeCamera = &Camera::instance();
         }
 
+        scene2->input(window, deltaTime);
         // Input::update();
         
         // mainCamera.mouse_handler(window);
@@ -134,10 +135,10 @@ int main() {
         Camera::input(window, deltaTime);
 
         // mainScene->input(window, deltaTime);
-        scene2->input(window, deltaTime);
         
         Camera::update(deltaTime);
         // mainScene->update(deltaTime);
+        scene2->update(deltaTime);
         
         ImGui::End();
 

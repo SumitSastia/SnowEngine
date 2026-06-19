@@ -30,7 +30,7 @@ public:
 
     virtual void init() = 0;
     virtual void input(GLFWwindow* window, const float& delta_time) = 0;
-    virtual void update(const float& delta_time) = 0;
+    virtual void update(const float delta_time) = 0;
     virtual void render() const = 0;
     virtual void renderGbuffer() const = 0;
     virtual void renderDeferred(const Shader& currentShader) const = 0;
@@ -90,7 +90,7 @@ public:
 
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
-    void update(const float& delta_time) override;
+    void update(const float delta_time) override;
     void render() const override;
     void renderGbuffer() const override;
     void renderDeferred(const Shader& currentShader) const override;
@@ -129,7 +129,7 @@ public:
 
     void init() override;
     void input(GLFWwindow* window, const float& delta_time) override;
-    void update(const float& delta_time) override {}
+    void update(const float delta_time) override;
     void render() const override;
     void renderGbuffer() const override;
     void renderDeferred(const Shader& currentShader) const override;

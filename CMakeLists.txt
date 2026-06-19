@@ -32,6 +32,12 @@ set(
     src/scenes/scene2.cpp
 )
 
+set(
+    ECS_SYSTEMS
+
+    src/systems/updateTransform.cpp
+)
+
 add_executable(
     ${TARGET_NAME}
 
@@ -55,6 +61,7 @@ add_executable(
     ${SCENES_SRC}
     ${ECS_SRC}
     ${IMGUI_SRC}
+    ${ECS_SYSTEMS}
 )
 
 target_include_directories(${TARGET_NAME} PRIVATE include)

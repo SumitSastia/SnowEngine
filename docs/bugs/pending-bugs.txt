@@ -1,0 +1,1 @@
+1. Shadows are also affect when instances are culled using frustum, because the mesh data is updated in VRAM which passes in ShadowPass.

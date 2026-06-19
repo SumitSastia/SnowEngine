@@ -82,6 +82,55 @@ struct ECS {
     ComponentManager componentManager;
 
     template <typename Component0>
+    const std::vector<Entity> view() {
+
+        std::vector <Entity> entities;
+
+        for (Entity entity = 0; entity < entityManager.total_entities(); entity++) {
+            if (componentManager.has<Component0>(entity)) entities.push_back(entity);
+        }
+
+        return entities;
+    }
+
+    template <typename Component0, typename Component1>
+    const std::vector<Entity> view() {
+
+        std::vector <Entity> entities;
+
+        for (Entity entity = 0; entity < entityManager.total_entities(); entity++) {
+
+            if (
+                componentManager.has<Component0>(entity) &&
+                componentManager.has<Component1>(entity)
+            ) {
+                entities.push_back(entity);
+            }
+        }
+
+        return entities;
+    }
+
+    template <typename Component0, typename Component1, typename Component2>
+    const std::vector<Entity> view() {
+
+        std::vector <Entity> entities;
+
+        for (Entity entity = 0; entity < entityManager.total_entities(); entity++) {
+
+            if (
+                componentManager.has<Component0>(entity) &&
+                componentManager.has<Component1>(entity) &&
+                componentManager.has<Component2>(entity)
+            ) {
+                entities.push_back(entity);
+            }
+        }
+
+        return entities;
+    }
+
+    template <typename Component0>
     const std::vector<Entity> view() const {
 
         std::vector <Entity> entities;

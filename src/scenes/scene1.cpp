@@ -346,7 +346,7 @@ void Scene1::init() {
     // std::cout << "Scene1 - Loaded Entities: " << loaded_entities.size() + cubes.getCount() << std::endl;
 }
 
-void Scene1::update(const float& delta_time) {
+void Scene1::update(const float delta_time) {
 
     for (uint8_t i = 0; i < light_count; i++) {
         lights[i]->setPosition(lightModels[i]->getPos());
