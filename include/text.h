@@ -33,4 +33,6 @@ public:
 
     static bool init(const char* path);
     static void render(const std::string text, const glm::vec2 pos, const float scale, const glm::vec3 color);
+
+    static std::string floatToString(const float value); 
 };

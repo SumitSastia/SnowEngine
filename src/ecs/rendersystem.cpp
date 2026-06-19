@@ -13,9 +13,9 @@
 
 void RenderSystem::bindCameraGlobals(const Shader* shader) {
 
-    shader->setMat4("projection", Camera::instance().getPerspective());
-    shader->setMat4("view",       Camera::instance().getView());
-    shader->setVec3("camPos",     Camera::instance().getPos());
+    shader->setMat4("projection", Camera::get_projection());
+    shader->setMat4("view",       Camera::get_view());
+    shader->setVec3("camPos",     Camera::get_position());
 }
 
 void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
@@ -182,7 +182,7 @@ void RenderSystem::render(const ECS& ecs) {
 
         instance.updateModels();
 
-        DebugMenu::log("Instances: " + std::to_string(instance.visibleCount));
+        // DebugMenu::log("Instances: " + std::to_string(instance.visibleCount));
         draw(instance, material);
     }
 
@@ -505,6 +505,9 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
     const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
+    const std::vector<Entity> objects_with_LOD = ecs.view<MeshLODComponent, TransformComponent, MaterialComponent>();
+    const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
+
     // Frustum
     Frustum frustum(Camera::instance().getPerspective() * Camera::instance().getView());
 
@@ -515,7 +518,10 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
 
         // Frustum Culling
         const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        if (!frustum.isMeshInside(boundingSphere)) continue;
+        const BoundingAABBComponent&   boundingAABB   = componentManager.get<BoundingAABBComponent>(entity);
+
+        // if (!frustum.isMeshInside(boundingSphere)) continue;
+        if (!frustum.isMeshInside(boundingAABB)) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
@@ -541,6 +547,44 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
 
             const MeshComponent&     mesh     = componentManager.get<ModelComponent>(entity).meshes[i];
             const MaterialComponent& material = componentManager.get<ModelComponent>(entity).materials[i];
+
+            if (material.gbufferShader) drawGbuffer(mesh, transform, material);
+        }
+    }
+
+    // LOD System
+    for (const Entity& entity : objects_with_LOD) {
+
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
+
+        const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+        const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
+        
+        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
+
+        if (material.gbufferShader) drawGbuffer(mesh, transform, material);
+    }
+
+    for (const Entity& entity : models_with_LOD) {
+
+        // Frustum Culling
+        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
+        if (!frustum.isMeshInside(boundingSphere)) continue;
+
+        const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+        
+        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
+
+        const uint total_meshes = model.meshes.size();
+
+        for (uint i = 0 ; i < total_meshes; i++) {
+
+            const MeshComponent&     mesh     = model.meshes[i];
+            const MaterialComponent& material = model.materials[i];
 
             if (material.gbufferShader) drawGbuffer(mesh, transform, material);
         }

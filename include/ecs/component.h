@@ -9,6 +9,7 @@
 
 #include <s_math.h>
 #include <model.h>
+#include <camera.h>
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
@@ -232,6 +233,12 @@ struct BoundingAABBComponent {
     void recompute(const glm::mat4& model);
 };
 
+struct CameraComponent {
+
+    Camera camera;
+    // operator Camera&() { return camera; }
+};
+
 struct InstanceComponent {
 
     MeshComponent mesh;
@@ -366,6 +373,7 @@ public:
     ComponentPool <BoundingAABBComponent>   boundingAABBs;
     ComponentPool <MeshLODComponent>        meshLODs;
     ComponentPool <ModelLODComponent>       modelLODs;
+    ComponentPool <CameraComponent>         cameras;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);

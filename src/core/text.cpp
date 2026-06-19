@@ -3,6 +3,7 @@
 #include <shader.h>
 
 #include <iostream>
+#include <sstream>
 
 FT_Library Text::ft   {};
 FT_Face    Text::font {};
@@ -152,4 +153,12 @@ void Text::render(const std::string text, glm::vec2 pos, const float scale, cons
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glDisable(GL_BLEND);
+}
+
+std::string Text::floatToString(const float value) {
+
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(1) << value;
+
+    return ss.str();
 }

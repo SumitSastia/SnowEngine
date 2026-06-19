@@ -34,7 +34,8 @@ int main() {
 
     Input::init();
     DebugMenu::init(window);
-    Text::init("../assets/fonts/BlockBlueprint.ttf");
+    // Text::init("../assets/fonts/BlockBlueprint.ttf");
+    Text::init("../assets/fonts/Lato-Bold.ttf");
     SSAO::init();
     // ShadowSystem::init();
     Shaders::initShaders();
@@ -79,12 +80,25 @@ int main() {
 
     // ---------- Loop ------------------------ //
 
+    float update_timer = 0.0f;
+    float fps = 0.0f, frameTime = 0.0f;
+
     while (!glfwWindowShouldClose(window) && isRunning) {
 
         // Time
         float currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+        lastTime  = currentTime;
+
+        update_timer += deltaTime;
+
+        if (update_timer >= 0.5f) {
+
+            fps = 1.0f / deltaTime;
+            frameTime = deltaTime * 1000.0f;
+            update_timer = 0.0f;
+        }
+
         
         DebugMenu::beginUI();
 
@@ -97,12 +111,17 @@ int main() {
             SSAO::enable = !SSAO::enable;
         }
 
+        if (Input::isKeyDown(GLFW_KEY_C)) {
+            Camera::activeCamera = &Camera::instance();
+        }
+
         // Input::update();
         
-        mainCamera.mouse_handler(window);
-        mainCamera.scroll_handler(scrollOffset);
-        
+        // mainCamera.mouse_handler(window);
+        // mainCamera.scroll_handler(scrollOffset);
 
+        Camera::handle_mouse(window);
+        
         if (Input::isKeyDown(GLFW_KEY_P)) {
             deferredRender = !deferredRender;
         }
@@ -112,11 +131,12 @@ int main() {
         ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
 
         DefaultLights::instance().update();
-        mainCamera.input_handler(window, deltaTime);
+        Camera::input(window, deltaTime);
+
         // mainScene->input(window, deltaTime);
         scene2->input(window, deltaTime);
         
-        mainCamera.update(deltaTime);
+        Camera::update(deltaTime);
         // mainScene->update(deltaTime);
         
         ImGui::End();
@@ -142,7 +162,6 @@ int main() {
 
         scene2->renderDirectShadow();
         scene2->renderPointShadow();
-
 
         // Scene
         if (!deferredRender) {
@@ -235,7 +254,19 @@ int main() {
         // Debug - UI
         DebugMenu::endUI();
 
-        // Text::render((deferredRender)? "Deferred Rendering" : "Forward Rendering", glm::vec2(50.0f), 1.0, glm::vec3(1.0f));
+        Text::render(
+            "FPS: " + Text::floatToString(fps),
+            glm::vec2(10.0f, 700.0f),
+            0.3f,
+            glm::vec3(1.0f)
+        );
+
+        Text::render(
+            "frametime: " + Text::floatToString(frameTime) + "ms",
+            glm::vec2(10.0f, 680.0f), 
+            0.3f,
+            glm::vec3(1.0f)
+        );
 
         glfwSwapBuffers(window);
     }

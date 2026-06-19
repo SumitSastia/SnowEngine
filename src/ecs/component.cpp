@@ -479,6 +479,11 @@ ComponentPool<ModelLODComponent>& ComponentManager::getPool() {
 }
 
 template <>
+ComponentPool<CameraComponent>& ComponentManager::getPool() {
+    return cameras;
+}
+
+template <>
 const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
     return transforms;
 }
@@ -531,6 +536,11 @@ const ComponentPool<MeshLODComponent>& ComponentManager::getPool() const {
 template <>
 const ComponentPool<ModelLODComponent>& ComponentManager::getPool() const {
     return modelLODs;
+}
+
+template <>
+const ComponentPool<CameraComponent>& ComponentManager::getPool() const {
+    return cameras;
 }
 
 // ------------------------------ Components ----------------------------------------- //

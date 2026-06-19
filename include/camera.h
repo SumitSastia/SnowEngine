@@ -23,18 +23,18 @@ class Camera {
 
     float camSlow;
     float camSpeed;
-    float camSensitivity;
-
+    
     float yaw; // y-axis rotation
     float yaw_initial;
-
+    
     float pitch; // x-axis rotation
     float pitch_initial;
-
+    
     float fov;
     float aspectRatio;
-
-    bool mouseEnabled;
+    
+    static float camSensitivity;
+    static bool  mouseEnabled;
 
     // Player Movements
     bool Uturn;
@@ -42,11 +42,24 @@ class Camera {
 public:
 
     Camera();
-    static Camera& instance();
+    static Camera& instance() {
+        static Camera instance {};
+        return instance;
+    }
 
-    void update(const float& delta_time);
+    static Camera* activeCamera;
+
+    static const glm::vec3& get_position() { return activeCamera->position; }
+    static const glm::mat4& get_projection() { return activeCamera->projection; }
+    static const glm::mat4& get_view() { return activeCamera->viewMatrix; }
+
+    static void input(GLFWwindow* window, const float deltaTime);
+    static void update(const float deltaTime);
+    static void handle_mouse(GLFWwindow* window);
+
+    // void update(const float& delta_time);
     void look_at();
-    void input_handler(GLFWwindow* window, float deltaTime);
+    // void input_handler(GLFWwindow* window, float deltaTime);
     void mouse_handler(GLFWwindow* window);
     void scroll_handler(float &scrollOffset);
 

@@ -388,11 +388,20 @@ void Scene2::init() {
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         boundingSphere.radius = localRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
+        CameraComponent cameraComponent;
+        Camera& camera = cameraComponent.camera;
+
+        camera.set_position(transform.position);
+        camera.set_target({-1.0f, 0.0f, -1.0f});
+
         componentManager.addComponent(headcam, modelComponent);
         componentManager.addComponent(headcam, transform);
         componentManager.addComponent(headcam, boundingSphere);
         componentManager.addComponent(headcam, AABB);
+        componentManager.addComponent(headcam, cameraComponent);
     }
+
+    // Camera::activeCamera = &componentManager.get<CameraComponent>(headcam).camera;
 
     // DebugMenu::log("Sphere (Model3D to ECS): " + running::globalTimer::endInterval());
 
@@ -562,8 +571,8 @@ void Scene2::renderLight() const {
         const Shader& shader = *Shaders::get(ENVIRONMENT);
         shader.use();
 
-        shader.setMat4("projection", Camera::instance().getPerspective());
-        shader.setMat4("view", glm::mat4(glm::mat3(Camera::instance().getView())));
+        shader.setMat4("projection", Camera::get_projection());
+        shader.setMat4("view", glm::mat4(glm::mat3(Camera::get_view())));
         
         shader.setInt("environmentMap", 0);
         env->bindTexture(0);

@@ -7,6 +7,12 @@
 
 #include <iostream>
 
+// Static Members
+Camera* Camera::activeCamera = &Camera::instance();
+
+float Camera::camSensitivity = 0.1f;
+bool  Camera::mouseEnabled = false;
+
 Camera::Camera() {
 
     position  = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -15,7 +21,9 @@ Camera::Camera() {
 
     camSlow  = 0.5f;
     camSpeed = 1.0f;
-    camSensitivity = 0.1f;
+
+    // camSensitivity = 0.1f;
+    // mouseEnabled = false;
 
     glm::vec3 up(0.0f, 1.0f, 0.0f);
 
@@ -28,8 +36,6 @@ Camera::Camera() {
     projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
     viewMatrix = glm::lookAt(position, position + target, up_axis);
 
-    mouseEnabled = false;
-
     yaw   = -90.0f;
     pitch = 0.0f;
 
@@ -37,37 +43,105 @@ Camera::Camera() {
     Uturn = false;
 }
 
-Camera& Camera::instance() {
-    static Camera instance;
-    return instance;
+void Camera::input(GLFWwindow* window, const float deltaTime) {
+
+    if (Input::isKeyPressed(GLFW_KEY_W)) {
+        activeCamera->position += activeCamera->target * activeCamera->camSpeed * deltaTime;
+    }
+    if (Input::isKeyPressed(GLFW_KEY_S)) {
+        activeCamera->position -= activeCamera->target * activeCamera->camSpeed * deltaTime;
+    }
+    
+    if (Input::isKeyPressed(GLFW_KEY_A)) {
+        activeCamera->position -= glm::normalize(glm::cross(activeCamera->target, activeCamera->up_axis)) * activeCamera->camSpeed * deltaTime;
+    }
+    if (Input::isKeyPressed(GLFW_KEY_D)) {
+        activeCamera->position += glm::normalize(glm::cross(activeCamera->target, activeCamera->up_axis)) * activeCamera->camSpeed * deltaTime;
+    }
+
+    if (Input::isKeyPressed(GLFW_KEY_SPACE)) {
+        activeCamera->position.y += activeCamera->camSpeed * deltaTime;
+    }
+    if (Input::isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+        activeCamera->position.y -= activeCamera->camSpeed * deltaTime;
+    }
+
+    if (Input::isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+        activeCamera->camSpeed = 5.0f;
+    }
+    else{
+        activeCamera->camSpeed = 1.0f;
+    }
+
+    if (Input::isKeyDown(GLFW_KEY_E)) {
+        (mouseEnabled)?
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        mouseEnabled = !mouseEnabled;
+    }
+
+    if (Input::isKeyDown(GLFW_KEY_X)) {
+        activeCamera->Uturn = true;
+        activeCamera->yaw_initial = activeCamera->yaw;
+    }
+
+    if (Input::isKeyDown(GLFW_KEY_T)) {
+        DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
+    }
 }
 
-void Camera::update(const float& delta_time) {
+void Camera::update(const float delta_time) {
 
-    if (Uturn) {
+    if (activeCamera->Uturn) {
         mouseEnabled = false;
         
-        if (yaw < yaw_initial + 180.0f) {
-            yaw += 2.0f;
+        if (activeCamera->yaw < activeCamera->yaw_initial + 180.0f) {
+            activeCamera->yaw += 2.0f;
         }
         else {
-            Uturn = false;
+            activeCamera->Uturn = false;
             mouseEnabled = true;
         }
     }
 
     glm::vec3 new_direction;
 
-    new_direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    new_direction.y = sin(glm::radians(pitch));
-    new_direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    new_direction.x = cos(glm::radians(activeCamera->yaw)) * cos(glm::radians(activeCamera->pitch));
+    new_direction.y = sin(glm::radians(activeCamera->pitch));
+    new_direction.z = sin(glm::radians(activeCamera->yaw)) * cos(glm::radians(activeCamera->pitch));
 
-    target = glm::normalize(new_direction);
+    activeCamera->target = glm::normalize(new_direction);
 
-    look_at();
+    activeCamera->look_at();
 
-    ImGui::Text("Camera FOV: %.1f", fov);
+    ImGui::Text("Camera FOV: %.1f", activeCamera->fov);
 }
+
+// void Camera::update(const float& delta_time) {
+
+//     if (Uturn) {
+//         mouseEnabled = false;
+        
+//         if (yaw < yaw_initial + 180.0f) {
+//             yaw += 2.0f;
+//         }
+//         else {
+//             Uturn = false;
+//             mouseEnabled = true;
+//         }
+//     }
+
+//     glm::vec3 new_direction;
+
+//     new_direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+//     new_direction.y = sin(glm::radians(pitch));
+//     new_direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+//     target = glm::normalize(new_direction);
+
+//     look_at();
+
+//     ImGui::Text("Camera FOV: %.1f", fov);
+// }
 
 void Camera::set_position(const glm::vec3 position){
     this->position = position;
@@ -114,51 +188,51 @@ void Camera::look_at(){
     viewMatrix = glm::lookAt(position, position + target, up_axis);
 }
 
-void Camera::input_handler(GLFWwindow* window, float deltaTime){
+// void Camera::input_handler(GLFWwindow* window, float deltaTime){
     
-    if (glfwGetKey(window,GLFW_KEY_W)) {
-        position += target * camSpeed * deltaTime;
-    }
-    if (glfwGetKey(window,GLFW_KEY_S)) {
-        position -= target * camSpeed * deltaTime;
-    }
+//     if (glfwGetKey(window,GLFW_KEY_W)) {
+//         position += target * camSpeed * deltaTime;
+//     }
+//     if (glfwGetKey(window,GLFW_KEY_S)) {
+//         position -= target * camSpeed * deltaTime;
+//     }
     
-    if (glfwGetKey(window,GLFW_KEY_A)) {
-        position -= glm::normalize(glm::cross(target,up_axis)) * camSpeed * deltaTime;
-    }
-    if (glfwGetKey(window,GLFW_KEY_D)) {
-        position += glm::normalize(glm::cross(target,up_axis)) * camSpeed * deltaTime;
-    }
+//     if (glfwGetKey(window,GLFW_KEY_A)) {
+//         position -= glm::normalize(glm::cross(target,up_axis)) * camSpeed * deltaTime;
+//     }
+//     if (glfwGetKey(window,GLFW_KEY_D)) {
+//         position += glm::normalize(glm::cross(target,up_axis)) * camSpeed * deltaTime;
+//     }
 
-    if (glfwGetKey(window,GLFW_KEY_SPACE)) {
-        position.y += camSpeed * deltaTime;
-    }
-    if (glfwGetKey(window,GLFW_KEY_LEFT_CONTROL)) {
-        position.y -= camSpeed * deltaTime;
-    }
+//     if (glfwGetKey(window,GLFW_KEY_SPACE)) {
+//         position.y += camSpeed * deltaTime;
+//     }
+//     if (glfwGetKey(window,GLFW_KEY_LEFT_CONTROL)) {
+//         position.y -= camSpeed * deltaTime;
+//     }
 
-    if (glfwGetKey(window,GLFW_KEY_LEFT_SHIFT)) {
-        camSpeed = 5.0f;
-    }
-    else{
-        camSpeed = 1.0f;
-    }
+//     if (glfwGetKey(window,GLFW_KEY_LEFT_SHIFT)) {
+//         camSpeed = 5.0f;
+//     }
+//     else{
+//         camSpeed = 1.0f;
+//     }
 
-    if (Input::isKeyDown(GLFW_KEY_E)) {
-        (mouseEnabled)?
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        mouseEnabled = !mouseEnabled;
-    }
+//     if (Input::isKeyDown(GLFW_KEY_E)) {
+//         (mouseEnabled)?
+//             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//         mouseEnabled = !mouseEnabled;
+//     }
 
-    if (Input::isKeyDown(GLFW_KEY_X)) {
-        Uturn = true;
-        yaw_initial = yaw;
-    }
+//     if (Input::isKeyDown(GLFW_KEY_X)) {
+//         Uturn = true;
+//         yaw_initial = yaw;
+//     }
 
-    if (Input::isKeyDown(GLFW_KEY_T)) {
-        DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
-    }
-}
+//     if (Input::isKeyDown(GLFW_KEY_T)) {
+//         DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
+//     }
+// }
 
 void Camera::mouse_handler(GLFWwindow* window){
     
@@ -196,6 +270,45 @@ void Camera::scroll_handler(float &scrollOffset){
     
     set_fov(fov - scrollOffset);
     scrollOffset = 0.0f;
+}
+
+void Camera::handle_mouse(GLFWwindow* window) {
+
+    // Cursor Handling
+    double pos_x = 0.0;
+    double pos_y = 0.0;
+    
+    glfwGetCursorPos(window, &pos_x, &pos_y);
+    
+    static double prev_x = pos_x;
+    static double prev_y = pos_y;
+
+    if(!mouseEnabled){
+        prev_x = pos_x;
+        prev_y = pos_y;
+        return;
+    }
+
+    double cursor_dx = pos_x - prev_x;
+    double cursor_dy = prev_y - pos_y;
+
+    prev_x = pos_x;
+    prev_y = pos_y;
+
+    float offset_x = cursor_dx * camSensitivity;
+    float offset_y = cursor_dy * camSensitivity;
+
+    activeCamera->yaw = glm::mod(activeCamera->yaw + offset_x, 360.0f);
+    activeCamera->pitch += offset_y;
+
+    if(activeCamera->pitch > 89.0f)  activeCamera->pitch = 89.0f;
+    if(activeCamera->pitch < -89.0f) activeCamera->pitch = -89.0f;
+
+    // Scroll Handling
+    if (scrollOffset) {
+        activeCamera->set_fov(activeCamera->fov - scrollOffset);
+        scrollOffset = 0.0f;
+    }
 }
 
 //***************************************************************************//
