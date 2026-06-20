@@ -13,6 +13,8 @@
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
+using TextureHandle = uint32_t;
+
 #define MAX_ENTITIES 5000
 #define TOTAL_COMPONENTS 10
 #define MAX_INSTANCES 100
@@ -28,57 +30,25 @@ using Entity = uint32_t;
 
 // ------------------------------ Components ----------------------------------------- //
 
-struct ShapeComponent {
-
-    uint VAO, VBO, EBO;
-    uint indicesCount;
-
-    glm::vec3 center;
-    float radius;
-
-    ShapeComponent():
-        VAO(0), VBO(0), EBO(0),
-        indicesCount(0), center(0.0f), radius(0.0f) {
-    }
-
-    ShapeComponent(uint VAO, uint VBO, uint EBO, uint indicesCount):
-        VAO(VAO), VBO(VBO), EBO(EBO),
-        indicesCount(indicesCount) {
-    }
-
-    void bindVertices2D(
-        const float* vertices, const size_t& size_v,
-        const unsigned int* indices, const size_t& size_i
-    );
-
-    void bindVertices3D(
-        const float* vertices, const size_t& size_v,
-        const unsigned int* indices, const size_t& size_i
-    );
-
-    void bindVertices3D_Normal(
-        const float* vertices, const size_t& size_v,
-        const unsigned int* indices, const size_t& size_i
-    );
-
-    void draw() const;
-};
-
 struct TransformComponent {
 
-    glm::vec3 position;
-    glm::vec3 rotation;
-    glm::vec3 scale;
+    glm::vec3 position {0.0f};
+    glm::vec3 rotation {0.0f};
+    glm::vec3 scale {1.0f};
 
-    glm::vec3 local_position;
-    glm::vec3 local_rotation;
-    glm::vec3 local_scale;
+    glm::vec3 local_position {0.0f};
+    glm::vec3 local_rotation {0.0f};
+    glm::vec3 local_scale {1.0f};
 
     Matrix4 model;
     Matrix4 localModel;
 
+    bool isVisible = true;
+
     void computeModel();
     void computePosition() { position = model.getMatrix()[3]; }
+
+    void destroy() {}
 };
 
 struct MeshComponent {
@@ -134,6 +104,7 @@ struct MeshComponent {
     );
 
     void draw() const;
+    void destroy();
 };
 
 struct MeshLODComponent {
@@ -143,25 +114,30 @@ struct MeshLODComponent {
     MeshComponent low;
 
     const MeshComponent& getMesh(const float distance) const;
+
+    void destroy();
 };
 
 struct DirectionalLight {
 
     glm::vec3 direction; // 12-Bytes
     glm::vec3 color;     // 12-Bytes
+
+    void destroy() {}
 };
 
 struct PointLightComponent {
 
     glm::vec3 color;    // 12-Bytes
 
-    float constant;     // 4-Bytes 
-    float linear;       // 4-Bytes 
-    float quadratic;    // 4-Bytes 
+    float constant;     // 4-Bytes
+    float linear;       // 4-Bytes
+    float quadratic;    // 4-Bytes
+
+    void destroy() {}
 };
 
-// Not suitable for ECS
-struct SpotLight {
+struct SpotLightComponent {
 
     glm::vec3 position;  // 12-Bytes
     glm::vec3 direction; // 12-Bytes
@@ -175,6 +151,8 @@ struct SpotLight {
     float quadratic;     // 4-Bytes
     
     bool isVisible;      // 1-Byte
+
+    void destroy() {}
 };
 
 struct MaterialComponent {
@@ -182,31 +160,40 @@ struct MaterialComponent {
     Shader* shader;
     Shader* gbufferShader;
     
-    Texture2D* albedo;
-    Texture2D* normal;
-    Texture2D* height;
-    Texture2D* specular;
+    TextureHandle albedo    = 0;
+    TextureHandle normal    = 0;
+    TextureHandle height    = 0;
+    TextureHandle specular  = 0;
+    TextureHandle metallic  = 0;
+    TextureHandle roughness = 0;
+    TextureHandle ao        = 0;
 
-    Texture2D* metallic;
-    Texture2D* roughness;
-    Texture2D* ao;
+    // Temporary for Models
+    Texture2D* m_albedo;
 
     MaterialComponent(): 
         shader(nullptr),
-        albedo(nullptr),
-        normal(nullptr),
-        height(nullptr),
-        specular(nullptr),
-        metallic(nullptr),
-        roughness(nullptr),
-        ao(nullptr),
+        // albedo(nullptr),
+        // normal(nullptr),
+        // height(nullptr),
+        // specular(nullptr),
+        // metallic(nullptr),
+        // roughness(nullptr),
+        // ao(nullptr),
+        m_albedo(nullptr),
         gbufferShader(nullptr) {
     }
+
+    // SHOULD BE IMPLEMENTED WITH ASSET MANAGER
+    void destroy() {}
 };
 
 struct BoundingSphereComponent {
+
     glm::vec3 center;
     float radius;
+
+    void destroy() {}
 };
 
 struct BoundingAABBComponent {
@@ -236,12 +223,14 @@ struct BoundingAABBComponent {
     }
 
     void recompute(const glm::mat4& model);
+    void destroy() {}
 };
 
 struct CameraComponent {
 
     Camera camera;
     // operator Camera&() { return camera; }
+    void destroy() {}
 };
 
 struct InstanceComponent {
@@ -273,6 +262,7 @@ struct InstanceComponent {
     void updateModels();
 
     void draw() const;
+    void destroy();
 };
 
 struct ModelComponent {
@@ -289,6 +279,7 @@ struct ModelComponent {
     }
 
     void init(const Model3D* model, const MaterialComponent material);
+    void destroy();
 };
 
 struct ModelLODComponent {
@@ -298,6 +289,15 @@ struct ModelLODComponent {
     ModelComponent low;
 
     const ModelComponent& getMesh(const float distance) const;
+    void destroy();
+};
+
+struct ChildComponent {
+
+    std::vector <Entity> children;
+    
+    // INCOMPLETE
+    void destroy();
 };
 
 struct PointShadowData {
@@ -312,6 +312,8 @@ struct PointShadowData {
     PointShadowData(Entity entity, PointShadowFrame* frame):
         entity(entity), frame(frame) {
     }
+
+    void destroy();
 };
 
 struct DirectShadowData {
@@ -327,11 +329,8 @@ struct DirectShadowData {
     DirectShadowData(Entity entity, Matrix4 matrix, DirectShadowFrame* frame):
         entity(entity), lightSpaceMatrix(matrix), frame(frame) {
     }
-};
 
-struct ChildComponent {
-
-    std::vector <Entity> children;
+    void destroy();
 };
 
 template <typename Component>
@@ -352,7 +351,10 @@ public:
         hasData[entity] = true;
     }
 
-    void removeComponent(const Entity entity) {}
+    void removeComponent(const Entity entity) {
+        data[entity].destroy();
+        hasData[entity] = false;
+    }
 
     const bool hasComponent(const Entity entity) const {
         return hasData[entity];
@@ -385,6 +387,7 @@ public:
     ComponentPool <ModelLODComponent>       modelLODs;
     ComponentPool <CameraComponent>         cameras;
     ComponentPool <ChildComponent>          childrens;
+    ComponentPool <SpotLightComponent>      spotlights;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);
@@ -410,6 +413,14 @@ public:
     }
 
     template <typename Component>
+    void removeComponent(const Entity& entity) {
+
+        if (has<Component>(entity)) {
+            getPool<Component>().removeComponent(entity);
+        }
+    }
+
+    template <typename Component>
     bool has(const Entity& entity) const {
         return getPool<Component>().hasComponent(entity);
     }
@@ -422,5 +433,14 @@ public:
     template <typename Component>
     Component& get(const Entity& entity) {
         return getPool<Component>().getComponent(entity);
+    }
+
+    template <typename Component>
+    void copy(const Entity& src, const Entity& dst) {
+        
+        addComponent(
+            dst,
+            Component(get<Component>(src))
+        );
     }
 };

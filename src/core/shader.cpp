@@ -302,7 +302,7 @@ void Texture2D::load(const char* path, const bool format) {
         return;
     }
 
-    glGenTextures(1,&textureID);
+    glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
     float borderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };

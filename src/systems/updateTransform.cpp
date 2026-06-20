@@ -20,6 +20,15 @@ void updateTransform(ECS& ecs) {
             child_transform.position = transform.position + child_transform.local_position;
 
             child_transform.computeModel();
+            child_transform.isVisible = transform.isVisible;
+
+            if (componentManager.has<BoundingAABBComponent>(child)) {
+
+                BoundingAABBComponent& AABB = componentManager.get<BoundingAABBComponent>(child);
+                AABB.center = child_transform.position;
+
+                AABB.recompute(child_transform.model);
+            }
         }
     }
 }

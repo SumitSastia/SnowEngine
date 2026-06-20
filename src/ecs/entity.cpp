@@ -1,22 +1,8 @@
-#include <ecs/rendersystem.h>
+#include <systems/rendersystem.h>
 
 #include <shader.h>
 #include <shapes.h>
 #include <lights.h>
-
-// ECS::ECS():
-//     hasPointLight(MAX_ENTITIES, false)
-// {
-//     transforms.reserve(MAX_ENTITIES);
-//     meshes.reserve(MAX_ENTITIES);
-//     materialType.reserve(MAX_ENTITIES);
-
-//     materials.reserve(MAX_ENTITIES);
-//     materialLight.reserve(MAX_ENTITIES);
-//     materialPBR.reserve(MAX_ENTITIES);
-
-//     lightSources.reserve(MAX_ENTITIES);
-// }
 
 EntityShapes::EntityShapes() {
 
@@ -329,6 +315,43 @@ EntityShapes::EntityShapes() {
     cubes.bind(vertices, indices);
 }
 
-EntityManager::EntityManager(): nextEntity(0) {
+void ECS::destroy(const Entity& entity) {
 
+    if (entity > entityManager.lastEntity) {
+        std::cerr << "ERROR::DESTROYING ENTITY WHICH WAS NEVER CREATED!" << std::endl;
+        return;
+    }
+
+    componentManager.removeComponent<TransformComponent>     (entity);
+    componentManager.removeComponent<MeshComponent>          (entity);
+    componentManager.removeComponent<MaterialComponent>      (entity);
+    componentManager.removeComponent<InstanceComponent>      (entity);
+    componentManager.removeComponent<ModelComponent>         (entity);
+    componentManager.removeComponent<PointLightComponent>    (entity);
+    componentManager.removeComponent<DirectionalLight>       (entity);
+    componentManager.removeComponent<BoundingSphereComponent>(entity);
+    componentManager.removeComponent<BoundingAABBComponent>  (entity);
+    componentManager.removeComponent<MeshLODComponent>       (entity);
+    componentManager.removeComponent<ModelLODComponent>      (entity);
+    componentManager.removeComponent<CameraComponent>        (entity);
+    componentManager.removeComponent<ChildComponent>         (entity);
+
+    if (entity < entityManager.lastEntity) {
+
+        componentManager.copy<TransformComponent>     (entityManager.lastEntity, entity);
+        componentManager.copy<MeshComponent>          (entityManager.lastEntity, entity);
+        componentManager.copy<MaterialComponent>      (entityManager.lastEntity, entity);
+        componentManager.copy<InstanceComponent>      (entityManager.lastEntity, entity);
+        componentManager.copy<ModelComponent>         (entityManager.lastEntity, entity);
+        componentManager.copy<PointLightComponent>    (entityManager.lastEntity, entity);
+        componentManager.copy<DirectionalLight>       (entityManager.lastEntity, entity);
+        componentManager.copy<BoundingSphereComponent>(entityManager.lastEntity, entity);
+        componentManager.copy<BoundingAABBComponent>  (entityManager.lastEntity, entity);
+        componentManager.copy<MeshLODComponent>       (entityManager.lastEntity, entity);
+        componentManager.copy<ModelLODComponent>      (entityManager.lastEntity, entity);
+        componentManager.copy<CameraComponent>        (entityManager.lastEntity, entity);
+        componentManager.copy<ChildComponent>         (entityManager.lastEntity, entity);
+    }
+
+    entityManager.nextEntity = entityManager.lastEntity;
 }

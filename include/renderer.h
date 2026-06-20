@@ -28,7 +28,7 @@ class Renderer {
     GLFWmonitor* monitor;
     GLFWwindow*  window;
 
-    int MAX_TEXTURES;
+    int MAX_TEXTURES_SUPPORTED;
     static bool culling;
 
     Renderer() { 

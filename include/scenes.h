@@ -8,7 +8,7 @@
 #include <model.h>
 #include <ibl.h>
 #include <s_time.h>
-#include <ecs/rendersystem.h>
+#include <systems/rendersystem.h>
 
 namespace scene_var {
     const float speed = 3.0f;

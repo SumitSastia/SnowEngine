@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <input.h>
 #include <systems/update.h>
+#include <assetManager.h>
 
 void Scene2::init() {
 
@@ -87,8 +88,8 @@ void Scene2::init() {
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR3D);
         
-        material.albedo = new Texture2D("assets/textures/wood_box.png", 1);
-        material.normal = new Texture2D("assets/textures/wood_box_normal.png");
+        material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png", 1);
+        material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png");
         
         material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
@@ -177,9 +178,9 @@ void Scene2::init() {
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
 
-        material.albedo   = new Texture2D("assets/textures/brickwall.jpg", 1);
-        material.normal   = new Texture2D("assets/textures/brickwall_normal.png");
-        material.specular = new Texture2D("assets/textures/stone_floor.jpg", 1);
+        material.albedo   = AssetManager::loadTexture("assets/textures/brickwall.jpg", 1);
+        material.normal   = AssetManager::loadTexture("assets/textures/brickwall_normal.png");
+        material.specular = AssetManager::loadTexture("assets/textures/stone_floor.jpg", 1);
 
         material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
 
@@ -263,9 +264,9 @@ void Scene2::init() {
         material.shader = Shaders::get(PARALLAX2D);
         // material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
         
-        material.albedo = new Texture2D("assets/textures/parallax_maps/bricks2.jpg", 1);
-        material.normal = new Texture2D("assets/textures/parallax_maps/bricks2_normal.jpg");
-        material.height = new Texture2D("assets/textures/parallax_maps/bricks2_disp.jpg");
+        material.albedo = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2.jpg", 1);
+        material.normal = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_normal.jpg");
+        material.height = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_disp.jpg");
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -414,7 +415,7 @@ void Scene2::init() {
     {
         MaterialComponent material;
         material.shader = Shaders::get(INSTANCEPBR3D);
-        material.albedo = new Texture2D("assets/textures/grunge-box-small.jpg", 1);
+        material.albedo = AssetManager::loadTexture("assets/textures/grunge-box-small.jpg", 1);
 
         material.gbufferShader = Shaders::get(INSTANCE_GBUFFER3D);
 

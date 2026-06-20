@@ -99,25 +99,16 @@ public:
 
 class Texture2D {
 
-    int width;
-    int height;
+    int width  = 0;
+    int height = 0;
     
-    std::string type;
-    unsigned int textureID;
+    unsigned int textureID = 0;
     
 public:
 
-    Texture2D():
-        width(0),
-        height(0),
-        textureID(0) {
-    }
+    Texture2D() = default;
 
-    Texture2D(uint textureID):
-        width(0),
-        height(0),
-        textureID(textureID) {
-    }
+    // Texture2D(uint textureID): textureID(textureID) {}
 
     Texture2D(const char* path, const bool format = 0) {
         load(path, format);
@@ -131,10 +122,10 @@ public:
     void load(const char* path, const bool format = 0);
     void bind(const unsigned int textureUnit) const;
 
+    void setID(uint textureID) { this->textureID = textureID; }
     void destroy();
 
     const unsigned int& getID()  const { return textureID; }
-    const std::string& getType() const { return type; }
 };
 
 class CubeMap {

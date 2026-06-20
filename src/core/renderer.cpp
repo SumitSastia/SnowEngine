@@ -66,7 +66,7 @@ bool Renderer::init() {
     glFrontFace(GL_CCW);
 
     // Max Textures that can be Loaded by GPU = 32
-    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_TEXTURES);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_TEXTURES_SUPPORTED);
 
     return true;
 }

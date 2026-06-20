@@ -10,6 +10,7 @@
 #include <model.h>
 #include <text.h>
 #include <ssao.h>
+#include <assetManager.h>
 
 // ------------------------------ Global Variables ----------------------------------- //
 
@@ -39,6 +40,7 @@ int main() {
     SSAO::init();
     // ShadowSystem::init();
     Shaders::initShaders();
+    AssetManager::loadTexture("assets/textures/error_texture.png");
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -54,8 +56,6 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
 
     // ---------- Testing --------------------- //
-
-    Camera& mainCamera = Camera::instance();
 
     running::core::timer t;
 
@@ -228,8 +228,8 @@ int main() {
                 deferredFrame->bind_gNormal(1);
 
                 SSAO::bindNoiseTex(2);
-                SSAO::shader->setMat4("projection", mainCamera.getPerspective());
-                SSAO::shader->setMat4("view", mainCamera.getView());
+                SSAO::shader->setMat4("projection", Camera::activeCamera->get_projection());
+                SSAO::shader->setMat4("view", Camera::activeCamera->getView());
 
                 frameBuffers::renderScreen();
                 SSAO::blurSSAO();

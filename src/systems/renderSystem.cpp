@@ -1,4 +1,5 @@
-#include <ecs/rendersystem.h>
+#include <systems/rendersystem.h>
+#include <assetManager.h>
 
 #include <shader.h>
 #include <shapes.h>
@@ -126,7 +127,7 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
 
     // Frustum
-    Frustum frustum(Camera::instance().getPerspective() * Camera::instance().getView());
+    Frustum frustum(Camera::activeCamera->getPerspective() * Camera::activeCamera->getView());
 
     int totalRenderCalls = 0;
     for (const Entity& entity : objects) {
@@ -137,12 +138,13 @@ void RenderSystem::render(const ECS& ecs) {
         // Frustum Culling
         const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
         const BoundingAABBComponent&   boundingAABB   = componentManager.get<BoundingAABBComponent>(entity);
+        const TransformComponent&      transform      = componentManager.get<TransformComponent>(entity);
 
         // if (!frustum.isMeshInside(boundingSphere)) continue;
         if (!frustum.isMeshInside(boundingAABB)) continue;
+        if (!transform.isVisible) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
-        const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
 
         draw(mesh, transform, material);
@@ -189,8 +191,8 @@ void RenderSystem::render(const ECS& ecs) {
     for (const Entity& entity : models) {
 
         // Frustum Culling
-        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        if (!frustum.isMeshInside(boundingSphere)) continue;
+        const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+        if (!frustum.isMeshInside(boundingAABB)) continue;
 
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
@@ -203,9 +205,7 @@ void RenderSystem::render(const ECS& ecs) {
             draw(mesh, transform, material);
         }
 
-        if (componentManager.has<BoundingAABBComponent>(entity)) {
-            drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
-        }
+        drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
     }
     
     // LOD System
@@ -335,35 +335,39 @@ void RenderSystem::draw(
 
     const uint32_t initialUnit = lastTextureUnit;
 
-    if (material.albedo) {
+    if (material.m_albedo) {
         shader->setInt("albedo", initialUnit);
-        material.albedo->bind(initialUnit);
+        material.m_albedo->bind(initialUnit);
+    }
+    else if (material.albedo) {
+        shader->setInt("albedo", initialUnit);
+        AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
         shader->setInt("normalMap", initialUnit+1);
-        material.normal->bind(initialUnit+1);
+        AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
     if (material.height) {
         shader->setFloat("height_scale", 0.1);
         shader->setInt("heightMap", initialUnit+2);
-        material.height->bind(initialUnit+2);
+        AssetManager::getTexture(material.height).bind(initialUnit + 2);
     }
 
     if (material.metallic) {
         shader->setInt("metallicMap", initialUnit+3);
-        material.metallic->bind(initialUnit+3);
+        AssetManager::getTexture(material.metallic).bind(initialUnit + 3);
     }
 
     if (material.roughness) {
         shader->setInt("roughnessMap", initialUnit+4);
-        material.roughness->bind(initialUnit+4);
+        AssetManager::getTexture(material.roughness).bind(initialUnit + 4);
     }
 
     if (material.specular) {
         shader->setInt("specularMap", initialUnit+5);
-        material.specular->bind(initialUnit+5);
+        AssetManager::getTexture(material.specular).bind(initialUnit + 5);
     }
 
     mesh.draw();
@@ -398,12 +402,12 @@ void RenderSystem::draw(
 
     if (material.albedo) {
         material.shader->setInt("albedo", initialUnit);
-        material.albedo->bind(initialUnit);
+        AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
         material.shader->setInt("normalMap", initialUnit+1);
-        material.albedo->bind(initialUnit+1);
+        AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
     instance.draw();
@@ -424,30 +428,39 @@ void RenderSystem::drawGbuffer(
 
     const uint32_t initialUnit = lastTextureUnit;
 
-    if (material.albedo) {
+    if (material.m_albedo) {
         shader->setInt("albedo", initialUnit);
-        material.albedo->bind(initialUnit);
+        material.m_albedo->bind(initialUnit);
+    }
+    else if (material.albedo) {
+        shader->setInt("albedo", initialUnit);
+        AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
         shader->setInt("normalMap", initialUnit+1);
-        material.normal->bind(initialUnit+1);
+        AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
     if (material.height) {
         shader->setFloat("height_scale", 0.1);
         shader->setInt("heightMap", initialUnit+2);
-        material.height->bind(initialUnit+2);
+        AssetManager::getTexture(material.height).bind(initialUnit + 2);
     }
 
     if (material.metallic) {
         shader->setInt("metallicMap", initialUnit+3);
-        material.metallic->bind(initialUnit+3);
+        AssetManager::getTexture(material.metallic).bind(initialUnit + 3);
     }
 
     if (material.roughness) {
         shader->setInt("roughnessMap", initialUnit+4);
-        material.roughness->bind(initialUnit+4);
+        AssetManager::getTexture(material.roughness).bind(initialUnit + 4);
+    }
+
+    if (material.specular) {
+        shader->setInt("specularMap", initialUnit+5);
+        AssetManager::getTexture(material.specular).bind(initialUnit + 5);
     }
 
     mesh.draw();
@@ -482,13 +495,13 @@ void RenderSystem::drawGbuffer(
     const uint32_t initialUnit = 0;
 
     if (material.albedo) {
-        shader->setInt("albedo", initialUnit);
-        material.albedo->bind(initialUnit);
+        material.shader->setInt("albedo", initialUnit);
+        AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
-        shader->setInt("normalMap", initialUnit+1);
-        material.albedo->bind(initialUnit+1);
+        material.shader->setInt("normalMap", initialUnit+1);
+        AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
     instance.draw();
@@ -509,7 +522,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
 
     // Frustum
-    Frustum frustum(Camera::instance().getPerspective() * Camera::instance().getView());
+    Frustum frustum(Camera::activeCamera->get_projection() * Camera::activeCamera->getView());
 
     // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
     for (const Entity& entity : objects) {
@@ -539,6 +552,10 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     }
 
     for (const Entity& entity : models) {
+
+        // Frustum Culling
+        const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+        if (!frustum.isMeshInside(boundingAABB)) continue;
 
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();

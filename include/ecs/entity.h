@@ -32,10 +32,6 @@ class EntityShapes {
     
 public:
 
-    // ShapeComponent cube;
-    // ShapeComponent square;
-    // ShapeComponent cubeNormalMapped;
-
     MeshComponent cube;
     MeshComponent square;
     MeshComponent cubeNorm;
@@ -50,20 +46,23 @@ public:
 };
 
 class EntityManager {
-
-    Entity nextEntity;
-
+    
     uint32_t total_objects;
     uint32_t total_lights;
-
+    
+    std::vector <Entity> destroyedEntities;
+    
 public:
-
+    
     Environment* env;
+    
+    Entity nextEntity;
+    Entity lastEntity;
 
     std::vector <Entity> visibleEntities;
     std::vector <Entity> emissiveEntities;
 
-    EntityManager();
+    EntityManager(): nextEntity(0) {};
 
     Entity createEntity() {
 
@@ -71,8 +70,11 @@ public:
             std::cerr << "ERROR::MAX ENTITIES REACHED!" << std::endl;
         }
 
+        lastEntity = nextEntity;
+
         return nextEntity++;
     }
+
     const Entity& total_entities() const { return nextEntity; }
 };
 
@@ -178,4 +180,6 @@ struct ECS {
 
         return entities;
     }
+
+    void destroy(const Entity& entity);
 };

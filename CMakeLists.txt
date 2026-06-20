@@ -7,39 +7,7 @@ set(CMAKE_BUILD_TYPE Debug)
 project(${TARGET_NAME})
 
 set(
-    IMGUI_SRC
-
-    include/imgui/imgui.cpp
-    include/imgui/imgui_draw.cpp
-    include/imgui/imgui_tables.cpp
-    include/imgui/imgui_widgets.cpp
-    include/imgui/imgui_impl_glfw.cpp
-    include/imgui/imgui_impl_opengl3.cpp
-)
-
-set(
-    ECS_SRC
-
-    src/ecs/entity.cpp
-    src/ecs/component.cpp
-    src/ecs/rendersystem.cpp
-)
-
-set(
-    SCENES_SRC
-
-    src/scenes/scene1.cpp
-    src/scenes/scene2.cpp
-)
-
-set(
-    ECS_SYSTEMS
-
-    src/systems/updateTransform.cpp
-)
-
-add_executable(
-    ${TARGET_NAME}
+    CORE_SRC
 
     src/core/glad.c
     src/core/s_math.cpp
@@ -55,9 +23,49 @@ add_executable(
     src/core/ibl.cpp
     src/core/text.cpp
     src/core/ssao.cpp
-    src/debug/debug.cpp
     src/core/frustum.cpp
+    src/core/assetManager.cpp
+)
+
+set(
+    IMGUI_SRC
+
+    include/imgui/imgui.cpp
+    include/imgui/imgui_draw.cpp
+    include/imgui/imgui_tables.cpp
+    include/imgui/imgui_widgets.cpp
+    include/imgui/imgui_impl_glfw.cpp
+    include/imgui/imgui_impl_opengl3.cpp
+)
+
+set(
+    ECS_SRC
+
+    src/ecs/entity.cpp
+    src/ecs/component.cpp
+)
+
+set(
+    SCENES_SRC
+
+    src/scenes/scene1.cpp
+    src/scenes/scene2.cpp
+)
+
+set(
+    ECS_SYSTEMS
+
+    src/systems/updateTransform.cpp
+    src/systems/renderSystem.cpp
+)
+
+add_executable(
+    ${TARGET_NAME}
+
+    ${CORE_SRC}
+    src/debug/debug.cpp
     src/utils/wireframe.cpp
+    
     ${SCENES_SRC}
     ${ECS_SRC}
     ${IMGUI_SRC}

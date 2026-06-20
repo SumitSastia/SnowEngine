@@ -8,11 +8,123 @@
 
 // ------------------------------ Temporary ------------------------------------------ //
 
-void ShapeComponent::bindVertices2D(
-    const float* vertices, const size_t& size_v,
-    const unsigned int* indices, const size_t& size_i
+// void ShapeComponent::bindVertices2D(
+//     const float* vertices, const size_t& size_v,
+//     const unsigned int* indices, const size_t& size_i
+// ) {
+//     indicesCount = size_i / sizeof(u_int);
+
+//     glGenBuffers(1, &VBO);
+//     glGenBuffers(1, &EBO);
+//     glGenVertexArrays(1, &VAO);
+
+//     glBindVertexArray(VAO);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+
+//     // Position
+//     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+//     glEnableVertexAttribArray(0);
+
+//     // TextureCords
+//     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+//     glEnableVertexAttribArray(1);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, 0);
+//     glBindVertexArray(0);
+// }
+
+
+// void ShapeComponent::bindVertices3D(
+//     const float* vertices, const size_t& size_v,
+//     const unsigned int* indices, const size_t& size_i
+// ) {
+//     indicesCount = size_i / sizeof(u_int);
+
+//     glGenBuffers(1, &VBO);
+//     glGenBuffers(1, &EBO);
+//     glGenVertexArrays(1, &VAO);
+
+//     glBindVertexArray(VAO);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+
+//     // Position
+//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+//     glEnableVertexAttribArray(0);
+
+//     // Normal
+//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+//     glEnableVertexAttribArray(1);
+
+//     // TextureCords
+//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+//     glEnableVertexAttribArray(2);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, 0);
+//     glBindVertexArray(0);
+// }
+
+// void ShapeComponent::bindVertices3D_Normal(
+//     const float* vertices, const size_t& size_v,
+//     const unsigned int* indices, const size_t& size_i
+// ) {
+//     indicesCount = size_i / sizeof(u_int);
+
+//     glGenBuffers(1, &VBO);
+//     glGenBuffers(1, &EBO);
+//     glGenVertexArrays(1, &VAO);
+
+//     glBindVertexArray(VAO);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//     glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+
+//     // Position
+//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+//     glEnableVertexAttribArray(0);
+
+//     // Normal
+//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+//     glEnableVertexAttribArray(1);
+
+//     // TextureCords
+//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+//     glEnableVertexAttribArray(2);
+
+//     // Tangent
+//     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+//     glEnableVertexAttribArray(3);
+
+//     glBindBuffer(GL_ARRAY_BUFFER, 0);
+//     glBindVertexArray(0);
+// }
+
+// void ShapeComponent::draw() const {
+
+//     glBindVertexArray(VAO);
+//     glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
+//     glBindVertexArray(0);
+// }
+
+// ------------------------------ Components ----------------------------------------- //
+
+void MeshComponent::loadMesh2D(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
 ) {
-    indicesCount = size_i / sizeof(u_int);
+    indicesCount = indices.size();
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -21,10 +133,10 @@ void ShapeComponent::bindVertices2D(
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
     // Position
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
@@ -39,11 +151,11 @@ void ShapeComponent::bindVertices2D(
 }
 
 
-void ShapeComponent::bindVertices3D(
-    const float* vertices, const size_t& size_v,
-    const unsigned int* indices, const size_t& size_i
+void MeshComponent::loadMesh3D(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
 ) {
-    indicesCount = size_i / sizeof(u_int);
+    indicesCount = indices.size();
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -52,10 +164,10 @@ void ShapeComponent::bindVertices3D(
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
     // Position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -73,11 +185,11 @@ void ShapeComponent::bindVertices3D(
     glBindVertexArray(0);
 }
 
-void ShapeComponent::bindVertices3D_Normal(
-    const float* vertices, const size_t& size_v,
-    const unsigned int* indices, const size_t& size_i
+void MeshComponent::loadMesh3DNormal(
+    const std::vector<float>& vertices,
+    const std::vector<uint>&  indices
 ) {
-    indicesCount = size_i / sizeof(u_int);
+    indicesCount = indices.size();
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -86,10 +198,10 @@ void ShapeComponent::bindVertices3D_Normal(
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, size_v, vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_i, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
     // Position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
@@ -99,26 +211,35 @@ void ShapeComponent::bindVertices3D_Normal(
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // TextureCords
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    // Tangent
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    // Tangent
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+    // TextureCords
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void ShapeComponent::draw() const {
+void MeshComponent::draw() const {
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)(0 * sizeof(float)));
+    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)0);
     glBindVertexArray(0);
 }
 
-// ------------------------------ Components ----------------------------------------- //
+void MeshComponent::destroy() {
+
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
+
+    VBO = 0;
+    EBO = 0;
+    VAO = 0;
+}
 
 void InstanceComponent::bind(
     const std::vector<float>& vertices,
@@ -244,6 +365,14 @@ void InstanceComponent::draw() const {
     glBindVertexArray(0);
 }
 
+void InstanceComponent::destroy() {
+
+    mesh.destroy();
+
+    glDeleteBuffers(1, &modelVBO);
+    glDeleteBuffers(1, &normalVBO);
+}
+
 void TransformComponent::computeModel() {
 
     model.matrix_4x4 = glm::translate(glm::mat4(1.0f), position);
@@ -255,116 +384,6 @@ void TransformComponent::computeModel() {
     model.matrix_4x4 = glm::scale(model.matrix_4x4, scale);
 }
 
-void MeshComponent::loadMesh2D(
-    const std::vector<float>& vertices,
-    const std::vector<uint>&  indices
-) {
-    indicesCount = indices.size();
-
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
-
-    // Position
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // TextureCords
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-
-void MeshComponent::loadMesh3D(
-    const std::vector<float>& vertices,
-    const std::vector<uint>&  indices
-) {
-    indicesCount = indices.size();
-
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
-
-    // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // TextureCords
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void MeshComponent::loadMesh3DNormal(
-    const std::vector<float>& vertices,
-    const std::vector<uint>&  indices
-) {
-    indicesCount = indices.size();
-
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
-
-    // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // Tangent
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    // TextureCords
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void MeshComponent::draw() const {
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)0);
-    glBindVertexArray(0);
-}
-
 const MeshComponent& MeshLODComponent::getMesh(const float distance) const {
 
     if (distance < 5.0f)  return high;
@@ -372,11 +391,34 @@ const MeshComponent& MeshLODComponent::getMesh(const float distance) const {
     return low;
 }
 
+void MeshLODComponent::destroy() {
+    high.destroy();
+    moderate.destroy();
+    low.destroy();
+}
+
+void ModelComponent::destroy() {
+
+    for (MeshComponent& mesh : meshes) {
+        mesh.destroy();
+    }
+
+    for (MaterialComponent& material : materials) {
+        material.destroy();
+    }
+}
+
 const ModelComponent& ModelLODComponent::getMesh(const float distance) const {
 
     if (distance < 5.0f)  return high;
     if (distance < 10.0f) return moderate;
     return low;
+}
+
+void ModelLODComponent::destroy() {
+    high.destroy();
+    moderate.destroy();
+    low.destroy();
 }
 
 void ModelComponent::init(const Model3D* model, const MaterialComponent material) {
@@ -389,7 +431,8 @@ void ModelComponent::init(const Model3D* model, const MaterialComponent material
         };
 
         MaterialComponent mat = material;
-        mat.albedo = new Texture2D(mesh.textures[0].id);
+        mat.m_albedo = new Texture2D();
+        mat.m_albedo->setID(mesh.textures[0].id);
 
         meshes.push_back(meshComponent);
         materials.push_back(mat);
@@ -418,6 +461,13 @@ void BoundingAABBComponent::recompute(const glm::mat4& model) {
         
         min = glm::min(min, corner);
         max = glm::max(max, corner);
+    }
+}
+
+void ChildComponent::destroy() {
+
+    for (const Entity& child : children) {
+
     }
 }
 
@@ -489,6 +539,11 @@ ComponentPool<ChildComponent>& ComponentManager::getPool() {
 }
 
 template <>
+ComponentPool<SpotLightComponent>& ComponentManager::getPool() {
+    return spotlights;
+}
+
+template <>
 const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
     return transforms;
 }
@@ -551,6 +606,11 @@ const ComponentPool<CameraComponent>& ComponentManager::getPool() const {
 template <>
 const ComponentPool<ChildComponent>& ComponentManager::getPool() const {
     return childrens;
+}
+
+template <>
+const ComponentPool<SpotLightComponent>& ComponentManager::getPool() const {
+    return spotlights;
 }
 
 // ------------------------------ Components ----------------------------------------- //
