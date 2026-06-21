@@ -150,7 +150,6 @@ void MeshComponent::loadMesh2D(
     glBindVertexArray(0);
 }
 
-
 void MeshComponent::loadMesh3D(
     const std::vector<float>& vertices,
     const std::vector<uint>&  indices
@@ -179,6 +178,40 @@ void MeshComponent::loadMesh3D(
 
     // TextureCords
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void MeshComponent::loadMesh3D(
+    const std::vector<Vertex>& vertices,
+    const std::vector<uint>&  indices
+) {
+    indicesCount = indices.size();
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(1);
+
+    // TextureCords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, textureCords));
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -402,10 +435,6 @@ void ModelComponent::destroy() {
     for (MeshComponent& mesh : meshes) {
         mesh.destroy();
     }
-
-    for (MaterialComponent& material : materials) {
-        material.destroy();
-    }
 }
 
 const ModelComponent& ModelLODComponent::getMesh(const float distance) const {
@@ -421,25 +450,9 @@ void ModelLODComponent::destroy() {
     low.destroy();
 }
 
-void ModelComponent::init(const Model3D* model, const MaterialComponent material) {
-
-    for (const Mesh& mesh : model->meshes) {
-
-        MeshComponent meshComponent = {
-            mesh.VAO, mesh.VBO, mesh.EBO,
-            static_cast<uint>(mesh.indices.size())
-        };
-
-        MaterialComponent mat = material;
-        mat.m_albedo = new Texture2D();
-        mat.m_albedo->setID(mesh.textures[0].id);
-
-        meshes.push_back(meshComponent);
-        materials.push_back(mat);
-    }
-}
-
 void BoundingAABBComponent::recompute(const glm::mat4& model) {
+
+    center = model[3];
 
     glm::vec3 corners[8] = {
         {local_min.x, local_min.y, local_min.z},

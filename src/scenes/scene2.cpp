@@ -13,16 +13,16 @@ void Scene2::init() {
 
     running::globalTimer::startInterval();
 
-    wood_box  = ecs.entityManager.createEntity();
-    floor     = ecs.entityManager.createEntity();
-    wall      = ecs.entityManager.createEntity();
-    light1    = ecs.entityManager.createEntity();
-    light2    = ecs.entityManager.createEntity();
-    cubes     = ecs.entityManager.createEntity();
-    sphere    = ecs.entityManager.createEntity();
-    brickWall = ecs.entityManager.createEntity();
-    headcam   = ecs.entityManager.createEntity();
-    sun       = ecs.entityManager.createEntity();
+    wood_box  = entityManager.createEntity();
+    floor     = entityManager.createEntity();
+    wall      = entityManager.createEntity();
+    light1    = entityManager.createEntity();
+    light2    = entityManager.createEntity();
+    cubes     = entityManager.createEntity();
+    sphere    = entityManager.createEntity();
+    brickWall = entityManager.createEntity();
+    headcam   = entityManager.createEntity();
+    sun       = entityManager.createEntity();
 
     entityManager.visibleEntities.push_back(wood_box);
     entityManager.visibleEntities.push_back(floor);
@@ -119,50 +119,50 @@ void Scene2::init() {
 
     DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
-    for (uint32_t i = 0; i < 100; i++) {
+    // for (uint32_t i = 0; i < 100; i++) {
 
-        crowd[i] = entityManager.createEntity();
+    //     crowd[i] = entityManager.createEntity();
 
-        TransformComponent transform;
-        transform.position = randomPosition(-20.0f, 20.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
-        transform.computeModel();
+    //     TransformComponent transform;
+    //     transform.position = randomPosition(-20.0f, 20.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
         
-        MeshComponent mesh;
-        mesh = EntityShapes::instance().cubeNorm;
+    //     MeshComponent mesh;
+    //     mesh = EntityShapes::instance().cubeNorm;
         
-        MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR3D);
+    //     MaterialComponent material;
+    //     material.shader = Shaders::get(NORMPBR3D);
         
-        material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
-        material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
+    //     material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
+    //     material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
         
-        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
-        material.metallic  = material.albedo;
-        material.roughness = material.albedo;
+    //     material.metallic  = material.albedo;
+    //     material.roughness = material.albedo;
 
-        BoundingSphereComponent boundingSphere;
-        boundingSphere.center = transform.position;
-        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+    //     BoundingSphereComponent boundingSphere;
+    //     boundingSphere.center = transform.position;
+    //     boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
-        BoundingAABBComponent AABB {
-            transform.position,
-            mesh.minCorner,
-            mesh.maxCorner
-        };
+    //     BoundingAABBComponent AABB {
+    //         transform.position,
+    //         mesh.minCorner,
+    //         mesh.maxCorner
+    //     };
 
-        AABB.recompute(transform.model);
+    //     AABB.recompute(transform.model);
         
-        componentManager.addComponent(crowd[i], mesh);
-        componentManager.addComponent(crowd[i], transform);
-        componentManager.addComponent(crowd[i], material);
-        componentManager.addComponent(crowd[i], boundingSphere);
-        componentManager.addComponent(crowd[i], AABB);
-    }
+    //     componentManager.addComponent(crowd[i], mesh);
+    //     componentManager.addComponent(crowd[i], transform);
+    //     componentManager.addComponent(crowd[i], material);
+    //     componentManager.addComponent(crowd[i], boundingSphere);
+    //     componentManager.addComponent(crowd[i], AABB);
+    // }
 
-    DebugMenu::log("crowd: " + running::globalTimer::endInterval());
+    // DebugMenu::log("crowd: " + running::globalTimer::endInterval());
 
     // floor
     {
@@ -298,65 +298,58 @@ void Scene2::init() {
         transform.scale    = glm::vec3(1.0f);
         transform.computeModel();
 
-        Model3D* sphere0 = new Model3D("../assets/models/sphere/sphereHD.obj");
-        Model3D* sphere1 = new Model3D("../assets/models/sphere/sphere.obj");
-        Model3D* sphere2 = new Model3D("../assets/models/sphere/sphereSD.obj");
-
         MaterialComponent material;
         material.shader = Shaders::get(PBR3D);
         material.gbufferShader = Shaders::get(GBUFFER3D);
-        componentManager.addShader(material.shader);
 
-        ModelComponent model0 (sphere0, material);
-        ModelComponent model1 (sphere1, material);
-        ModelComponent model2 (sphere2, material);
+        ModelComponent model0 = AssetManager::loadModel("../assets/models/sphere/sphereHD.obj");
+        ModelComponent model1 = AssetManager::loadModel("../assets/models/sphere/sphere.obj");
+        ModelComponent model2 = AssetManager::loadModel("../assets/models/sphere/sphereSD.obj");
         
         ModelLODComponent meshLOD { model0, model1, model2 };
 
         BoundingAABBComponent AABB {
             transform.position,
-            sphere0->minCorner,
-            sphere0->maxCorner
+            model0.minCorner,
+            model0.maxCorner
         };
         
         AABB.recompute(transform.model);
-        
-        sphereRadius = sphere0->clean();
-
-        BoundingSphereComponent boundingSphere;
-        boundingSphere.center = transform.position;
-        boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         componentManager.addComponent(sphere, meshLOD);
         componentManager.addComponent(sphere, transform);
-        componentManager.addComponent(sphere, boundingSphere);
+        componentManager.addComponent(sphere, material);
         componentManager.addComponent(sphere, AABB);
     }
 
-    // for (uint32_t i = 0; i < 100; i++) {
+    DebugMenu::log("Sphere: " + running::globalTimer::endInterval());
 
-    //     crowd[100 + i] = entityManager.createEntity();
+    for (uint32_t i = 0; i < 100; i++) {
 
-    //     TransformComponent transform;
-    //     transform.position = randomPosition(-20.0f, 20.0f);
-    //     transform.rotation = glm::vec3(0.0f);
-    //     transform.scale    = glm::vec3(1.0f);
-    //     transform.computeModel();
+        crowd[100 + i] = entityManager.createEntity();
 
-    //     BoundingAABBComponent AABB = componentManager.get<BoundingAABBComponent>(sphere);
+        TransformComponent transform;
+        transform.position = randomPosition(-20.0f, 20.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
 
-    //     AABB.center = transform.position;
-    //     AABB.recompute(transform.model);
+        MaterialComponent material = componentManager.get<MaterialComponent>(sphere);
+        BoundingAABBComponent AABB = componentManager.get<BoundingAABBComponent>(sphere);
 
-    //     BoundingSphereComponent boundingSphere;
-    //     boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    //     boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        AABB.center = transform.position;
+        AABB.recompute(transform.model);
 
-    //     componentManager.addComponent(crowd[100 + i], componentManager.get<ModelLODComponent>(sphere));
-    //     componentManager.addComponent(crowd[100 + i], transform);
-    //     componentManager.addComponent(crowd[100 + i], boundingSphere);
-    //     componentManager.addComponent(crowd[100 + i], AABB);
-    // }
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        boundingSphere.radius = sphereRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+
+        componentManager.addComponent(crowd[100 + i], componentManager.get<ModelLODComponent>(sphere));
+        componentManager.addComponent(crowd[100 + i], transform);
+        componentManager.addComponent(crowd[100 + i], material);
+        componentManager.addComponent(crowd[100 + i], boundingSphere);
+        componentManager.addComponent(crowd[100 + i], AABB);
+    }
 
     // headcam
     {
@@ -370,29 +363,25 @@ void Scene2::init() {
         transform.local_rotation = glm::vec3(0.0f);
         transform.local_scale = glm::vec3(1.0f);
 
-        Model3D* camModel = new Model3D("../assets/models/test_cube/colorCamera.obj");
-
         MaterialComponent material;
         material.shader = Shaders::get(PHONG3D);
         material.gbufferShader = Shaders::get(GBUFFER3D);
-        componentManager.addShader(material.shader);
 
-        ModelComponent modelComponent;
-        modelComponent.init(camModel, material);
+        material.albedo = 0;
+
+        ModelComponent modelComp = AssetManager::loadModel("../assets/models/test_cube/colorCamera.obj");
 
         BoundingAABBComponent AABB {
             transform.position,
-            camModel->minCorner,
-            camModel->maxCorner
+            modelComp.minCorner,
+            modelComp.maxCorner
         };
 
         AABB.recompute(transform.model);
 
-        float localRadius = camModel->clean();
-
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        boundingSphere.radius = localRadius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        boundingSphere.radius = modelComp.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
         CameraComponent cameraComponent;
         Camera& camera = cameraComponent.camera;
@@ -400,7 +389,8 @@ void Scene2::init() {
         camera.set_position(transform.position);
         camera.set_target({-1.0f, 0.0f, -1.0f});
 
-        componentManager.addComponent(headcam, modelComponent);
+        componentManager.addComponent(headcam, modelComp);
+        componentManager.addComponent(headcam, material);
         componentManager.addComponent(headcam, transform);
         componentManager.addComponent(headcam, boundingSphere);
         componentManager.addComponent(headcam, AABB);
@@ -533,8 +523,10 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
         }
         
         if (glfwGetKey(window, GLFW_KEY_KP_7)) {
-        movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
+            movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
         }
+
+        ecs.componentManager.get<TransformComponent>(entity).computePosition();
     }
     
     if (Input::isKeyPressed(GLFW_KEY_KP_5)) {

@@ -12,6 +12,8 @@
 #include <ssao.h>
 #include <assetManager.h>
 
+#include <thread>
+
 // ------------------------------ Global Variables ----------------------------------- //
 
 bool isRunning = true;
@@ -35,12 +37,14 @@ int main() {
 
     Input::init();
     DebugMenu::init(window);
+
     // Text::init("../assets/fonts/BlockBlueprint.ttf");
     Text::init("../assets/fonts/Lato-Bold.ttf");
+
     SSAO::init();
-    // ShadowSystem::init();
+    
     Shaders::initShaders();
-    AssetManager::loadTexture("assets/textures/error_texture.png");
+    AssetManager::init();
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);

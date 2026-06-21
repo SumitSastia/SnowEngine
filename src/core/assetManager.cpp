@@ -1,11 +1,17 @@
 #include <assetManager.h>
 #include <debug.h>
+#include <model.h>
+
 #include <iostream>
 
 uint32_t AssetManager::total_loadedTextures = 0;
 
 std::vector <Texture2D> AssetManager::textures (MAX_TEXTURES);
 std::unordered_map <std::string, TextureHandle> AssetManager::textureLookup {};
+
+void AssetManager::init() {
+    loadTexture("assets/textures/error_texture.png");
+}
 
 TextureHandle AssetManager::loadTexture(const std::string& path, const bool format) {
 
@@ -28,10 +34,17 @@ TextureHandle AssetManager::loadTexture(const std::string& path, const bool form
 
     textureLookup[index] = handle;
 
-    // std::cout << "Loaded: " << index << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
+    std::cout << "Loaded: " << index << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
     return handle;
 }
 
 void AssetManager::destroyTexture(const TextureHandle& textureID) {
+    
+}
 
+// Model Loading
+
+ModelComponent AssetManager::loadModel(const std::string& path) {
+
+    return ModelComponent(path);
 }

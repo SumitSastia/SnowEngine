@@ -115,6 +115,7 @@ class Scene2 : public Scene {
     Entity brickWall;
     Entity sun;
     Entity headcam;
+    Entity headcam2;
 
     ECS ecs;
     Environment* env;

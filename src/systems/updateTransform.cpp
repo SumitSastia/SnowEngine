@@ -21,14 +21,16 @@ void updateTransform(ECS& ecs) {
 
             child_transform.computeModel();
             child_transform.isVisible = transform.isVisible;
-
-            if (componentManager.has<BoundingAABBComponent>(child)) {
-
-                BoundingAABBComponent& AABB = componentManager.get<BoundingAABBComponent>(child);
-                AABB.center = child_transform.position;
-
-                AABB.recompute(child_transform.model);
-            }
         }
+    }
+
+    const std::vector<Entity>& entities = ecs.view<TransformComponent, BoundingAABBComponent>();
+
+    for (const Entity& entity : entities) {
+
+        const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+        BoundingAABBComponent&    AABB      = componentManager.get<BoundingAABBComponent>(entity);
+
+        AABB.recompute(transform.model);
     }
 }

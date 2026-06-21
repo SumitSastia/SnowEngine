@@ -1,25 +1,22 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include <vector>
 #include <cstdint>
 
 #include <s_math.h>
-#include <model.h>
 #include <camera.h>
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-using TextureHandle = uint32_t;
-
 #define MAX_ENTITIES 5000
-#define TOTAL_COMPONENTS 10
 #define MAX_INSTANCES 100
 
-class Shape;
 class Shader;
 class Texture2D;
 class Model3D;
@@ -27,8 +24,26 @@ class PointShadowFrame;
 class DirectShadowFrame;
 
 using Entity = uint32_t;
+using TextureHandle = uint32_t;
 
 // ------------------------------ Components ----------------------------------------- //
+
+struct Vertex {
+
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 textureCords;
+
+    Vertex(
+        const glm::vec3& position     = glm::vec3(0.0f),
+        const glm::vec3& normal       = glm::vec3(0.0f),
+        const glm::vec2& textureCords = glm::vec3(0.0f)
+    ) :
+        position(position),
+        normal(normal),
+        textureCords(textureCords) {
+    }
+};
 
 struct TransformComponent {
 
@@ -90,6 +105,10 @@ struct MeshComponent {
         const std::vector<float>& vertices,
         const std::vector<uint>&  indices
     );
+    void loadMesh3D(
+        const std::vector<Vertex>& vertices,
+        const std::vector<uint>&   indices
+    );
 
     /*
     vertices format:
@@ -102,6 +121,7 @@ struct MeshComponent {
         const std::vector<float>& vertices,
         const std::vector<uint>&  indices
     );
+    
 
     void draw() const;
     void destroy();
@@ -265,20 +285,27 @@ struct InstanceComponent {
     void destroy();
 };
 
-struct ModelComponent {
+class ModelComponent {
+    
+    void          processNode(aiNode* node, const aiScene* scene, const std::string& path);
+    MeshComponent processMesh(aiMesh* mesh, const aiScene* scene, const std::string& path);
 
-    std::vector <MeshComponent>     meshes;
-    std::vector <MaterialComponent> materials;
+    TextureHandle loadMaterialTexture(aiMaterial* material, aiTextureType type, const std::string& path);
+    TextureHandle loadMaterialTextures(aiMaterial* material, aiTextureType type, const std::string& type_str, const std::string& path) { return 0; }
+    
+public:
+
+    glm::vec3 minCorner;
+    glm::vec3 maxCorner;
+    
+    std::vector <MeshComponent> meshes;
+    std::vector <TextureHandle> textures;
 
     float radius;
 
     ModelComponent() = default;
+    ModelComponent(const std::string& path);
 
-    ModelComponent(const Model3D* model, const MaterialComponent material) {
-        init(model, material);
-    }
-
-    void init(const Model3D* model, const MaterialComponent material);
     void destroy();
 };
 

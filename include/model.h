@@ -2,28 +2,13 @@
 #include <string>
 #include <vector>
 
-#include <s_math.h>
+#include <glm/glm.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-struct Vertex {
-
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 textureCords;
-
-    Vertex(
-        const glm::vec3& position     = glm::vec3(0.0f),
-        const glm::vec3& normal       = glm::vec3(0.0f),
-        const glm::vec2& textureCords = glm::vec3(0.0f)
-    ) :
-        position(position),
-        normal(normal),
-        textureCords(textureCords) {
-    }
-};
+#include <ecs/component.h>
 
 struct MeshTexture {
 
