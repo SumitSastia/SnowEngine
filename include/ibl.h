@@ -10,6 +10,8 @@ class Shader;
 
 class IBLFrame {
 
+    int width, height;
+
     uint captureFBO, captureRBO;
 
     uint env_texture;   // Equirectangular Environment 2D
@@ -27,11 +29,15 @@ class IBLFrame {
     bool isHDR;
     bool isInit;
 
+    float* pixelData;
+
     void renderCube() const;
     void renderSquare() const;
     
     /* Loads the environment that has HDR lighting (.hdr file) */
-    void loadEnvironment(const char* path, const uint16_t resolution);
+    // void loadEnvironment(const char* path, const uint16_t resolution);
+    void loadEnvironment(const char* path);
+    void compileEnvironment();
     
     /* @note (For Diffuse IBL) Call only once to initialize cubemap texture of the Environment. */
     void convertCubeMap(const uint16_t resolution);

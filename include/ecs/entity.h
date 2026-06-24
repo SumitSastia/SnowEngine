@@ -12,9 +12,6 @@
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-// WARNING: SHOULD BE SAME AS THAT DEFINED IN GLSL SHADER
-#define MAX_LIGHTS 4
-
 // ------------------------------ Foward Declarations -------------------------------- //
 
 class Environment;

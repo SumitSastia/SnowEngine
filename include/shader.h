@@ -254,6 +254,8 @@ enum shaderNames {
     PARALLAX2D,
     PBR3D,
     PBR2D,
+    PBR3D_COLORED,
+    PBR2D_COLORED,
     NORMPBR3D,
     NORMPBR2D,
     INSTANCEPBR3D,

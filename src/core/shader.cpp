@@ -295,8 +295,6 @@ void Texture2D::load(const char* path, const bool format) {
 
     unsigned char* pixelData = stbi_load(finalPath.c_str(), &width, &height, nullptr, 4);
 
-    // DebugMenu::log("STBI load: " + t.end());
-
     if(!pixelData){
         std::cerr << "Failed to Load Image!\n" << finalPath << std::endl;
         return;
@@ -366,6 +364,8 @@ std::vector <shader_paths> Shaders::path = {
     shader_paths("ecs/p2d.vert",              "ecs/p2d.frag", true),
     shader_paths("ecs/generic3d.vert",        "ecs/pbr.frag", true),
     shader_paths("ecs/generic2d.vert",        "ecs/pbr.frag", true),
+    shader_paths("ecs/generic3d.vert",        "ecs/pbrColor.frag", true),
+    shader_paths("ecs/generic2d.vert",        "ecs/pbrColor.frag", true),
     shader_paths("ecs/norm3d.vert",           "ecs/normPbr.frag", true),
     shader_paths("ecs/norm2d.vert",           "ecs/normPbr.frag", true),
     shader_paths("ecs/instance3d.vert",       "ecs/pbr.frag", true),

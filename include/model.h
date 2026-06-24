@@ -121,3 +121,21 @@ public:
     // Cleans meshes, loadedTextures after converting them to ECS Component.
     float clean();
 };
+
+//////////////////////////////////////////////////////////////////////////////////
+
+class ModelLoader {
+
+    enum MODEL_MATERIAL_TYPE {
+        FLATCOLOR_MATERIAL,
+        PBR_MATERIAL,
+        PHONG_MATERIAL
+    };
+
+    ModelComponent    model;
+    MaterialComponent material;
+
+public:
+
+    ModelLoader(const std::string& path): model(path) {}
+};

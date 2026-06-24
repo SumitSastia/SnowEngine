@@ -1,0 +1,5 @@
+When creating 'PointShadowFrame' for 'PointLightComponent' inside 'ComponentManager', 
+the GPU takes the work as pending, then execute when a certain amount of Data (shadow_size * shadow_size) per Face of CubeMap is to be allocated.
+
+That's why a high amount of time is taken during 'Light2' in 'Scene2::init()' approximately 1 second.
+Current CPU & GPU: AMD Ryzen 3 5300U - (iGPU) AMD Radeon RX Vega 6

@@ -12,7 +12,12 @@
 #include <s_math.h>
 #include <camera.h>
 
+#include <debug.h>
+
 // ------------------------------ Foward Declarations -------------------------------- //
+
+// WARNING: SHOULD BE SAME AS THAT DEFINED IN GLSL SHADER
+#define MAX_LIGHTS 4
 
 #define MAX_ENTITIES 5000
 #define MAX_INSTANCES 100
@@ -148,11 +153,11 @@ struct DirectionalLight {
 
 struct PointLightComponent {
 
-    glm::vec3 color;    // 12-Bytes
+    glm::vec3 color;        // 12-Bytes
 
-    float constant;     // 4-Bytes
-    float linear;       // 4-Bytes
-    float quadratic;    // 4-Bytes
+    float constant  = 0.0f; // 4-Bytes
+    float linear    = 0.0f; // 4-Bytes
+    float quadratic = 0.0f; // 4-Bytes
 
     void destroy() {}
 };
@@ -188,21 +193,17 @@ struct MaterialComponent {
     TextureHandle roughness = 0;
     TextureHandle ao        = 0;
 
+    glm::vec4 flatColor;
+
     // Temporary for Models
-    Texture2D* m_albedo;
+    // Texture2D* m_albedo;
 
     MaterialComponent(): 
         shader(nullptr),
-        // albedo(nullptr),
-        // normal(nullptr),
-        // height(nullptr),
-        // specular(nullptr),
-        // metallic(nullptr),
-        // roughness(nullptr),
-        // ao(nullptr),
-        m_albedo(nullptr),
         gbufferShader(nullptr) {
     }
+
+    void bind();
 
     // SHOULD BE IMPLEMENTED WITH ASSET MANAGER
     void destroy() {}
@@ -437,6 +438,7 @@ public:
     template <typename Component>
     void addComponent(const Entity& entity, const Component& component) {
         getPool<Component>().addComponent(entity, component);
+        // std::cout << typeid(Component).name() << '\n';
     }
 
     template <typename Component>

@@ -275,18 +275,20 @@ float Model3D::clean() {
 
 ModelComponent::ModelComponent(const std::string& path) {
 
+    const std::string finalPath = "../" + path;
+
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(finalPath, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
         std::cerr << "ERROR::ASSIMP::Unable to Open the Model File!" << std::endl;
         return;
     }
 
-    const std::size_t start = path.find_first_of('/') + 1;
+    // const std::size_t start = path.find_first_of('/') + 1;
     const std::size_t end   = path.find_last_of('/');
 
-    processNode(scene->mRootNode, scene, path.substr(start, end - start));
+    processNode(scene->mRootNode, scene, path.substr(0, end - 0));
 }
 
 TextureHandle ModelComponent::loadMaterialTexture(aiMaterial* material, aiTextureType type, const std::string& path) {

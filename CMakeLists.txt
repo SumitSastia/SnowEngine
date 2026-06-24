@@ -25,6 +25,7 @@ set(
     src/core/ssao.cpp
     src/core/frustum.cpp
     src/core/assetManager.cpp
+    src/core/texture.cpp
 )
 
 set(
@@ -55,7 +56,8 @@ set(
 set(
     ECS_SYSTEMS
 
-    src/systems/updateTransform.cpp
+    src/systems/initSystem.cpp
+    src/systems/updateSystem.cpp
     src/systems/renderSystem.cpp
 )
 

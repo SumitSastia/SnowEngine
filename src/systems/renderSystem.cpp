@@ -67,8 +67,6 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
                 shader->setFloat((e + ".constant").c_str(),  pointlight.constant);
                 shader->setFloat((e + ".linear").c_str(),    pointlight.linear);
                 shader->setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
-
-                // DebugMenu::log("bindig");
             }
         }
 
@@ -127,7 +125,7 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent, MaterialComponent>();
 
     // Frustum
-    Frustum frustum(Camera::activeCamera->getPerspective() * Camera::activeCamera->getView());
+    Frustum frustum(Camera::get_projection() * Camera::get_view());
 
     int totalRenderCalls = 0;
     for (const Entity& entity : objects) {
@@ -136,24 +134,21 @@ void RenderSystem::render(const ECS& ecs) {
         if (componentManager.has<PointLightComponent>(entity)) continue;
 
         // Frustum Culling
-        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        const BoundingAABBComponent&   boundingAABB   = componentManager.get<BoundingAABBComponent>(entity);
-        const TransformComponent&      transform      = componentManager.get<TransformComponent>(entity);
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
 
-        // if (!frustum.isMeshInside(boundingSphere)) continue;
-        if (!frustum.isMeshInside(boundingAABB)) continue;
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
+
+        const TransformComponent&    transform    = componentManager.get<TransformComponent>(entity);
         if (!transform.isVisible) continue;
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
 
         draw(mesh, transform, material);
-        // drawWireframe(Wireframes::instance().sphere, boundingSphere);
 
-        if (componentManager.has<BoundingAABBComponent>(entity)) {
-            drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
-        }
-
+        drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
         totalRenderCalls++;
     }
 
@@ -188,34 +183,19 @@ void RenderSystem::render(const ECS& ecs) {
         draw(instance, material);
     }
 
-    // for (const Entity& entity : models) {
-
-    //     // Frustum Culling
-    //     const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
-    //     if (!frustum.isMeshInside(boundingAABB)) continue;
-
-    //     const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
-    //     const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
-
-    //     for (uint i = 0 ; i < total_meshes; i++) {
-
-    //         const MeshComponent&     mesh     = componentManager.get<ModelComponent>(entity).meshes[i];
-    //         const MaterialComponent& material = componentManager.get<ModelComponent>(entity).materials[i];
-
-    //         draw(mesh, transform, material);
-    //     }
-
-    //     drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
-    // }
-
     for (const Entity& entity : models) {
 
         // Frustum Culling
-        const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
-        if (!frustum.isMeshInside(boundingAABB)) continue;
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const ModelComponent&     model     = componentManager.get<ModelComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+
+        if (!transform.isVisible) continue;
         const uint total_meshes = model.meshes.size();
 
         MaterialComponent material = componentManager.get<MaterialComponent>(entity);
@@ -235,12 +215,16 @@ void RenderSystem::render(const ECS& ecs) {
     for (const Entity& entity : objects_with_LOD) {
 
         // Frustum Culling
-        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        if (!frustum.isMeshInside(boundingSphere)) continue;
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
         
+        if (!transform.isVisible) continue;
         float distance = glm::length(Camera::instance().getPos() - transform.position);
         const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
@@ -250,6 +234,11 @@ void RenderSystem::render(const ECS& ecs) {
     for (const Entity& entity : models_with_LOD) {
 
         // Frustum Culling
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         MaterialComponent material   = componentManager.get<MaterialComponent>(entity);
@@ -277,6 +266,8 @@ void RenderSystem::renderLights(const ECS& ecs) {
 
     const EntityManager&    entityManager    = ecs.entityManager;
     const ComponentManager& componentManager = ecs.componentManager;
+
+    Frustum frustum(Camera::get_projection() * Camera::get_view());
 
     for (const Entity& entity : entityManager.emissiveEntities) {
 
@@ -355,12 +346,7 @@ void RenderSystem::draw(
 
     const uint32_t initialUnit = lastTextureUnit;
 
-    if (material.m_albedo) {
-        shader->setInt("albedo", initialUnit);
-        material.m_albedo->bind(initialUnit);
-    }
-
-    else if (material.albedo) {
+    if (material.albedo) {
         shader->setInt("albedo", initialUnit);
         AssetManager::getTexture(material.albedo).bind(initialUnit);
         // AssetManager::getTexture(0).bind(initialUnit);
@@ -450,11 +436,7 @@ void RenderSystem::drawGbuffer(
 
     const uint32_t initialUnit = lastTextureUnit;
 
-    if (material.m_albedo) {
-        shader->setInt("albedo", initialUnit);
-        material.m_albedo->bind(initialUnit);
-    }
-    else if (material.albedo) {
+    if (material.albedo) {
         shader->setInt("albedo", initialUnit);
         AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
@@ -544,7 +526,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
 
     // Frustum
-    Frustum frustum(Camera::activeCamera->get_projection() * Camera::activeCamera->getView());
+    Frustum frustum(Camera::get_projection() * Camera::get_view());
 
     // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
     for (const Entity& entity : objects) {
@@ -552,16 +534,17 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
         if (componentManager.has<PointLightComponent>(entity)) continue;
 
         // Frustum Culling
-        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        const BoundingAABBComponent&   boundingAABB   = componentManager.get<BoundingAABBComponent>(entity);
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
 
-        // if (!frustum.isMeshInside(boundingSphere)) continue;
-        if (!frustum.isMeshInside(boundingAABB)) continue;
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
-
+        
+        if (!transform.isVisible) continue;
         if (material.gbufferShader) drawGbuffer(mesh, transform, material);
     }
 
@@ -573,32 +556,19 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
         if (material.gbufferShader) drawGbuffer(instance, material);
     }
 
-    // for (const Entity& entity : models) {
-
-    //     // Frustum Culling
-    //     const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
-    //     if (!frustum.isMeshInside(boundingAABB)) continue;
-
-    //     const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
-    //     const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
-
-    //     for (uint i = 0 ; i < total_meshes; i++) {
-
-    //         const MeshComponent&     mesh     = componentManager.get<ModelComponent>(entity).meshes[i];
-    //         const MaterialComponent& material = componentManager.get<ModelComponent>(entity).materials[i];
-
-    //         if (material.gbufferShader) drawGbuffer(mesh, transform, material);
-    //     }
-    // }
-
     for (const Entity& entity : models) {
 
         // Frustum Culling
-        const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
-        if (!frustum.isMeshInside(boundingAABB)) continue;
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const ModelComponent&     model     = componentManager.get<ModelComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+
+        if (!transform.isVisible) continue;
         const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
 
         MaterialComponent material = componentManager.get<MaterialComponent>(entity);
@@ -616,12 +586,17 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     for (const Entity& entity : objects_with_LOD) {
 
         // Frustum Culling
-        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        if (!frustum.isMeshInside(boundingSphere)) continue;
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
         
+        if (!transform.isVisible) continue;
+
         float distance = glm::length(Camera::instance().getPos() - transform.position);
         const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
@@ -631,12 +606,17 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     for (const Entity& entity : models_with_LOD) {
 
         // Frustum Culling
-        const BoundingSphereComponent& boundingSphere = componentManager.get<BoundingSphereComponent>(entity);
-        if (!frustum.isMeshInside(boundingSphere)) continue;
+        if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+            const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+            if (!frustum.isMeshInside(boundingAABB)) continue;
+        }
 
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         MaterialComponent material = componentManager.get<MaterialComponent>(entity);
         
+        if (!transform.isVisible) continue;
+
         float distance = glm::length(Camera::instance().getPos() - transform.position);
         const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
@@ -790,68 +770,8 @@ void ShadowSystem::render(const ECS& ecs) {
         const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
         const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
 
-        // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
-        for (const Entity& entity : objects) {
-
-            const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
-            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
-
-            drawShadow(shader[0], mesh, transform);
-        }
-
-        for (const Entity& entity : instances) {
-
-            const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
-            drawShadowInstanced(shader[1], instance);
-        }
-
-        for (const Entity& entity : models) {
-
-            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
-            const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
-
-            for (uint i = 0 ; i < total_meshes; i++) {
-
-                const MeshComponent& mesh = componentManager.get<ModelComponent>(entity).meshes[i];
-                drawShadow(shader[0], mesh, transform);
-            }
-        }
-    }
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void ShadowSystem::renderDirectional(const ECS& ecs) {
-
-    const EntityManager&    entityManager    = ecs.entityManager;
-    const ComponentManager& componentManager = ecs.componentManager;
-
-    Renderer::disableCulling();
-
-    for (const DirectShadowData& directShadow : componentManager.directShadowFrames) {
-
-        const Shader shader[2] = {
-            *Shaders::getDirectLightShadow(),
-            *Shaders::getDirectLightShadow_Instanced()
-        };
-
-        for (uint8_t i = 0; i < 2; i++) {
-
-            shader[i].use();
-            shader[i].setMat4("lightSpace", directShadow.lightSpaceMatrix);
-        }
-
-        directShadow.frame->bindFBO();
-        glViewport(0,0, frameBuffers::shadowSize, frameBuffers::shadowSize);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        
-        // Rendering meshes of VisibleEntities
-        const std::vector<Entity> objects   = ecs.view<MeshComponent, TransformComponent, MaterialComponent>();
-        const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
-        const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
-
         const std::vector<Entity> objects_with_LOD = ecs.view<MeshLODComponent, TransformComponent, MaterialComponent>();
-        const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
+        const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent, MaterialComponent>();
 
         // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
         for (const Entity& entity : objects) {
@@ -894,14 +814,105 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
         for (const Entity& entity : models_with_LOD) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
-            const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
-
+            
             float distance = glm::length(Camera::instance().getPos() - transform.position);
-            const ModelComponent& mesh = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
+            const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
+
+            const uint total_meshes = model.meshes.size();
+
+            for (uint i = 0 ; i < total_meshes; i++) {
+
+                const MeshComponent& mesh = model.meshes[i];
+                drawShadow(shader[0], mesh, transform);
+            }
+        }
+    }
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void ShadowSystem::renderDirectional(const ECS& ecs) {
+
+    const EntityManager&    entityManager    = ecs.entityManager;
+    const ComponentManager& componentManager = ecs.componentManager;
+
+    Renderer::disableCulling();
+
+    for (const DirectShadowData& directShadow : componentManager.directShadowFrames) {
+
+        const Shader shader[2] = {
+            *Shaders::getDirectLightShadow(),
+            *Shaders::getDirectLightShadow_Instanced()
+        };
+
+        for (uint8_t i = 0; i < 2; i++) {
+
+            shader[i].use();
+            shader[i].setMat4("lightSpace", directShadow.lightSpaceMatrix);
+        }
+
+        directShadow.frame->bindFBO();
+        glViewport(0,0, frameBuffers::shadowSize, frameBuffers::shadowSize);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        
+        // Rendering meshes of VisibleEntities
+        const std::vector<Entity> objects   = ecs.view<MeshComponent, TransformComponent, MaterialComponent>();
+        const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
+        const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent>();
+
+        const std::vector<Entity> objects_with_LOD = ecs.view<MeshLODComponent, TransformComponent, MaterialComponent>();
+        const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent, MaterialComponent>();
+
+        // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
+        for (const Entity& entity : objects) {
+
+            const MeshComponent&      mesh      = componentManager.get<MeshComponent>(entity);
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+
+            drawShadow(shader[0], mesh, transform);
+        }
+
+        for (const Entity& entity : instances) {
+
+            const InstanceComponent& instance = componentManager.get<InstanceComponent>(entity);
+            drawShadowInstanced(shader[1], instance);
+        }
+
+        for (const Entity& entity : models) {
+
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            const uint total_meshes = componentManager.get<ModelComponent>(entity).meshes.size();
 
             for (uint i = 0 ; i < total_meshes; i++) {
 
                 const MeshComponent& mesh = componentManager.get<ModelComponent>(entity).meshes[i];
+                drawShadow(shader[0], mesh, transform);
+            }
+        }
+
+        // LOD System
+        for (const Entity& entity : objects_with_LOD) {
+
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            
+            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
+
+            drawShadow(shader[0], mesh, transform);
+        }
+
+        for (const Entity& entity : models_with_LOD) {
+
+            const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+            
+            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
+
+            const uint total_meshes = model.meshes.size();
+
+            for (uint i = 0 ; i < total_meshes; i++) {
+
+                const MeshComponent& mesh = model.meshes[i];
                 drawShadow(shader[0], mesh, transform);
             }
         }

@@ -10,6 +10,8 @@
 #include <s_time.h>
 #include <systems/rendersystem.h>
 
+#include <systems/init.h>
+
 namespace scene_var {
     const float speed = 3.0f;
 };
@@ -115,7 +117,7 @@ class Scene2 : public Scene {
     Entity brickWall;
     Entity sun;
     Entity headcam;
-    Entity headcam2;
+    Entity gun;
 
     ECS ecs;
     Environment* env;

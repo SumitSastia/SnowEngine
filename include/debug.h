@@ -13,12 +13,6 @@
 #include <string>
 #include <iostream>
 
-struct TextBox {
-        
-    std::string title;
-    std::string desc;
-};
-
 class DebugMenu {
 
 public:

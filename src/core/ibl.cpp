@@ -5,6 +5,7 @@
 #include <frame.h>
 
 #include <stb_image.h>
+#include <debug/assert.h>
 
 #include <iostream>
 #include <thread>
@@ -55,8 +56,11 @@ IBLFrame::IBLFrame(const char* path, const uint16_t resolution): isInit(false) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    this->loadEnvironment(path, resolution);
-    this->brdfLUT();
+    loadEnvironment(path);
+    compileEnvironment();
+
+    convertCubeMap(resolution);
+    brdfLUT();
     
     isInit = true;
 }
@@ -73,25 +77,45 @@ void IBLFrame::renderSquare() const {
     frameBuffers::renderScreen();
 }
 
-void IBLFrame::loadEnvironment(const char* path, const uint16_t resolution) {
+void IBLFrame::loadEnvironment(const char* path) {
 
     isHDR = true;
 
-    int width, height;
+    // std::string path_str(path);
+    // std::string base_str = base.string();
 
-    std::string path_str(path);
-    std::string base_str = base.string();
+    // base_str.erase(base_str.size() - 5);
+    // const std::string finalPath = base_str + path_str;
 
-    base_str.erase(base_str.size() - 5);
+    const std::string finalPath = "../" + std::string(path);
 
-    std::string finalPath = base_str + path_str;
-
-    float* pixelData = stbi_loadf(finalPath.c_str(), &width, &height, nullptr, 4);
+    pixelData = stbi_loadf(finalPath.c_str(), &width, &height, nullptr, 4);
 
     if (!pixelData) {
         std::cerr << "Failed to Load Image!\n" << finalPath << std::endl;
         return;
     }
+
+    // glGenTextures(1, &env_texture);
+    // glBindTexture(GL_TEXTURE_2D, env_texture);
+
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, pixelData);
+    
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // glGenerateMipmap(GL_TEXTURE_2D);
+
+    // stbi_image_free(pixelData);
+    // glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void IBLFrame::compileEnvironment() {
+
+    SNOW_ASSERT(pixelData, "PIXELDATA IS NOT LOADED FROM HDR FILE!");
 
     glGenTextures(1, &env_texture);
     glBindTexture(GL_TEXTURE_2D, env_texture);
@@ -108,8 +132,6 @@ void IBLFrame::loadEnvironment(const char* path, const uint16_t resolution) {
 
     stbi_image_free(pixelData);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    this->convertCubeMap(resolution);
 }
 
 void IBLFrame::convertCubeMap(const uint16_t resolution) {
