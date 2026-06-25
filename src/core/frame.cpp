@@ -242,8 +242,8 @@ void HDRFrame::render() const {
     if (Input::isKeyDown(GLFW_KEY_M)) {
         
         toggle = !toggle;
-        // if (toggle) std::cout << "ENABLED  :: Tone Mapping" << std::endl;
-        // else        std::cout << "DISABLED :: Tone Mapping" << std::endl;
+        if (toggle) std::cout << "ENABLED  :: Tone Mapping" << std::endl;
+        else        std::cout << "DISABLED :: Tone Mapping" << std::endl;
     }
 
     if (Input::isKeyDown(GLFW_KEY_KP_SUBTRACT)) {

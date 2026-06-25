@@ -301,6 +301,7 @@ class Shaders {
 
     static Shader* pointLightShadow_instanced;
     static Shader* directLightShadow_instanced;
+    static Shader* lineShader;
 
 public:
 
@@ -311,6 +312,8 @@ public:
 
     static Shader* getPointLightShadow_Instanced() { return pointLightShadow_instanced; }
     static Shader* getDirectLightShadow_Instanced() { return directLightShadow_instanced; }
+
+    static Shader* getLineShader() { return lineShader; }
 
     static Shader* get(shaderNames shader);
     static uint32_t totat() { return SHADER_COUNT; }

@@ -368,8 +368,34 @@ MeshComponent ModelComponent::processMesh(aiMesh* mesh, const aiScene* scene, co
 
     if (mesh->mMaterialIndex >= 0) {
 
+        aiColor3D color;
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        textures.push_back(loadMaterialTexture(material, aiTextureType_DIFFUSE, path));
+
+        if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0){
+            textures.push_back(loadMaterialTexture(material, aiTextureType_DIFFUSE, path));
+        }
+        else if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
+            
+            glm::vec4 flatColor = {
+                color.r,
+                color.g,
+                color.b,
+                1.0f
+            };
+
+            // glm::vec4 flatColor = {
+            //     std::pow(color.r, 1.6f),
+            //     std::pow(color.g, 1.6f),
+            //     std::pow(color.b, 1.6f),
+            //     1.0f
+            // };
+
+            textures.push_back(AssetManager::loadTexture_flatColor(flatColor));
+        }
+        else {
+            textures.push_back(0);
+        }
+
     }
     else {
         // If mesh has no texture

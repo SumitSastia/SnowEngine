@@ -100,7 +100,7 @@ float calcDirectShadow() {
     }
 
     float shadow = 0.0;
-    float bias   = 0.025;
+    float bias   = 0.25;
 
     // Filtering
     shadow = 0.0;

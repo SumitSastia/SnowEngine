@@ -25,13 +25,15 @@ void Scene2::init() {
     sun       = entityManager.createEntity();
     gun       = entityManager.createEntity();
 
-    entityManager.visibleEntities.push_back(wood_box);
-    entityManager.visibleEntities.push_back(floor);
-    entityManager.visibleEntities.push_back(wall);
-    entityManager.visibleEntities.push_back(cubes);
-    entityManager.visibleEntities.push_back(sphere);
-    entityManager.visibleEntities.push_back(brickWall);
-    entityManager.visibleEntities.push_back(headcam);
+    mainCamera = entityManager.createEntity();
+
+    // entityManager.visibleEntities.push_back(wood_box);
+    // entityManager.visibleEntities.push_back(floor);
+    // entityManager.visibleEntities.push_back(wall);
+    // entityManager.visibleEntities.push_back(cubes);
+    // entityManager.visibleEntities.push_back(sphere);
+    // entityManager.visibleEntities.push_back(brickWall);
+    // entityManager.visibleEntities.push_back(headcam);
 
     entityManager.emissiveEntities.push_back(light1);
     entityManager.emissiveEntities.push_back(light2);
@@ -73,6 +75,22 @@ void Scene2::init() {
 
     DebugMenu::log("HDR Environment: " + running::globalTimer::endInterval());
 
+    // mainCamera
+    {
+        CameraComponent cameraComponent;
+        cameraComponent.camera = Camera::instance();
+        
+        TransformComponent transform;
+        transform.position = cameraComponent.camera.getPos();
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+
+        componentManager.addComponent(mainCamera, transform);
+        componentManager.addComponent(mainCamera, cameraComponent);
+
+        Camera::activeCamera = &componentManager.get<CameraComponent>(mainCamera).camera;
+    }
+
     // wood_box
     {
         TransformComponent transform;
@@ -80,6 +98,8 @@ void Scene2::init() {
         transform.rotation = glm::vec3(0.0f);
         transform.scale    = glm::vec3(1.0f);
         transform.computeModel();
+
+        transform.isVisible = false;
         
         MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
@@ -477,6 +497,10 @@ void Scene2::init() {
 
     DebugMenu::log("Gun: " + running::globalTimer::endInterval());
 
+    ChildComponent camChild;
+    camChild.children = { gun };
+    componentManager.addComponent(mainCamera, camChild);
+
     // Multi-threaded Work
     AssetManager::compileTextures();
     DebugMenu::log("Texture Compilation: " + running::globalTimer::endInterval());
@@ -498,6 +522,7 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
 
     if (ecs.componentManager.has<TransformComponent>(entity)) {
 
+        TransformComponent& transform = ecs.componentManager.get<TransformComponent>(entity);
         Matrix4& movableModel = ecs.componentManager.get<TransformComponent>(entity).model;
         
         if (glfwGetKey(window, GLFW_KEY_KP_8)) {
@@ -524,6 +549,11 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
             movableModel.translate(move_speed * glm::vec3( 0.0f,-1.0f, 0.0f));
         }
 
+        if (Input::isKeyPressed(GLFW_KEY_KP_3)) {
+            transform.rotation.y += 100.0f * delta_time;
+            transform.computeModel();
+        }
+
         ecs.componentManager.get<TransformComponent>(entity).computePosition();
     }
     
@@ -544,10 +574,14 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
             transforms[i]->computePosition();
         }
     }
+
+    if (Input::isKeyDown(GLFW_KEY_T)) {
+        DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
+    }
 }
 
 void Scene2::update(const float deltaTime) {
-
+    
     updateTransform(ecs);
 }
 
@@ -581,6 +615,9 @@ void Scene2::renderLight() const {
         env->draw();
         glDepthFunc(GL_LESS);
     }
+
+    const CameraComponent& cameraComponent = ecs.componentManager.get<CameraComponent>(mainCamera);
+    cameraComponent.renderFrustum();
 }
 
 void Scene2::renderPointShadow() const {

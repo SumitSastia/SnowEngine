@@ -251,6 +251,8 @@ struct CameraComponent {
 
     Camera camera;
     // operator Camera&() { return camera; }
+
+    void renderFrustum() const;
     void destroy() {}
 };
 

@@ -2,8 +2,6 @@
 #include <debug.h>
 #include <renderer.h>
 #include <input.h>
-#include <lights.h>
-#include <ecs/component.h>
 
 #include <iostream>
 
@@ -11,7 +9,7 @@
 Camera* Camera::activeCamera = &Camera::instance();
 
 float Camera::camSensitivity = 0.1f;
-bool  Camera::mouseEnabled = false;
+bool  Camera::mouseEnabled   = false;
 
 Camera::Camera() {
 
@@ -82,10 +80,6 @@ void Camera::input(GLFWwindow* window, const float deltaTime) {
     if (Input::isKeyDown(GLFW_KEY_X)) {
         activeCamera->Uturn = true;
         activeCamera->yaw_initial = activeCamera->yaw;
-    }
-
-    if (Input::isKeyDown(GLFW_KEY_T)) {
-        DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
     }
 }
 

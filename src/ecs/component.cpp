@@ -5,10 +5,58 @@
 #include <shader.h>
 #include <frame.h>
 #include <camera.h>
+#include <texture.h>
 
 // ------------------------------ Temporary ------------------------------------------ //
 
 // ------------------------------ Components ----------------------------------------- //
+
+void CameraComponent::renderFrustum() const {
+
+    glm::vec4 NDC_corners[8] = {
+
+        // Near Plane
+        {-1,-1,-1, 1},
+        { 1,-1,-1, 1},
+        { 1, 1,-1, 1},
+        {-1, 1,-1, 1},
+
+        // Far Plane
+        {-1,-1, 1, 1},
+        { 1,-1, 1, 1},
+        { 1, 1, 1, 1},
+        {-1, 1, 1, 1}
+    };
+
+    glm::vec3 corners[8];
+
+    const glm::mat4 invVP = glm::inverse(camera.getPerspective() * camera.getView());
+
+    for (uint i = 0; i < 8; i++) {
+
+        glm::vec4 p = invVP * NDC_corners[i];
+        corners[i]  = glm::vec3(p) / p.w;
+        corners[i]  = camera.getPos() + (corners[i] - camera.getPos()) * 0.01f;
+    }
+
+    // Near Plane Quad
+    Line::render(corners[0], corners[1]);
+    Line::render(corners[1], corners[2]);
+    Line::render(corners[2], corners[3]);
+    Line::render(corners[3], corners[0]);
+
+    // Slanted Edges
+    Line::render(corners[4], corners[5]);
+    Line::render(corners[5], corners[6]);
+    Line::render(corners[6], corners[7]);
+    Line::render(corners[7], corners[4]);
+
+    // Far Plane Quad
+    Line::render(corners[0], corners[4]);
+    Line::render(corners[1], corners[5]);
+    Line::render(corners[2], corners[6]);
+    Line::render(corners[3], corners[7]);
+}
 
 void MeshComponent::loadMesh2D(
     const std::vector<float>& vertices,

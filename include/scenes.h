@@ -119,6 +119,8 @@ class Scene2 : public Scene {
     Entity headcam;
     Entity gun;
 
+    Entity mainCamera;
+
     ECS ecs;
     Environment* env;
 

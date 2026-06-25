@@ -348,6 +348,8 @@ Shader* Shaders::directLightShadow = nullptr;
 Shader* Shaders::pointLightShadow_instanced  = nullptr;
 Shader* Shaders::directLightShadow_instanced = nullptr;
 
+Shader* Shaders::lineShader = nullptr;
+
 std::vector <shader_paths> Shaders::path = {
 
     shader_paths("ecs/generic3d.vert",        "ecs/test.frag"),
@@ -404,6 +406,11 @@ bool Shaders::initShaders() {
     directLightShadow_instanced = new Shader(
         "../shaders/directShadow/directShadowInstanced.vert",
         "../shaders/directShadow/directShadow.frag"
+    );
+
+    lineShader = new Shader(
+        "../shaders/line/line.vert",
+        "../shaders/line/line.frag"
     );
 
     return true;

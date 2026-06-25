@@ -5,29 +5,34 @@
 
 #include <iostream>
 
-uint32_t AssetManager::total_loadedTextures = 0;
+uint32_t AssetManager::loadedTextures = 0;
 
+AssetManager::Queue AssetManager::loadingQueue {};
 std::vector <Texture> AssetManager::textures (MAX_TEXTURES);
 
 std::unordered_map <std::string, TextureHandle> AssetManager::textureLookup {};
 std::unordered_map <uint32_t, TextureHandle>    AssetManager::textureLookup_flat {};
 
 void AssetManager::init() {
+
+    loadingQueue.queue_size = 5;
+    loadingQueue.init();
+    
     loadTexture("assets/textures/error_texture.png");
 }
 
-const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color) {
+const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color, const bool format) {
 
     const uint32_t hex = gfx::helper::rgba_to_hex(color);
 
     const auto lookupID = textureLookup_flat.find(hex);
     if (lookupID != textureLookup_flat.end()) return lookupID->second;
 
-    SNOW_ASSERT(total_loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!");
+    SNOW_ASSERT(loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!");
 
-    const TextureHandle handle = total_loadedTextures++;
+    const TextureHandle handle = loadedTextures++;
 
-    textures[handle].load(hex);
+    textures[handle].load(hex, format);
     textureLookup_flat[hex] = handle;
 
     std::cout << "Color Loaded: " << hex << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
@@ -45,22 +50,21 @@ const TextureHandle AssetManager::loadTexture(const std::string& path, const boo
     const auto lookupID = textureLookup.find(index);
     if (lookupID != textureLookup.end()) return lookupID->second;
 
-    SNOW_ASSERT(total_loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!");
+    SNOW_ASSERT(loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!");
 
-    const TextureHandle handle = total_loadedTextures++;
+    const TextureHandle handle = loadedTextures++;
+    textureLookup[index] = handle;
 
     textures[handle].load(path, !format);
     // textures[handle].compile();
 
-    textureLookup[index] = handle;
-
-    std::cout << "Texture Loaded: " << index << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
+    std::cout << "Texture Loaded: " << std::hex << index << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
     return handle;
 }
 
 void AssetManager::compileTextures() {
 
-    for (uint32_t i = 0; i < total_loadedTextures; i++) {
+    for (uint32_t i = 0; i < loadedTextures; i++) {
         textures[i].compile();
     }
 }
@@ -76,4 +80,10 @@ ModelComponent AssetManager::loadModel(const std::string& path) {
 
     // Duplicate Prevention Implementation PENDING!
     return ModelComponent(path);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+const TextureHandle AssetManager::loadTex(const std::string& path, const bool format) {
+    return 0;
 }

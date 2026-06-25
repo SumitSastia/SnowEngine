@@ -37,10 +37,10 @@ public:
     Texture() = default;
     
     // Generate & Load a FlatColor Texture
-    void load(const uint32_t color);
+    void load(const uint32_t color, const bool isRGBA);
 
     // Load an Image Texture
-    void load(const std::string& path, const bool format); // CPU-Work
+    void load(const std::string& path, const bool isRGBA); // CPU-Work
 
     // Compiles pixelData into VRAM
     void compile(); // GPU-Work
@@ -49,4 +49,24 @@ public:
 
     // NOTE: USE ONLY IN DEVELOPMENT PHASE
     uint32_t getID() const { return textureID; }
+};
+
+class Line {
+
+    static uint VAO, VBO;
+
+    static void renderHelper(
+        const glm::mat4& model,
+        const glm::vec3& color
+    );
+
+public:
+
+    static void init();
+
+    static void render(
+        const glm::vec3& point1,
+        const glm::vec3& point2,
+        const glm::vec3& color = glm::vec3(1.0f)
+    );
 };

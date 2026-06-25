@@ -45,6 +45,7 @@ int main() {
     
     Shaders::initShaders();
     AssetManager::init();
+    Line::init();
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -198,6 +199,10 @@ int main() {
             //     mainScene->renderLight();
             
             scene2->renderLight();
+            // Line::render(glm::vec3(0.0f), glm::vec3(4.0f));
+            // Line::render(glm::vec3(0.0f), glm::vec3(10.0f, 0.0f, 0.0f), colors::GREEN);
+            // Line::render(glm::vec3(0.0f), glm::vec3(0.0f, 0.5f, 0.0f), colors::RED);
+            // Line::render(glm::vec3(0.0f), glm::vec3(0.001f, 0.0f, 0.0f), colors::YELLOW);
         }
         else {
 

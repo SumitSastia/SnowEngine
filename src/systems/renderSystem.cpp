@@ -225,7 +225,7 @@ void RenderSystem::render(const ECS& ecs) {
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
         
         if (!transform.isVisible) continue;
-        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        float distance = glm::length(Camera::get_position() - transform.position);
         const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
         draw(mesh, transform, material);
@@ -243,7 +243,7 @@ void RenderSystem::render(const ECS& ecs) {
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         MaterialComponent material   = componentManager.get<MaterialComponent>(entity);
         
-        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        float distance = glm::length(Camera::get_position() - transform.position);
         const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
         const uint total_meshes = model.meshes.size();
@@ -597,7 +597,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
         
         if (!transform.isVisible) continue;
 
-        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        float distance = glm::length(Camera::get_position() - transform.position);
         const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
         if (material.gbufferShader) drawGbuffer(mesh, transform, material);
@@ -617,7 +617,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
         
         if (!transform.isVisible) continue;
 
-        float distance = glm::length(Camera::instance().getPos() - transform.position);
+        float distance = glm::length(Camera::get_position() - transform.position);
         const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
         const uint total_meshes = model.meshes.size();
@@ -805,7 +805,7 @@ void ShadowSystem::render(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            float distance = glm::length(Camera::get_position() - transform.position);
             const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
             drawShadow(shader[0], mesh, transform);
@@ -815,7 +815,7 @@ void ShadowSystem::render(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            float distance = glm::length(Camera::get_position() - transform.position);
             const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
             const uint total_meshes = model.meshes.size();
@@ -895,7 +895,7 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            float distance = glm::length(Camera::get_position() - transform.position);
             const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
             drawShadow(shader[0], mesh, transform);
@@ -905,7 +905,7 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::instance().getPos() - transform.position);
+            float distance = glm::length(Camera::get_position() - transform.position);
             const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
             const uint total_meshes = model.meshes.size();
