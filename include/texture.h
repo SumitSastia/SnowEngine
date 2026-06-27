@@ -53,15 +53,14 @@ public:
 
 class Line {
 
-    static uint VAO, VBO;
-
     static void renderHelper(
         const glm::mat4& model,
         const glm::vec3& color
     );
-
+    
 public:
-
+    
+    static uint VAO, VBO;
     static void init();
 
     static void render(

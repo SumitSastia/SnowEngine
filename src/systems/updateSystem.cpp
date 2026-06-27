@@ -28,9 +28,11 @@ void updateTransform(ECS& ecs) {
 
             TransformComponent& child_transform = componentManager.get<TransformComponent>(child);
             child_transform.position = transform.position + child_transform.local_position;
+            child_transform.rotation = child_transform.local_rotation;
+            child_transform.scale    = child_transform.local_scale;
 
             child_transform.computeModel();
-            child_transform.isVisible = transform.isVisible;
+            if (!transform.isVisible) child_transform.isVisible = false;
         }
     }
 

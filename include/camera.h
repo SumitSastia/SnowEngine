@@ -15,20 +15,11 @@ class Camera {
     glm::vec3 direction;
     glm::vec3 target;
 
-    glm::vec3 right_axis;
-    glm::vec3 up_axis;
-
     glm::mat4 viewMatrix;
     glm::mat4 projection;
 
     float camSlow;
     float camSpeed;
-    
-    float yaw; // y-axis rotation
-    float yaw_initial;
-    
-    float pitch; // x-axis rotation
-    float pitch_initial;
     
     float fov;
     float aspectRatio;
@@ -40,6 +31,15 @@ class Camera {
     bool Uturn;
 
 public:
+
+    float yaw; // y-axis rotation
+    float yaw_initial;
+    
+    float pitch; // x-axis rotation
+    float pitch_initial;
+
+    glm::vec3 right_axis;
+    glm::vec3 up_axis;
 
     Camera();
     static Camera& instance() {
@@ -53,9 +53,9 @@ public:
     static const glm::mat4& get_projection() { return activeCamera->projection; }
     static const glm::mat4& get_view() { return activeCamera->viewMatrix; }
 
-    static void input(GLFWwindow* window, const float deltaTime);
-    static void update(const float deltaTime);
-    static void handle_mouse(GLFWwindow* window);
+    void input(GLFWwindow* window, const float deltaTime);
+    void update(const float deltaTime);
+    void handle_mouse(GLFWwindow* window);
 
     // void update(const float& delta_time);
     void look_at();

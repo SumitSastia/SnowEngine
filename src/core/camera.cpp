@@ -9,13 +9,13 @@
 Camera* Camera::activeCamera = &Camera::instance();
 
 float Camera::camSensitivity = 0.1f;
-bool  Camera::mouseEnabled   = false;
+bool  Camera::mouseEnabled = false;
 
 Camera::Camera() {
 
     position  = glm::vec3(0.0f, 0.0f, 3.0f);
     target    = glm::vec3(0.0f, 0.0f, -1.0f);
-    direction = glm::normalize(position - target);
+    direction = glm::normalize(target - position);
 
     camSlow  = 0.5f;
     camSpeed = 1.0f;
@@ -85,29 +85,33 @@ void Camera::input(GLFWwindow* window, const float deltaTime) {
 
 void Camera::update(const float delta_time) {
 
-    if (activeCamera->Uturn) {
+    if (Uturn) {
         mouseEnabled = false;
         
-        if (activeCamera->yaw < activeCamera->yaw_initial + 180.0f) {
-            activeCamera->yaw += 2.0f;
+        if (yaw < yaw_initial + 180.0f) {
+            yaw += 2.0f;
         }
         else {
-            activeCamera->Uturn = false;
+            Uturn = false;
             mouseEnabled = true;
         }
     }
 
     glm::vec3 new_direction;
 
-    new_direction.x = cos(glm::radians(activeCamera->yaw)) * cos(glm::radians(activeCamera->pitch));
-    new_direction.y = sin(glm::radians(activeCamera->pitch));
-    new_direction.z = sin(glm::radians(activeCamera->yaw)) * cos(glm::radians(activeCamera->pitch));
+    new_direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    new_direction.y = sin(glm::radians(pitch));
+    new_direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
     activeCamera->target = glm::normalize(new_direction);
-
     activeCamera->look_at();
 
-    ImGui::Text("Camera FOV: %.1f", activeCamera->fov);
+    glm::vec3 up(0.0f, 1.0f, 0.0f);
+
+    right_axis = glm::normalize(glm::cross(up, new_direction));
+    up_axis    = glm::normalize(glm::cross(new_direction, right_axis));
+
+    ImGui::Text("Camera FOV: %.1f", fov);
 }
 
 // void Camera::update(const float& delta_time) {

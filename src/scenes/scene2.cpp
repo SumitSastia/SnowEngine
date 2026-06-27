@@ -471,12 +471,13 @@ void Scene2::init() {
         TransformComponent transform;
         transform.position = glm::vec3(-1.0f, 0.0f, 1.0f);
         transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(0.5f);
-        transform.computeModel();
+        transform.scale    = glm::vec3(0.1f);
 
-        transform.local_position = glm::vec3(1.0f, 0.0f, 0.0f);
-        transform.local_rotation = glm::vec3(0.0f);
-        transform.local_scale = glm::vec3(1.0f);
+        transform.local_position = glm::vec3(0.35f, -0.5f, -1.0f);
+        // transform.local_rotation = glm::vec3(0.0f, 95.0f, 5.0f);
+        transform.local_scale    = glm::vec3(0.2f);
+
+        transform.computeModel();
 
         MaterialComponent material;
         material.shader = Shaders::get(PHONG3D);
@@ -578,9 +579,36 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
     if (Input::isKeyDown(GLFW_KEY_T)) {
         DefaultLights::instance().flashlight.isVisible = !DefaultLights::instance().flashlight.isVisible;
     }
+
+    if (Input::isKeyDown(GLFW_KEY_V)) {
+        Camera::activeCamera = &ecs.componentManager.get<CameraComponent>(mainCamera).camera;
+    }
 }
 
 void Scene2::update(const float deltaTime) {
+
+    TransformComponent& transform = ecs.componentManager.get<TransformComponent>(gun);
+    const Camera& camera = ecs.componentManager.get<CameraComponent>(mainCamera).camera;
+
+    // transform.local_position = glm::vec3(0.35f, -0.5f, -1.0f);
+    // transform.local_rotation = glm::vec3(0.0f, 95.0f, 5.0f);
+
+    transform.local_position = {
+        camera.right_axis  * -0.35f -
+        camera.up_axis     * 0.5f +
+        camera.getTarget() * 1.0f
+    };
+
+    transform.local_rotation = {
+        0.0f,
+        camera.yaw   * -1.0f,
+        camera.pitch * 1.0f + 0.5f
+    };
+
+    // DebugMenu::log("pitch: " + std::to_string(camera.pitch));
+    // DebugMenu::log("rotation: " + std::to_string(transform.local_rotation.z));
+
+    // transform.isVisible = false;
     
     updateTransform(ecs);
 }
@@ -617,7 +645,12 @@ void Scene2::renderLight() const {
     }
 
     const CameraComponent& cameraComponent = ecs.componentManager.get<CameraComponent>(mainCamera);
-    cameraComponent.renderFrustum();
+    if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
+
+    const auto& cam_pos = cameraComponent.camera.getPos();
+    const auto& gun_pos = ecs.componentManager.get<TransformComponent>(gun).position;
+
+    Line::render(cam_pos, gun_pos);
 }
 
 void Scene2::renderPointShadow() const {

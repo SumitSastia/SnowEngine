@@ -67,6 +67,7 @@ add_executable(
     ${CORE_SRC}
     src/debug/debug.cpp
     src/utils/wireframe.cpp
+    src/utils/crosshair.cpp
     
     ${SCENES_SRC}
     ${ECS_SRC}

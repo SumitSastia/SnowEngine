@@ -11,6 +11,7 @@
 #include <text.h>
 #include <ssao.h>
 #include <assetManager.h>
+#include <utils/crosshair.h>
 
 #include <thread>
 
@@ -46,6 +47,7 @@ int main() {
     Shaders::initShaders();
     AssetManager::init();
     Line::init();
+    Crosshair::init();
 
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -104,7 +106,6 @@ int main() {
             update_timer = 0.0f;
         }
 
-        
         DebugMenu::beginUI();
 
         // Events //
@@ -126,7 +127,7 @@ int main() {
         // mainCamera.mouse_handler(window);
         // mainCamera.scroll_handler(scrollOffset);
 
-        Camera::handle_mouse(window);
+        Camera::activeCamera->handle_mouse(window);
         
         if (Input::isKeyDown(GLFW_KEY_P)) {
             deferredRender = !deferredRender;
@@ -137,11 +138,11 @@ int main() {
         ImGui::TextWrapped((deferredRender)? "Deferred Rendering" : "Forward Rendering");
 
         DefaultLights::instance().update();
-        Camera::input(window, deltaTime);
+        Camera::activeCamera->input(window, deltaTime);
 
         // mainScene->input(window, deltaTime);
         
-        Camera::update(deltaTime);
+        Camera::activeCamera->update(deltaTime);
         // mainScene->update(deltaTime);
         scene2->update(deltaTime);
         
@@ -199,10 +200,7 @@ int main() {
             //     mainScene->renderLight();
             
             scene2->renderLight();
-            // Line::render(glm::vec3(0.0f), glm::vec3(4.0f));
-            // Line::render(glm::vec3(0.0f), glm::vec3(10.0f, 0.0f, 0.0f), colors::GREEN);
-            // Line::render(glm::vec3(0.0f), glm::vec3(0.0f, 0.5f, 0.0f), colors::RED);
-            // Line::render(glm::vec3(0.0f), glm::vec3(0.001f, 0.0f, 0.0f), colors::YELLOW);
+            Crosshair::render();
         }
         else {
 
