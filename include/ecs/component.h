@@ -22,6 +22,9 @@
 #define MAX_ENTITIES 5000
 #define MAX_INSTANCES 100
 
+#define TEXTURE_DEFAULT_ALBEDO 1
+#define TEXTURE_DEFAULT_NORMAL 2
+
 class Shader;
 class Texture2D;
 class Model3D;
@@ -50,15 +53,35 @@ struct Vertex {
     }
 };
 
+struct Vertex_n {
+
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec3 bitangent;
+    glm::vec2 textureCords;
+
+    Vertex_n(
+        const glm::vec3& position     = glm::vec3(0.0f),
+        const glm::vec3& normal       = glm::vec3(0.0f),
+        const glm::vec3& bitangent    = glm::vec3(0.0f),
+        const glm::vec2& textureCords = glm::vec3(0.0f)
+    ) :
+        position(position),
+        normal(normal),
+        bitangent(bitangent),
+        textureCords(textureCords) {
+    }
+};
+
 struct TransformComponent {
 
     glm::vec3 position {0.0f};
     glm::vec3 rotation {0.0f};
-    glm::vec3 scale {1.0f};
+    glm::vec3 scale    {1.0f};
 
     glm::vec3 local_position {0.0f};
     glm::vec3 local_rotation {0.0f};
-    glm::vec3 local_scale {1.0f};
+    glm::vec3 local_scale    {1.0f};
 
     Matrix4 model;
     Matrix4 localModel;
@@ -122,11 +145,15 @@ struct MeshComponent {
     3f = aTangent
     2f = aTexCords
     */
+    void loadMesh3D(
+        const std::vector<Vertex_n>& vertices,
+        const std::vector<uint>&     indices
+    );
+
     void loadMesh3DNormal(
         const std::vector<float>& vertices,
         const std::vector<uint>&  indices
     );
-    
 
     void draw() const;
     void destroy();
@@ -192,11 +219,6 @@ struct MaterialComponent {
     TextureHandle metallic  = 0;
     TextureHandle roughness = 0;
     TextureHandle ao        = 0;
-
-    glm::vec4 flatColor;
-
-    // Temporary for Models
-    // Texture2D* m_albedo;
 
     MaterialComponent(): 
         shader(nullptr),
@@ -290,8 +312,8 @@ struct InstanceComponent {
 
 class ModelComponent {
     
-    void          processNode(aiNode* node, const aiScene* scene, const std::string& path);
-    MeshComponent processMesh(aiMesh* mesh, const aiScene* scene, const std::string& path);
+    void          processNode(aiNode* node, const aiScene* scene, const std::string& path, const bool normalMapped);
+    MeshComponent processMesh(aiMesh* mesh, const aiScene* scene, const std::string& path, const bool normalMapped);
 
     TextureHandle loadMaterialTexture(aiMaterial* material, aiTextureType type, const std::string& path);
     TextureHandle loadMaterialTextures(aiMaterial* material, aiTextureType type, const std::string& type_str, const std::string& path) { return 0; }
@@ -302,12 +324,13 @@ public:
     glm::vec3 maxCorner;
     
     std::vector <MeshComponent> meshes;
-    std::vector <TextureHandle> textures;
+    std::vector <TextureHandle> textures;   // diffuse
+    std::vector <TextureHandle> normalMaps; // normals
 
     float radius;
 
     ModelComponent() = default;
-    ModelComponent(const std::string& path);
+    ModelComponent(const std::string& path, const bool normalMapped);
 
     void destroy();
 };

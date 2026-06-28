@@ -18,10 +18,12 @@ void AssetManager::init() {
     loadingQueue.queue_size = 5;
     loadingQueue.init();
     
-    loadTexture("assets/textures/error_texture.png");
+    loadTexture_flatColor(glm::vec4(1.0f));                   // 0 - Non-Existent
+    loadTexture("assets/textures/error_texture.png");         // 1 - Albedo Default
+    loadTexture_flatColor(glm::vec4(0.5f, 0.5f, 1.0f, 1.0f)); // 2 - Normal Default
 }
 
-const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color, const bool format) {
+const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color, const bool isRGBA) {
 
     const uint32_t hex = gfx::helper::rgba_to_hex(color);
 
@@ -32,14 +34,14 @@ const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color, 
 
     const TextureHandle handle = loadedTextures++;
 
-    textures[handle].load(hex, format);
+    textures[handle].load(hex, isRGBA);
     textureLookup_flat[hex] = handle;
 
     std::cout << "Color Loaded: " << hex << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
     return handle;
 }
 
-const TextureHandle AssetManager::loadTexture(const std::string& path, const bool format) {
+const TextureHandle AssetManager::loadTexture(const std::string& path, const bool isRGBA) {
 
     // Index Formatting
     const std::size_t start = path.find_last_of('/') + 1;
@@ -55,7 +57,7 @@ const TextureHandle AssetManager::loadTexture(const std::string& path, const boo
     const TextureHandle handle = loadedTextures++;
     textureLookup[index] = handle;
 
-    textures[handle].load(path, !format);
+    textures[handle].load(path, isRGBA);
     // textures[handle].compile();
 
     std::cout << "Texture Loaded: " << std::hex << index << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
@@ -76,10 +78,10 @@ void AssetManager::destroyTexture(const TextureHandle& handle) {
 
 // Model Loading
 
-ModelComponent AssetManager::loadModel(const std::string& path) {
+ModelComponent AssetManager::loadModel(const std::string& path, const bool normalMapped) {
 
     // Duplicate Prevention Implementation PENDING!
-    return ModelComponent(path);
+    return ModelComponent(path, normalMapped);
 }
 
 /////////////////////////////////////////////////////////////////////////////

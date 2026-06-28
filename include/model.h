@@ -124,18 +124,18 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////
 
-class ModelLoader {
+// class ModelLoader {
 
-    enum MODEL_MATERIAL_TYPE {
-        FLATCOLOR_MATERIAL,
-        PBR_MATERIAL,
-        PHONG_MATERIAL
-    };
+//     enum MODEL_MATERIAL_TYPE {
+//         FLATCOLOR_MATERIAL,
+//         PBR_MATERIAL,
+//         PHONG_MATERIAL
+//     };
 
-    ModelComponent    model;
-    MaterialComponent material;
+//     ModelComponent    model;
+//     MaterialComponent material;
 
-public:
+// public:
 
-    ModelLoader(const std::string& path): model(path) {}
-};
+//     ModelLoader(const std::string& path): model(path) {}
+// };

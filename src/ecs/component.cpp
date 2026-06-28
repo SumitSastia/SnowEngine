@@ -156,6 +156,44 @@ void MeshComponent::loadMesh3D(
     glBindVertexArray(0);
 }
 
+void MeshComponent::loadMesh3D(
+    const std::vector<Vertex_n>& vertices,
+    const std::vector<uint>&     indices
+) {
+    indicesCount = indices.size();
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex_n), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesCount * sizeof(uint), indices.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Normal
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)offsetof(Vertex_n, normal));
+    glEnableVertexAttribArray(1);
+
+    // Tangent
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)offsetof(Vertex_n, bitangent));
+    glEnableVertexAttribArray(2);
+
+    // TextureCords
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)offsetof(Vertex_n, textureCords));
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 void MeshComponent::loadMesh3DNormal(
     const std::vector<float>& vertices,
     const std::vector<uint>&  indices

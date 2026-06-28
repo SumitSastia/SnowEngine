@@ -61,13 +61,13 @@ public:
 
     static void init();
     
-    static const TextureHandle loadTexture_flatColor(const glm::vec4& color, const bool format = 0);
-    static const TextureHandle loadTexture(const std::string& path, const bool format = 0);
+    static const TextureHandle loadTexture_flatColor(const glm::vec4& color, const bool isRGBA = 1);
+    static const TextureHandle loadTexture(const std::string& path, const bool isRGBA = 0);
     static const Texture&      getTexture(const TextureHandle& handle) { return textures[handle]; }
 
     static void compileTextures();
     
-    static ModelComponent loadModel(const std::string& path);
+    static ModelComponent loadModel(const std::string& path, const bool normalMapped = false);
     
     static void destroyTexture(const TextureHandle& handle);
 

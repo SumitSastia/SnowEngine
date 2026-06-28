@@ -68,4 +68,11 @@ public:
         const glm::vec3& point2,
         const glm::vec3& color = glm::vec3(1.0f)
     );
+
+    static void renderDirection(
+        const glm::vec3& point,
+        const glm::vec3& direction,
+        const float length,
+        const glm::vec3& color = glm::vec3(1.0f)
+    );
 };

@@ -204,6 +204,7 @@ void RenderSystem::render(const ECS& ecs) {
 
             const MeshComponent& mesh = model.meshes[i];
             material.albedo = model.textures[i];
+            material.normal = model.normalMaps[i];
 
             draw(mesh, transform, material);
         }
@@ -252,6 +253,7 @@ void RenderSystem::render(const ECS& ecs) {
 
             const MeshComponent& mesh = model.meshes[i];
             material.albedo = model.textures[i];
+            material.normal = model.normalMaps[i];
 
             draw(mesh, transform, material);
         }

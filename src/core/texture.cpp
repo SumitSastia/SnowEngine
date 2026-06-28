@@ -148,3 +148,21 @@ void Line::render(
 
     renderHelper(modelMatrix, color);
 }
+
+void Line::renderDirection(
+    const glm::vec3& point,
+    const glm::vec3& direction,
+    const float length,
+    const glm::vec3& color
+) {
+    // const glm::vec3& point2  = point + glm::normalize(direction) * length;
+    const glm::quat rotation = glm::rotation(glm::vec3(1.0f, 0.0f, 0.0f), glm::normalize(direction));
+
+    glm::mat4 modelMatrix { 1.0f };
+    
+    modelMatrix  = glm::translate(modelMatrix, point);
+    modelMatrix *= glm::mat4_cast(rotation);
+    modelMatrix  = glm::scale(modelMatrix, glm::vec3(length, 1.0f, 1.0f));
+
+    renderHelper(modelMatrix, color);
+}

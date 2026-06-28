@@ -6,6 +6,8 @@
 #include <systems/update.h>
 #include <assetManager.h>
 
+#include <glm/gtx/rotate_vector.hpp>
+
 void Scene2::init() {
 
     EntityManager&    entityManager    = ecs.entityManager;
@@ -99,7 +101,7 @@ void Scene2::init() {
         transform.scale    = glm::vec3(1.0f);
         transform.computeModel();
 
-        transform.isVisible = false;
+        // transform.isVisible = false;
         
         MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
@@ -108,9 +110,9 @@ void Scene2::init() {
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR3D);
         
-        // material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png", 1);
-        material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
-        material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png");
+        material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png");
+        // material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
+        material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png", 1);
         
         material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
@@ -190,9 +192,9 @@ void Scene2::init() {
         MaterialComponent material;
         material.shader = Shaders::get(NORMPBR2D);
 
-        material.albedo   = AssetManager::loadTexture("assets/textures/brickwall.jpg", 1);
-        material.normal   = AssetManager::loadTexture("assets/textures/brickwall_normal.png");
-        material.specular = AssetManager::loadTexture("assets/textures/stone_floor.jpg", 1);
+        material.albedo   = AssetManager::loadTexture("assets/textures/brickwall.jpg");
+        material.normal   = AssetManager::loadTexture("assets/textures/brickwall_normal.png", 1);
+        material.specular = AssetManager::loadTexture("assets/textures/stone_floor.jpg");
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -264,9 +266,9 @@ void Scene2::init() {
         material.shader = Shaders::get(PARALLAX2D);
         // material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
         
-        material.albedo = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2.jpg", 1);
-        material.normal = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_normal.jpg");
-        material.height = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_disp.jpg");
+        material.albedo = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2.jpg");
+        material.normal = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_normal.jpg", true);
+        material.height = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_disp.jpg", true);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -287,34 +289,57 @@ void Scene2::init() {
     DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::globalTimer::endInterval());
 
     // sphere
-    float sphereRadius = 0.0f;
-    {
-        TransformComponent transform;
-        transform.position = glm::vec3(6.0f, 0.0f, 3.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
-        transform.computeModel();
+    // {
+    //     TransformComponent transform;
+    //     transform.position = glm::vec3(6.0f, 0.0f, 3.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
 
-        MaterialComponent material;
-        material.shader = Shaders::get(PBR3D);
-        material.gbufferShader = Shaders::get(GBUFFER3D);
+    //     MaterialComponent material;
+    //     material.shader = Shaders::get(NORMPBR3D);
+    //     material.gbufferShader = Shaders::get(GBUFFER3D);
 
-        material.metallic  = material.albedo;
-        material.roughness = material.albedo;
+    //     material.metallic  = material.albedo;
+    //     material.roughness = material.albedo;
 
-        ModelComponent model0 = AssetManager::loadModel("assets/models/sphere/sphereHD.obj");
-        ModelComponent model1 = AssetManager::loadModel("assets/models/sphere/sphere.obj");
-        ModelComponent model2 = AssetManager::loadModel("assets/models/sphere/sphereSD.obj");
+    //     ModelComponent model0 = AssetManager::loadModel("assets/models/sphere/sphereHD.obj", true);
+    //     ModelComponent model1 = AssetManager::loadModel("assets/models/sphere/sphere.obj", true);
+    //     ModelComponent model2 = AssetManager::loadModel("assets/models/sphere/sphereSD.obj", true);
         
-        ModelLODComponent meshLOD { model0, model1, model2 };
+    //     ModelLODComponent meshLOD { model0, model1, model2 };
 
-        BoundingAABBComponent AABB = createAABB(transform, model0);
+    //     BoundingAABBComponent AABB = createAABB(transform, model0);
 
-        componentManager.addComponent(sphere, meshLOD);
-        componentManager.addComponent(sphere, transform);
-        componentManager.addComponent(sphere, material);
-        componentManager.addComponent(sphere, AABB);
-    }
+    //     componentManager.addComponent(sphere, meshLOD);
+    //     componentManager.addComponent(sphere, transform);
+    //     componentManager.addComponent(sphere, material);
+    //     componentManager.addComponent(sphere, AABB);
+    // }
+
+    // {
+    //     TransformComponent transform;
+    //     transform.position = glm::vec3(6.0f, 2.0f, 3.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
+
+    //     MaterialComponent material;
+    //     material.shader        = Shaders::get(NORMPBR3D);
+    //     material.gbufferShader = Shaders::get(GBUFFER3D);
+
+    //     material.metallic  = material.albedo;
+    //     material.roughness = material.albedo;
+
+    //     ModelComponent model = AssetManager::loadModel("assets/models/sphere/sphere_normalMapped.obj", true);
+
+    //     BoundingAABBComponent AABB = createAABB(transform, model);
+
+    //     componentManager.addComponent(sphere, model);
+    //     componentManager.addComponent(sphere, transform);
+    //     componentManager.addComponent(sphere, material);
+    //     componentManager.addComponent(sphere, AABB);
+    // }
 
     DebugMenu::log("Sphere: " + running::globalTimer::endInterval());
 
@@ -355,7 +380,7 @@ void Scene2::init() {
 
         transform.local_position = glm::vec3(1.0f, 0.0f, 0.0f);
         transform.local_rotation = glm::vec3(0.0f);
-        transform.local_scale = glm::vec3(1.0f);
+        transform.local_scale    = glm::vec3(0.5f);
 
         MaterialComponent material;
         material.shader = Shaders::get(PHONG3D);
@@ -389,7 +414,7 @@ void Scene2::init() {
     {
         MaterialComponent material;
         material.shader = Shaders::get(INSTANCEPBR3D);
-        material.albedo = AssetManager::loadTexture("assets/textures/grunge-box-small.jpg", 1);
+        material.albedo = AssetManager::loadTexture("assets/textures/grunge-box-small.jpg");
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -599,16 +624,14 @@ void Scene2::update(const float deltaTime) {
         camera.getTarget() * 1.0f
     };
 
+    const float GUN_OFFSET_Y = 4.0f;
+    const float GUN_OFFSET_Z = 2.0f;
+
     transform.local_rotation = {
         0.0f,
-        camera.yaw   * -1.0f,
-        camera.pitch * 1.0f + 0.5f
+        camera.yaw   * -1.0f + GUN_OFFSET_Y,
+        camera.pitch *  1.0f + GUN_OFFSET_Z
     };
-
-    // DebugMenu::log("pitch: " + std::to_string(camera.pitch));
-    // DebugMenu::log("rotation: " + std::to_string(transform.local_rotation.z));
-
-    // transform.isVisible = false;
     
     updateTransform(ecs);
 }
@@ -647,10 +670,24 @@ void Scene2::renderLight() const {
     const CameraComponent& cameraComponent = ecs.componentManager.get<CameraComponent>(mainCamera);
     if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
 
-    const auto& cam_pos = cameraComponent.camera.getPos();
-    const auto& gun_pos = ecs.componentManager.get<TransformComponent>(gun).position;
+    // const auto& cam_pos = cameraComponent.camera.getPos();
+    // auto gun_pos = ecs.componentManager.get<TransformComponent>(gun).position;
 
-    Line::render(cam_pos, gun_pos);
+    // if (Input::isKeyDown(GLFW_KEY_LEFT_BRACKET)) gun_pos.y -= 0.01f;
+    // if (Input::isKeyDown(GLFW_KEY_RIGHT_BRACKET)) gun_pos.y += 0.01f;
+    // DebugMenu::log("y: " + std::to_string(gun_pos.y));
+
+    // gun_pos.y = -0.18f;
+
+    // glm::vec3 direction = glm::rotateY(glm::vec3(0.0f, 0.0f,-1.0f), glm::radians(5.0f));
+
+    // Line::render(cam_pos, gun_pos);
+    // Line::renderDirection(
+    //     gun_pos,
+    //     // glm::vec3(0.0f, 0.0f, 3.0f),
+    //     direction,
+    //     5.0f
+    // );
 }
 
 void Scene2::renderPointShadow() const {

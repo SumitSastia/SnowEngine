@@ -273,22 +273,33 @@ float Model3D::clean() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-ModelComponent::ModelComponent(const std::string& path) {
+ModelComponent::ModelComponent(const std::string& path, const bool normalMapped) {
 
     const std::string finalPath = "../" + path;
-
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(finalPath, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
-        std::cerr << "ERROR::ASSIMP::Unable to Open the Model File!" << std::endl;
-        return;
-    }
-
-    // const std::size_t start = path.find_first_of('/') + 1;
     const std::size_t end   = path.find_last_of('/');
 
-    processNode(scene->mRootNode, scene, path.substr(0, end - 0));
+    Assimp::Importer importer;
+
+    if (!normalMapped) {    
+        const aiScene* scene = importer.ReadFile(finalPath, aiProcess_Triangulate | aiProcess_FlipUVs);
+        
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
+            std::cerr << "ERROR::ASSIMP::Unable to Open the Model File!" << std::endl;
+            return;
+        }
+        
+        processNode(scene->mRootNode, scene, path.substr(0, end - 0), normalMapped);
+    }
+    else {
+        const aiScene* scene = importer.ReadFile(finalPath, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
+        
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
+            std::cerr << "ERROR::ASSIMP::Unable to Open the Model File!" << std::endl;
+            return;
+        }
+        
+        processNode(scene->mRootNode, scene, path.substr(0, end - 0), normalMapped);
+    }
 }
 
 TextureHandle ModelComponent::loadMaterialTexture(aiMaterial* material, aiTextureType type, const std::string& path) {
@@ -298,79 +309,133 @@ TextureHandle ModelComponent::loadMaterialTexture(aiMaterial* material, aiTextur
 
     std::string finalPath = path + "/" + str.C_Str();
 
-    return AssetManager::loadTexture(finalPath, 1);
+    return AssetManager::loadTexture(finalPath, (type != aiTextureType_NORMALS)? 0 : 1);
 }
 
-void ModelComponent::processNode(aiNode* node, const aiScene* scene, const std::string& path) {
+void ModelComponent::processNode(aiNode* node, const aiScene* scene, const std::string& path, const bool normalMapped) {
 
     for (uint i = 0; i < node->mNumMeshes; i++) {
 
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene, path));
+        meshes.push_back(processMesh(mesh, scene, path, normalMapped));
     }
 
     for (uint i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene, path);
+        processNode(node->mChildren[i], scene, path, normalMapped);
     }
 }
 
-MeshComponent ModelComponent::processMesh(aiMesh* mesh, const aiScene* scene, const std::string& path) {
+MeshComponent ModelComponent::processMesh(aiMesh* mesh, const aiScene* scene, const std::string& path, const bool normalMapped) {
 
-    std::vector <Vertex> vertices;
-    std::vector <uint>   indices;
-
-    for (uint i = 0; i < mesh->mNumVertices; i++) {
-
-        Vertex vertex {};
-
-        vertex.position = glm::vec3(
-            mesh->mVertices[i].x,
-            mesh->mVertices[i].y,
-            mesh->mVertices[i].z
-        );
-
-        if (mesh->HasNormals()) {
-            vertex.normal = glm::vec3(
-                mesh->mNormals[i].x,
-                mesh->mNormals[i].y,
-                mesh->mNormals[i].z
-            );
-        }
-
-        if (mesh->mTextureCoords[0]) {
-
-            vertex.textureCords = glm::vec2(
-                mesh->mTextureCoords[0][i].x,
-                mesh->mTextureCoords[0][i].y
-            );
-        }
-        else {
-            vertex.textureCords = glm::vec2(0.5f);
-        }
-
-        // Frustum Culling - Data
-        radius = std::max(radius, glm::length(vertex.position));
-
-        minCorner = glm::min(minCorner, vertex.position);
-        maxCorner = glm::max(maxCorner, vertex.position);
-
-        vertices.push_back(vertex);
-    }
+    MeshComponent meshComponent;
+    std::vector <uint> indices;
 
     for (uint i = 0; i < mesh->mNumFaces; i++) {
-        
+            
         aiFace face = mesh->mFaces[i];
         for (uint j = 0; j < face.mNumIndices; j++) {
-
+            
             indices.push_back(face.mIndices[j]);
         }
     }
 
+    if (!normalMapped) {
+        
+        std::vector <Vertex> vertices;
+
+        for (uint i = 0; i < mesh->mNumVertices; i++) {
+
+            Vertex vertex {};
+
+            vertex.position = glm::vec3(
+                mesh->mVertices[i].x,
+                mesh->mVertices[i].y,
+                mesh->mVertices[i].z
+            );
+
+            if (mesh->HasNormals()) {
+                vertex.normal = glm::vec3(
+                    mesh->mNormals[i].x,
+                    mesh->mNormals[i].y,
+                    mesh->mNormals[i].z
+                );
+            }
+
+            if (mesh->mTextureCoords[0]) {
+
+                vertex.textureCords = glm::vec2(
+                    mesh->mTextureCoords[0][i].x,
+                    mesh->mTextureCoords[0][i].y
+                );
+            }
+            else {
+                vertex.textureCords = glm::vec2(0.5f);
+            }
+
+            // Frustum Culling - Data
+            radius = std::max(radius, glm::length(vertex.position));
+
+            minCorner = glm::min(minCorner, vertex.position);
+            maxCorner = glm::max(maxCorner, vertex.position);
+
+            vertices.push_back(vertex);
+        }
+
+        meshComponent.loadMesh3D(vertices, indices);
+    }
+    else {
+        std::vector <Vertex_n> vertices;
+
+        for (uint i = 0; i < mesh->mNumVertices; i++) {
+
+            Vertex_n vertex {};
+
+            vertex.position = glm::vec3(
+                mesh->mVertices[i].x,
+                mesh->mVertices[i].y,
+                mesh->mVertices[i].z
+            );
+
+            if (mesh->HasNormals()) {
+                vertex.normal = glm::vec3(
+                    mesh->mNormals[i].x,
+                    mesh->mNormals[i].y,
+                    mesh->mNormals[i].z
+                );
+            }
+
+            if (mesh->HasTangentsAndBitangents()) {
+                vertex.bitangent = glm::vec3(
+                    mesh->mBitangents[i].x,
+                    mesh->mBitangents[i].y,
+                    mesh->mBitangents[i].z
+                );
+            }
+
+            if (mesh->mTextureCoords[0]) {
+                vertex.textureCords = glm::vec2(
+                    mesh->mTextureCoords[0][i].x,
+                    mesh->mTextureCoords[0][i].y
+                );
+            }
+
+            // Frustum Culling - Data
+            radius = std::max(radius, glm::length(vertex.position));
+
+            minCorner = glm::min(minCorner, vertex.position);
+            maxCorner = glm::max(maxCorner, vertex.position);
+
+            vertices.push_back(vertex);
+        }
+
+        meshComponent.loadMesh3D(vertices, indices);
+    }
+    
     if (mesh->mMaterialIndex >= 0) {
 
         aiColor3D color;
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
+        
         if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0){
             textures.push_back(loadMaterialTexture(material, aiTextureType_DIFFUSE, path));
         }
@@ -383,27 +448,24 @@ MeshComponent ModelComponent::processMesh(aiMesh* mesh, const aiScene* scene, co
                 1.0f
             };
 
-            // glm::vec4 flatColor = {
-            //     std::pow(color.r, 1.6f),
-            //     std::pow(color.g, 1.6f),
-            //     std::pow(color.b, 1.6f),
-            //     1.0f
-            // };
-
-            textures.push_back(AssetManager::loadTexture_flatColor(flatColor));
+            textures.push_back(AssetManager::loadTexture_flatColor(flatColor, false));
         }
         else {
-            textures.push_back(0);
+            textures.push_back(TEXTURE_DEFAULT_ALBEDO);
+        }
+
+        if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
+            normalMaps.push_back(loadMaterialTexture(material, aiTextureType_NORMALS, path));
+        }
+        else {
+            normalMaps.push_back(TEXTURE_DEFAULT_NORMAL);
         }
 
     }
     else {
         // If mesh has no texture
-        textures.push_back(0);
+        textures.push_back(TEXTURE_DEFAULT_ALBEDO);
     }
-
-    MeshComponent meshComponent;
-    meshComponent.loadMesh3D(vertices, indices);
 
     return meshComponent;
 }
