@@ -3,7 +3,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <s_math.h>
+#include <glm/glm.hpp>
 #include <map>
 #include <string>
 

@@ -4,13 +4,14 @@
 #include <lights.h>
 #include <shader.h>
 #include <frame.h>
-#include <s_math.h>
+#include <math/matrix.h>
 #include <model.h>
 #include <ibl.h>
 #include <s_time.h>
 #include <systems/rendersystem.h>
 
 #include <systems/init.h>
+#include <gfx/particles.h>
 
 namespace scene_var {
     const float speed = 3.0f;
@@ -118,13 +119,13 @@ class Scene2 : public Scene {
     Entity sun;
     Entity headcam;
     Entity gun;
-
     Entity mainCamera;
+    Entity crowd[1000];
 
     ECS ecs;
     Environment* env;
 
-    Entity crowd[1000];
+    ParticleEmitter emitter;
 
 public:
 

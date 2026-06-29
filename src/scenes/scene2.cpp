@@ -5,10 +5,21 @@
 #include <input.h>
 #include <systems/update.h>
 #include <assetManager.h>
+#include <math/random.h>
 
 #include <glm/gtx/rotate_vector.hpp>
 
 void Scene2::init() {
+
+    Particle particle;
+    particle.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    particle.velocity = Random::vec3(0.1f);
+    particle.color    = glm::vec4(colors::YELLOW, 1.0f);
+
+    particle.size     = 0.1f;
+    particle.lifetime = 1000000.0f;
+
+    emitter.create(particle);
 
     EntityManager&    entityManager    = ecs.entityManager;
     ComponentManager& componentManager = ecs.componentManager;
@@ -94,43 +105,43 @@ void Scene2::init() {
     }
 
     // wood_box
-    {
-        TransformComponent transform;
-        transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-        transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(1.0f);
-        transform.computeModel();
+    // {
+    //     TransformComponent transform;
+    //     transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    //     transform.rotation = glm::vec3(0.0f);
+    //     transform.scale    = glm::vec3(1.0f);
+    //     transform.computeModel();
 
-        // transform.isVisible = false;
+    //     // transform.isVisible = false;
         
-        MeshComponent mesh = EntityShapes::instance().cubeNorm;
+    //     MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
-        DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
+    //     DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
         
-        MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR3D);
+    //     MaterialComponent material;
+    //     material.shader = Shaders::get(NORMPBR3D);
         
-        material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png");
-        // material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
-        material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png", 1);
+    //     material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png");
+    //     // material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
+    //     material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png", 1);
         
-        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
-        material.metallic  = material.albedo;
-        material.roughness = material.albedo;
+    //     material.metallic  = material.albedo;
+    //     material.roughness = material.albedo;
 
-        BoundingSphereComponent boundingSphere;
-        boundingSphere.center = transform.position;
-        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+    //     BoundingSphereComponent boundingSphere;
+    //     boundingSphere.center = transform.position;
+    //     boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
-        BoundingAABBComponent AABB = createAABB(transform, mesh);
+    //     BoundingAABBComponent AABB = createAABB(transform, mesh);
         
-        componentManager.addComponent(wood_box, mesh);
-        componentManager.addComponent(wood_box, transform);
-        componentManager.addComponent(wood_box, material);
-        componentManager.addComponent(wood_box, boundingSphere);
-        componentManager.addComponent(wood_box, AABB);
-    }
+    //     componentManager.addComponent(wood_box, mesh);
+    //     componentManager.addComponent(wood_box, transform);
+    //     componentManager.addComponent(wood_box, material);
+    //     componentManager.addComponent(wood_box, boundingSphere);
+    //     componentManager.addComponent(wood_box, AABB);
+    // }
 
     DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
@@ -289,33 +300,33 @@ void Scene2::init() {
     DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::globalTimer::endInterval());
 
     // sphere
-    // {
-    //     TransformComponent transform;
-    //     transform.position = glm::vec3(6.0f, 0.0f, 3.0f);
-    //     transform.rotation = glm::vec3(0.0f);
-    //     transform.scale    = glm::vec3(1.0f);
-    //     transform.computeModel();
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(6.0f, 0.0f, 3.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+        transform.computeModel();
 
-    //     MaterialComponent material;
-    //     material.shader = Shaders::get(NORMPBR3D);
-    //     material.gbufferShader = Shaders::get(GBUFFER3D);
+        MaterialComponent material;
+        material.shader = Shaders::get(NORMPBR3D);
+        material.gbufferShader = Shaders::get(GBUFFER3D);
 
-    //     material.metallic  = material.albedo;
-    //     material.roughness = material.albedo;
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
 
-    //     ModelComponent model0 = AssetManager::loadModel("assets/models/sphere/sphereHD.obj", true);
-    //     ModelComponent model1 = AssetManager::loadModel("assets/models/sphere/sphere.obj", true);
-    //     ModelComponent model2 = AssetManager::loadModel("assets/models/sphere/sphereSD.obj", true);
+        ModelComponent model0 = AssetManager::loadModel("assets/models/sphere/sphereHD.obj", true);
+        ModelComponent model1 = AssetManager::loadModel("assets/models/sphere/sphere.obj", true);
+        ModelComponent model2 = AssetManager::loadModel("assets/models/sphere/sphereSD.obj", true);
         
-    //     ModelLODComponent meshLOD { model0, model1, model2 };
+        ModelLODComponent meshLOD { model0, model1, model2 };
 
-    //     BoundingAABBComponent AABB = createAABB(transform, model0);
+        BoundingAABBComponent AABB = createAABB(transform, model0);
 
-    //     componentManager.addComponent(sphere, meshLOD);
-    //     componentManager.addComponent(sphere, transform);
-    //     componentManager.addComponent(sphere, material);
-    //     componentManager.addComponent(sphere, AABB);
-    // }
+        componentManager.addComponent(sphere, meshLOD);
+        componentManager.addComponent(sphere, transform);
+        componentManager.addComponent(sphere, material);
+        componentManager.addComponent(sphere, AABB);
+    }
 
     // {
     //     TransformComponent transform;
@@ -634,6 +645,8 @@ void Scene2::update(const float deltaTime) {
     };
     
     updateTransform(ecs);
+
+    emitter.update(deltaTime);
 }
 
 void Scene2::render() const {
@@ -670,24 +683,7 @@ void Scene2::renderLight() const {
     const CameraComponent& cameraComponent = ecs.componentManager.get<CameraComponent>(mainCamera);
     if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
 
-    // const auto& cam_pos = cameraComponent.camera.getPos();
-    // auto gun_pos = ecs.componentManager.get<TransformComponent>(gun).position;
-
-    // if (Input::isKeyDown(GLFW_KEY_LEFT_BRACKET)) gun_pos.y -= 0.01f;
-    // if (Input::isKeyDown(GLFW_KEY_RIGHT_BRACKET)) gun_pos.y += 0.01f;
-    // DebugMenu::log("y: " + std::to_string(gun_pos.y));
-
-    // gun_pos.y = -0.18f;
-
-    // glm::vec3 direction = glm::rotateY(glm::vec3(0.0f, 0.0f,-1.0f), glm::radians(5.0f));
-
-    // Line::render(cam_pos, gun_pos);
-    // Line::renderDirection(
-    //     gun_pos,
-    //     // glm::vec3(0.0f, 0.0f, 3.0f),
-    //     direction,
-    //     5.0f
-    // );
+    emitter.render();
 }
 
 void Scene2::renderPointShadow() const {

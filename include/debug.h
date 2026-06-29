@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <s_math.h>
+#include <glm/glm.hpp>
 #include <s_time.h>
 
 #include <string>

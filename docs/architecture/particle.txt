@@ -1,0 +1,14 @@
+Fire
+Smoke
+Sparks
+Rain
+Snow
+Dust
+Magic effects
+Bullet impacts
+Explosions
+Blood
+Muzzle flash
+Engine exhaust
+Leaves
+Ash

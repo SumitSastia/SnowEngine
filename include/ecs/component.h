@@ -9,7 +9,7 @@
 #include <vector>
 #include <cstdint>
 
-#include <s_math.h>
+#include <math/matrix.h>
 #include <camera.h>
 
 #include <debug.h>

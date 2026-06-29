@@ -1,6 +1,7 @@
 #pragma once
 
-#include <s_math.h>
+#include <glm/matrix.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class Shape;
 

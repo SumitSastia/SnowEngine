@@ -1,6 +1,6 @@
 #pragma once
 
-#include <s_math.h>
+#include <glm/glm.hpp>
 
 #include <vector>
 #include <string>

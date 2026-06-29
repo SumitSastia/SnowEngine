@@ -348,7 +348,8 @@ Shader* Shaders::directLightShadow = nullptr;
 Shader* Shaders::pointLightShadow_instanced  = nullptr;
 Shader* Shaders::directLightShadow_instanced = nullptr;
 
-Shader* Shaders::lineShader = nullptr;
+Shader* Shaders::lineShader     = nullptr;
+Shader* Shaders::particleShader = nullptr;
 
 std::vector <shader_paths> Shaders::path = {
 
@@ -411,6 +412,11 @@ bool Shaders::initShaders() {
     lineShader = new Shader(
         "../shaders/line/line.vert",
         "../shaders/line/line.frag"
+    );
+
+    particleShader = new Shader(
+        "../shaders/obj2d/particle.vert",
+        "../shaders/obj2d/particle.frag"
     );
 
     return true;
@@ -619,6 +625,15 @@ void Shader::setFloat(const char* target, const float &value) const {
 void Shader::setVec3(const char* target, const glm::vec3 &vector) const {
 
     glUniform3fv(
+        glGetUniformLocation(shaderProgram, target),
+        1,
+        glm::value_ptr(vector)
+    );
+}
+
+void Shader::setVec4(const char* target, const glm::vec4 &vector) const {
+
+    glUniform4fv(
         glGetUniformLocation(shaderProgram, target),
         1,
         glm::value_ptr(vector)

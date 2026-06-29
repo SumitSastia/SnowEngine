@@ -7,10 +7,16 @@ set(CMAKE_BUILD_TYPE Debug)
 project(${TARGET_NAME})
 
 set(
+    MATH_SRC
+
+    src/math/matrix.cpp
+    src/math/random.cpp
+)
+
+set(
     CORE_SRC
 
     src/core/glad.c
-    src/core/s_math.cpp
     src/core/main.cpp
     src/core/shader.cpp
     src/core/camera.cpp
@@ -64,10 +70,12 @@ set(
 add_executable(
     ${TARGET_NAME}
 
+    ${MATH_SRC}
     ${CORE_SRC}
     src/debug/debug.cpp
     src/utils/wireframe.cpp
     src/utils/crosshair.cpp
+    src/gfx/particles.cpp
     
     ${SCENES_SRC}
     ${ECS_SRC}

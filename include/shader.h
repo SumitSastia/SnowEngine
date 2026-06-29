@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <s_math.h>
+#include <glm/glm.hpp>
 
 #include <string>
 #include <vector>
@@ -88,6 +88,7 @@ public:
     void setInt  (const char* target, const int&   value) const;
     void setFloat(const char* target, const float& value) const;
     void setVec3 (const char* target, const glm::vec3& vector) const;
+    void setVec4 (const char* target, const glm::vec4& vector) const;
     void setMat3 (const char* target, const glm::mat3& matrix) const;
     void setMat4 (const char* target, const glm::mat4& matrix) const;
 
@@ -301,7 +302,9 @@ class Shaders {
 
     static Shader* pointLightShadow_instanced;
     static Shader* directLightShadow_instanced;
+
     static Shader* lineShader;
+    static Shader* particleShader;
 
 public:
 
@@ -314,6 +317,7 @@ public:
     static Shader* getDirectLightShadow_Instanced() { return directLightShadow_instanced; }
 
     static Shader* getLineShader() { return lineShader; }
+    static Shader* getParticleShader() { return particleShader; }
 
     static Shader* get(shaderNames shader);
     static uint32_t totat() { return SHADER_COUNT; }
