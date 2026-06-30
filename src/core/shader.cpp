@@ -415,8 +415,8 @@ bool Shaders::initShaders() {
     );
 
     particleShader = new Shader(
-        "../shaders/obj2d/particle.vert",
-        "../shaders/obj2d/particle.frag"
+        "../shaders/obj2d/tex_particle.vert",
+        "../shaders/obj2d/tex_particle.frag"
     );
 
     return true;

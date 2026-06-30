@@ -54,7 +54,7 @@ int main() {
 
     glDisable(GL_FRAMEBUFFER_SRGB);
 
-    // glEnable(GL_BLEND);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // ---------- CallBack Functions ---------- //
@@ -235,7 +235,7 @@ int main() {
                 deferredFrame->bind_gNormal(1);
 
                 SSAO::bindNoiseTex(2);
-                SSAO::shader->setMat4("projection", Camera::activeCamera->get_projection());
+                SSAO::shader->setMat4("projection", Camera::activeCamera->getProjection());
                 SSAO::shader->setMat4("view", Camera::activeCamera->getView());
 
                 frameBuffers::renderScreen();

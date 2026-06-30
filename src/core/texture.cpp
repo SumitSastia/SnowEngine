@@ -118,7 +118,7 @@ void Line::renderHelper(
 
     shader.setMat4(
         "finalMatrix", 
-        Camera::get_projection() * Camera::get_view() * model
+        Camera::activeCamera->getProjection() * Camera::activeCamera->getView() * model
         // model
     );
 

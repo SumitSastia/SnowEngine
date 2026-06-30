@@ -362,7 +362,7 @@ void Scene1::render() const {
 
     unsigned int loadedTextures = 0;
 
-    const glm::mat4 projection = Camera::instance().getPerspective();
+    const glm::mat4 projection = Camera::instance().getProjection();
     const glm::mat4 view       = Camera::instance().getView();
 
     Renderer::enableCulling();
@@ -559,7 +559,7 @@ void Scene1::renderGbuffer() const {
 
     unsigned int loadedTextures = 0;
 
-    const glm::mat4 projection = Camera::instance().getPerspective();
+    const glm::mat4 projection = Camera::instance().getProjection();
     const glm::mat4 view       = Camera::instance().getView();
 
     std::vector <uint8_t> commonShaders = {14,15,16,17,18};
@@ -678,7 +678,7 @@ void Scene1::renderDeferred(const Shader& currentShader) const {
 
 void Scene1::renderLight() const {
 
-    const glm::mat4 projection = Camera::instance().getPerspective();
+    const glm::mat4 projection = Camera::instance().getProjection();
     const glm::mat4 view       = Camera::instance().getView();
 
     // Light
@@ -707,7 +707,7 @@ void Scene1::renderSkybox() const {
     const Shader currentShader = loaded_shaders[CUBEMAP];
     currentShader.use();
 
-    currentShader.setMat4("projection", Camera::instance().getPerspective());
+    currentShader.setMat4("projection", Camera::instance().getProjection());
     currentShader.setMat4("view", glm::mat4(glm::mat3(Camera::instance().getView())));
 
     currentShader.setInt("cubeMap", 0);

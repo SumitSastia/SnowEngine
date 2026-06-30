@@ -14,9 +14,9 @@
 
 void RenderSystem::bindCameraGlobals(const Shader* shader) {
 
-    shader->setMat4("projection", Camera::get_projection());
-    shader->setMat4("view",       Camera::get_view());
-    shader->setVec3("camPos",     Camera::get_position());
+    shader->setMat4("projection", Camera::activeCamera->getProjection());
+    shader->setMat4("view",       Camera::activeCamera->getView());
+    shader->setVec3("camPos",     Camera::activeCamera->getPos());
 }
 
 void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
@@ -125,7 +125,7 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent, MaterialComponent>();
 
     // Frustum
-    Frustum frustum(Camera::get_projection() * Camera::get_view());
+    Frustum frustum(Camera::activeCamera->getProjection() * Camera::activeCamera->getView());
 
     int totalRenderCalls = 0;
     for (const Entity& entity : objects) {
@@ -226,7 +226,7 @@ void RenderSystem::render(const ECS& ecs) {
         const MaterialComponent&  material  = componentManager.get<MaterialComponent>(entity);
         
         if (!transform.isVisible) continue;
-        float distance = glm::length(Camera::get_position() - transform.position);
+        float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
         const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
         draw(mesh, transform, material);
@@ -244,7 +244,7 @@ void RenderSystem::render(const ECS& ecs) {
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
         MaterialComponent material   = componentManager.get<MaterialComponent>(entity);
         
-        float distance = glm::length(Camera::get_position() - transform.position);
+        float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
         const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
         const uint total_meshes = model.meshes.size();
@@ -269,7 +269,7 @@ void RenderSystem::renderLights(const ECS& ecs) {
     const EntityManager&    entityManager    = ecs.entityManager;
     const ComponentManager& componentManager = ecs.componentManager;
 
-    Frustum frustum(Camera::get_projection() * Camera::get_view());
+    Frustum frustum(Camera::activeCamera->getProjection() * Camera::activeCamera->getView());
 
     for (const Entity& entity : entityManager.emissiveEntities) {
 
@@ -528,7 +528,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent>();
 
     // Frustum
-    Frustum frustum(Camera::get_projection() * Camera::get_view());
+    Frustum frustum(Camera::activeCamera->getProjection() * Camera::activeCamera->getView());
 
     // NOTE: FIX THIS - ALSO RENDERING LIGHT SOURCES (WHICH THEN UNDERGOES TONE-MAPPING)
     for (const Entity& entity : objects) {
@@ -599,7 +599,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
         
         if (!transform.isVisible) continue;
 
-        float distance = glm::length(Camera::get_position() - transform.position);
+        float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
         const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
         if (material.gbufferShader) drawGbuffer(mesh, transform, material);
@@ -619,7 +619,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
         
         if (!transform.isVisible) continue;
 
-        float distance = glm::length(Camera::get_position() - transform.position);
+        float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
         const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
         const uint total_meshes = model.meshes.size();
@@ -807,7 +807,7 @@ void ShadowSystem::render(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::get_position() - transform.position);
+            float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
             const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
             drawShadow(shader[0], mesh, transform);
@@ -817,7 +817,7 @@ void ShadowSystem::render(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::get_position() - transform.position);
+            float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
             const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
             const uint total_meshes = model.meshes.size();
@@ -897,7 +897,7 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::get_position() - transform.position);
+            float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
             const MeshComponent& mesh = componentManager.get<MeshLODComponent>(entity).getMesh(distance);
 
             drawShadow(shader[0], mesh, transform);
@@ -907,7 +907,7 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
 
             const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
             
-            float distance = glm::length(Camera::get_position() - transform.position);
+            float distance = glm::length(Camera::activeCamera->getPos() - transform.position);
             const ModelComponent& model = componentManager.get<ModelLODComponent>(entity).getMesh(distance);
 
             const uint total_meshes = model.meshes.size();

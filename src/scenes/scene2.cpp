@@ -11,15 +11,7 @@
 
 void Scene2::init() {
 
-    Particle particle;
-    particle.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    particle.velocity = Random::vec3(0.1f);
-    particle.color    = glm::vec4(colors::YELLOW, 1.0f);
-
-    particle.size     = 0.1f;
-    particle.lifetime = 1000000.0f;
-
-    emitter.create(particle);
+    emitter.create();
 
     EntityManager&    entityManager    = ecs.entityManager;
     ComponentManager& componentManager = ecs.componentManager;
@@ -619,6 +611,14 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
     if (Input::isKeyDown(GLFW_KEY_V)) {
         Camera::activeCamera = &ecs.componentManager.get<CameraComponent>(mainCamera).camera;
     }
+    
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+
+        const float length = 5.0f;
+        const glm::vec3 position = Camera::activeCamera->getPos() + glm::normalize(Camera::activeCamera->getTarget()) * length;
+
+        emitter.emit(position);
+    }
 }
 
 void Scene2::update(const float deltaTime) {
@@ -629,10 +629,16 @@ void Scene2::update(const float deltaTime) {
     // transform.local_position = glm::vec3(0.35f, -0.5f, -1.0f);
     // transform.local_rotation = glm::vec3(0.0f, 95.0f, 5.0f);
 
+    const auto& view = camera.getView();
+
+    const glm::vec3 cameraRight(view[0][0], view[1][0], view[2][0]);
+    const glm::vec3 cameraUp   (view[0][1], view[1][1], view[2][1]);
+    const glm::vec3 cameraFront(view[0][2], view[1][2], view[2][2]);
+
     transform.local_position = {
-        camera.right_axis  * -0.35f -
-        camera.up_axis     * 0.5f +
-        camera.getTarget() * 1.0f
+        cameraRight * 0.35f -
+        cameraUp    * 0.5f +
+        cameraFront * -1.0f
     };
 
     const float GUN_OFFSET_Y = 4.0f;
@@ -640,8 +646,8 @@ void Scene2::update(const float deltaTime) {
 
     transform.local_rotation = {
         0.0f,
-        camera.yaw   * -1.0f + GUN_OFFSET_Y,
-        camera.pitch *  1.0f + GUN_OFFSET_Z
+        camera.getYaw()   * -1.0f + GUN_OFFSET_Y,
+        camera.getPitch() *  1.0f + GUN_OFFSET_Z
     };
     
     updateTransform(ecs);
@@ -670,8 +676,8 @@ void Scene2::renderLight() const {
         const Shader& shader = *Shaders::get(ENVIRONMENT);
         shader.use();
 
-        shader.setMat4("projection", Camera::get_projection());
-        shader.setMat4("view", glm::mat4(glm::mat3(Camera::get_view())));
+        shader.setMat4("projection", Camera::activeCamera->getProjection());
+        shader.setMat4("view", glm::mat4(glm::mat3(Camera::activeCamera->getView())));
         
         shader.setInt("environmentMap", 0);
         env->bindTexture(0);

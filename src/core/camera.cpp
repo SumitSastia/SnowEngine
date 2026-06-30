@@ -178,10 +178,6 @@ void Camera::set_aspect(const int frameWidth, const int frameHeight){
     projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
 }
 
-void Camera::set_yaw(const float& yaw) {
-    this->yaw = yaw;
-}
-
 void Camera::look_at(){
     viewMatrix = glm::lookAt(position, position + target, up_axis);
 }

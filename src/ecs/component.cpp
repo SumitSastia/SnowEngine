@@ -30,7 +30,7 @@ void CameraComponent::renderFrustum() const {
 
     glm::vec3 corners[8];
 
-    const glm::mat4 invVP = glm::inverse(camera.getPerspective() * camera.getView());
+    const glm::mat4 invVP = glm::inverse(camera.getProjection() * camera.getView());
 
     for (uint i = 0; i < 8; i++) {
 
