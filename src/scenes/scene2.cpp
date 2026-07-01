@@ -686,6 +686,26 @@ void Scene2::update(const float deltaTime) {
     
     updateTransform(ecs);
 
+    emitter.particleType = gfx::particles::COLORED;
+
+    Particle fire = gfx::particles::Fire;
+    
+    fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
+    emitter.create(fire, 1);
+
+    fire.position.x -= 0.1f;
+    emitter.create(fire, 1);
+
+    fire.position.x += 0.2f;
+    emitter.create(fire, 1);
+
+    fire.position.z -= 0.1f;
+    emitter.create(fire, 1);
+
+    fire.position.z += 0.2f;
+    emitter.create(fire, 1);
+
+    // emitter.emit(fire.position);
     emitter.update(deltaTime);
 }
 

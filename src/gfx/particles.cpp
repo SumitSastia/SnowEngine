@@ -29,12 +29,22 @@ namespace gfx::particles {
     
     void init() {
 
+        Fire.acceleration = glm::vec3(
+            Random::Float(0.0f, 0.2f),
+            2.0f,
+            Random::Float(0.0f, 0.2f)
+        );
+
         Fire.velocity   = glm::vec3(0.0f, Random::Float(0.5f, 0.8f), 0.0f);
         Fire.startColor = colors::ORANGE;
         Fire.endColor   = colors::YELLOW;
 
-        Fire.size     = 0.4f;
+        Fire.color = glm::vec4(1.0f);
+
+        Fire.size     = 0.5f;
         Fire.lifetime = 1.5f;
+
+        Fire.remainingLife = Fire.lifetime;
     }
 };
 
@@ -54,11 +64,25 @@ void ParticleEmitter::create(Particle& particle, uint32_t count) {
 
         if (!p.isActive) {
             
-            p = particle;
-            
-            p.remainingLife = p.lifetime;
             p.isActive = true;
+            p.position = particle.position;
+            p.lifetime = particle.lifetime;
+            p.velocity = particle.velocity;
+
+            p.velocity.x = Random::Float(0.2f);
+            p.velocity.z = Random::Float(0.2f);
+
+            p.startColor = particle.startColor;
+            p.endColor   = particle.endColor;
+
+            p.color = glm::vec4(1.0f);
+            p.size  = particle.size;
+
+            p.remainingLife = particle.remainingLife;
+
+            if (++amount == count) break;
         }
+
     }
 }
 
@@ -89,6 +113,8 @@ void ParticleEmitter::emit(const glm::vec3& position) {
             p.velocity = Random::vec3(10.0f);
             p.size     = Random::Float(0.2f);
 
+            p.acceleration = Random::vec3(2.0f);
+
             if (++count == 100) break;
         }
     }
@@ -97,8 +123,8 @@ void ParticleEmitter::emit(const glm::vec3& position) {
 void ParticleEmitter::update(const float dt) {
 
     if (Input::isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) particleType = !particleType;
-    
-    if (Input::isKeyPressed(GLFW_KEY_N)) emit(Random::vec3(0.0f, 0.5f));
+
+    // if (Input::isKeyPressed(GLFW_KEY_N)) emit(Random::vec3(0.0f, 0.5f));
 
     // if (!Input::isKeyPressed(GLFW_KEY_N)) return;
 
@@ -117,6 +143,10 @@ void ParticleEmitter::update(const float dt) {
             particle.isActive = false;
             continue;
         }
+
+        particle.velocity += particle.acceleration * dt;
+        particle.velocity.z += Random::Float(0.2f) * dt;
+        particle.velocity.z += Random::Float(0.2f) * dt;
 
         particle.position += particle.velocity * dt;
     }

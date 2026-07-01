@@ -12,6 +12,7 @@ struct Particle {
 
     glm::vec3 position;
     glm::vec3 velocity;
+    glm::vec3 acceleration;
 
     glm::vec4 color;
     glm::vec3 startColor;
@@ -46,9 +47,9 @@ class ParticleEmitter {
     TextureHandle particleTexture;
     uint32_t      activeParticles;
 
-    bool particleType;
-
 public:
+    
+    bool particleType;
 
     ParticleEmitter();
 

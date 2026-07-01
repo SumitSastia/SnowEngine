@@ -49,6 +49,8 @@ int main() {
     Line::init();
     Crosshair::init();
 
+    gfx::particles::init();
+
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
