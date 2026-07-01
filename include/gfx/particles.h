@@ -26,16 +26,33 @@ struct Particle {
     bool isActive = false;
 };
 
+namespace gfx::particles {
+
+    enum Type {
+        COLORED,
+        TEXTURED
+    };
+
+    inline Particle Fire;
+    inline Particle Smoke;
+    
+    void init();
+};
+
 class ParticleEmitter {
 
     std::vector <Particle> particles;
+
     TextureHandle particleTexture;
+    uint32_t      activeParticles;
+
+    bool particleType;
 
 public:
 
     ParticleEmitter();
 
-    void create();
+    void create(Particle& particle, uint32_t count);
     void emit(const glm::vec3& position);
     void update(const float dt);
     void render() const;

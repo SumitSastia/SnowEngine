@@ -273,6 +273,16 @@ enum shaderNames {
     SHADER_COUNT
 };
 
+namespace gfx::shader {
+
+    enum special {
+        COLORED_PARTICLE,
+        TETXURED_PARTICLE,
+
+        TOTAL_SPECIAL_SHADERS
+    };
+};
+
 struct shader_paths {
 
     std::string vert;
@@ -297,6 +307,8 @@ class Shaders {
     static std::vector <bool>         preprocess;
     static std::vector <shader_paths> path;
 
+    static std::vector <Shader*> specialShaders;
+
     static Shader* pointLightShadow;
     static Shader* directLightShadow;
 
@@ -320,5 +332,7 @@ public:
     static Shader* getParticleShader() { return particleShader; }
 
     static Shader* get(shaderNames shader);
+    static Shader* get(gfx::shader::special shader);
+    
     static uint32_t totat() { return SHADER_COUNT; }
 };

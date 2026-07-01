@@ -7,14 +7,59 @@
 #include <camera.h>
 #include <input.h>
 
-ParticleEmitter::ParticleEmitter(): particles(MAX_PARTICLES) {
+// struct Particle {
+
+//     glm::vec3 position;
+//     glm::vec3 velocity;
+
+//     glm::vec4 color;
+//     glm::vec3 startColor;
+//     glm::vec3 endColor;
+
+//     float size;
+//     float shrinking_rate;
+
+//     float lifetime;
+//     float remainingLife;
+
+//     bool isActive = false;
+// };
+
+namespace gfx::particles {
+    
+    void init() {
+
+        Fire.velocity   = glm::vec3(0.0f, Random::Float(0.5f, 0.8f), 0.0f);
+        Fire.startColor = colors::ORANGE;
+        Fire.endColor   = colors::YELLOW;
+
+        Fire.size     = 0.4f;
+        Fire.lifetime = 1.5f;
+    }
+};
+
+ParticleEmitter::ParticleEmitter():
+    particles(MAX_PARTICLES),
+    particleTexture(0),
+    activeParticles(0),
+    particleType(gfx::particles::COLORED)
+{
     particleTexture = AssetManager::loadTexture("assets/particles/scorch_01.png", true);
-    // particleTexture = AssetManager::loadTexture("assets/textures/pure_red.png");
 }
 
-void ParticleEmitter::create() {
+void ParticleEmitter::create(Particle& particle, uint32_t count) {
 
-    emit(Random::vec3(0.0f, 0.5f));
+    uint32_t amount = 0;
+    for (Particle& p : particles) {
+
+        if (!p.isActive) {
+            
+            p = particle;
+            
+            p.remainingLife = p.lifetime;
+            p.isActive = true;
+        }
+    }
 }
 
 void ParticleEmitter::emit(const glm::vec3& position) {
@@ -43,15 +88,17 @@ void ParticleEmitter::emit(const glm::vec3& position) {
 
             p.velocity = Random::vec3(10.0f);
             p.size     = Random::Float(0.2f);
-        }
 
-        if (count == 100) break;
+            if (++count == 100) break;
+        }
     }
 }
 
 void ParticleEmitter::update(const float dt) {
 
-    if (Input::isKeyPressed(GLFW_KEY_N)) create();
+    if (Input::isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) particleType = !particleType;
+    
+    if (Input::isKeyPressed(GLFW_KEY_N)) emit(Random::vec3(0.0f, 0.5f));
 
     // if (!Input::isKeyPressed(GLFW_KEY_N)) return;
 
@@ -77,7 +124,8 @@ void ParticleEmitter::update(const float dt) {
 
 void ParticleEmitter::render() const {
 
-    const Shader& shader = *Shaders::getParticleShader();
+    const Shader& shader = *Shaders::get(gfx::shader::TETXURED_PARTICLE);
+    // const Shader& shader = *Shaders::get(gfx::shader::COLORED_PARTICLE);
     shader.use();
 
     const MeshComponent& mesh = EntityShapes::instance().square;
@@ -101,12 +149,24 @@ void ParticleEmitter::render() const {
         modelMatrix[1] = glm::vec4(cameraUp    * particle.size, 0.0f);
         modelMatrix[2] = glm::vec4(cameraFront,                 0.0f);
         modelMatrix[3] = glm::vec4(particle.position,           1.0f);
-
-        shader.setVec4("color", particle.color);
-        shader.setMat4("finalMatrix", projection * view * modelMatrix);
         
-        shader.setInt("particle", 0);
-        AssetManager::getTexture(particleTexture).bind(0);
+        if (particleType == gfx::particles::TEXTURED) {
+
+            const Shader& shader = *Shaders::get(gfx::shader::TETXURED_PARTICLE);
+            shader.use();
+
+            shader.setMat4("finalMatrix", projection * view * modelMatrix);
+            shader.setInt("particle", 0);
+            AssetManager::getTexture(particleTexture).bind(0);
+        }
+        else {
+
+            const Shader& shader = *Shaders::get(gfx::shader::COLORED_PARTICLE);
+            shader.use();
+
+            shader.setMat4("finalMatrix", projection * view * modelMatrix);
+            shader.setVec4("color", particle.color);
+        }
 
         mesh.draw();
     }

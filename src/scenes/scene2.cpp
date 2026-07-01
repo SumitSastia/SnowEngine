@@ -11,7 +11,7 @@
 
 void Scene2::init() {
 
-    emitter.create();
+    // emitter.create();
 
     EntityManager&    entityManager    = ecs.entityManager;
     ComponentManager& componentManager = ecs.componentManager;
@@ -29,6 +29,7 @@ void Scene2::init() {
     headcam   = entityManager.createEntity();
     sun       = entityManager.createEntity();
     gun       = entityManager.createEntity();
+    campfire  = entityManager.createEntity();
 
     mainCamera = entityManager.createEntity();
 
@@ -493,6 +494,39 @@ void Scene2::init() {
         // DebugMenu::log("Light2 after pl: " + running::globalTimer::endInterval());
         componentManager.addComponent(light2, AABB);
     }
+
+    DebugMenu::log("Light2: " + running::globalTimer::endInterval());
+
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(-1.0f, -1.7f, 1.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(0.4f);
+
+        // transform.local_position = glm::vec3(0.35f, -0.5f, -1.0f);
+        // transform.local_rotation = glm::vec3(0.0f, 95.0f, 5.0f);
+        // transform.local_scale    = glm::vec3(0.2f);
+
+        transform.computeModel();
+
+        MaterialComponent material;
+        material.shader = Shaders::get(PBR3D);
+        material.gbufferShader = Shaders::get(GBUFFER3D);
+
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
+
+        ModelComponent model = AssetManager::loadModel("assets/models/campfire/campfire.obj");
+
+        BoundingAABBComponent AABB = createAABB(transform, model);
+
+        componentManager.addComponent(campfire, model);
+        componentManager.addComponent(campfire, material);
+        componentManager.addComponent(campfire, transform);
+        componentManager.addComponent(campfire, AABB);
+    }
+
+    DebugMenu::log("Campfire: " + running::globalTimer::endInterval());
 
     // gun
     {

@@ -6,10 +6,16 @@
 bool* Input::currentState  = nullptr;
 bool* Input::previousState = nullptr;
 
+bool* Input::prev_mousebutton = nullptr;
+bool* Input::curr_mousebutton = nullptr;
+
 void Input::init() {
 
     currentState  = new bool[GLFW_KEY_LAST + 1]();
     previousState = new bool[GLFW_KEY_LAST + 1]();
+
+    prev_mousebutton = new bool[GLFW_MOUSE_BUTTON_LAST + 1]();
+    curr_mousebutton = new bool[GLFW_MOUSE_BUTTON_LAST + 1]();
 }
 
 void Input::update() {
@@ -18,6 +24,12 @@ void Input::update() {
         currentState,
         currentState + GLFW_KEY_LAST + 1,
         previousState
+    );
+
+    std::copy(
+        curr_mousebutton,
+        curr_mousebutton + GLFW_MOUSE_BUTTON_LAST + 1,
+        prev_mousebutton
     );
 }
 
@@ -34,6 +46,18 @@ void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
     else if (action == GLFW_RELEASE) {
         currentState[key] = false;
+    }
+}
+
+void Input::mouseButton_callback(GLFWwindow* window, int button, int action, int mods) {
+
+    if (button < 0 || button >= GLFW_MOUSE_BUTTON_LAST) return;
+
+    if (action == GLFW_PRESS) {
+        curr_mousebutton[button] = true;
+    }
+    else if (action == GLFW_RELEASE) {
+        curr_mousebutton[button] = false;
     }
 }
 

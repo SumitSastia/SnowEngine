@@ -61,6 +61,7 @@ int main() {
 
     glfwSetKeyCallback(window, Input::key_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetMouseButtonCallback(window, Input::mouseButton_callback);
 
     // ---------- Testing --------------------- //
 

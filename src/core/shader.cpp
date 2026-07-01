@@ -341,6 +341,7 @@ void Texture2D::destroy() {
 
 std::vector <bool>    Shaders::isLoaded(MAX_SHADERS, false);
 std::vector <Shader*> Shaders::loadedShaders(MAX_SHADERS);
+std::vector <Shader*> Shaders::specialShaders(gfx::shader::TOTAL_SPECIAL_SHADERS);
 
 Shader* Shaders::pointLightShadow  = nullptr;
 Shader* Shaders::directLightShadow = nullptr;
@@ -419,6 +420,14 @@ bool Shaders::initShaders() {
         "../shaders/obj2d/tex_particle.frag"
     );
 
+    specialShaders = {
+        new Shader(
+            "../shaders/obj2d/particle.vert",
+            "../shaders/obj2d/particle.frag"
+        ),
+        particleShader
+    };
+
     return true;
 }
 
@@ -436,6 +445,12 @@ Shader* Shaders::get(shaderNames shader) {
     }
 
     return loadedShaders[shader];
+}
+
+Shader* Shaders::get(gfx::shader::special shader) {
+
+    if (shader >= gfx::shader::TOTAL_SPECIAL_SHADERS) return nullptr;
+    return specialShaders[shader];
 }
 
 // ------------------------------ Shaders -------------------------------------------- //

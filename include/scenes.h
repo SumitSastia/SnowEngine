@@ -120,6 +120,7 @@ class Scene2 : public Scene {
     Entity headcam;
     Entity gun;
     Entity mainCamera;
+    Entity campfire;
     Entity crowd[1000];
 
     ECS ecs;

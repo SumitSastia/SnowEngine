@@ -3,7 +3,7 @@
 out vec4 FragColor;
 in  vec2 vTexCords;
 
-uniform vec4 color;
+// uniform vec4 color;
 uniform sampler2D particle;
 
 void main() {
