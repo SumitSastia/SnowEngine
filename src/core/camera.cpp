@@ -111,7 +111,7 @@ void Camera::update(const float delta_time) {
     right_axis = glm::normalize(glm::cross(up, new_direction));
     up_axis    = glm::normalize(glm::cross(new_direction, right_axis));
 
-    ImGui::Text("Camera FOV: %.1f", fov);
+    // ImGui::Text("Camera FOV: %.1f", fov);
 }
 
 // void Camera::update(const float& delta_time) {

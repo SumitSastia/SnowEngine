@@ -224,15 +224,19 @@ namespace colors {
     // const glm::vec3 BLACK  { 0.000f, 0.000f, 0.000f };
     // const glm::vec3 GRAY   { 0.392f, 0.392f, 0.392f };
 
-    const glm::vec3 RED    { 1.000f, 0.000f, 0.000f };
-    const glm::vec3 ORANGE { 0.882f, 0.100f, 0.118f };
-    const glm::vec3 YELLOW { 1.000f, 1.000f, 0.000f };
-    const glm::vec3 GREEN  { 0.000f, 1.000f, 0.000f };
-    const glm::vec3 BLUE   { 0.000f, 0.000f, 1.000f };
-    const glm::vec3 PINK   { 0.773f, 0.042f, 0.301f };
-    const glm::vec3 WHITE  { 1.000f, 1.000f, 1.000f };
-    const glm::vec3 BLACK  { 0.000f, 0.000f, 0.000f };
-    const glm::vec3 GRAY   { 0.133f, 0.133f, 0.133f };
+    const glm::vec3 RED        { 1.000f, 0.000f, 0.000f };
+    const glm::vec3 PINK       { 0.773f, 0.042f, 0.301f };
+    const glm::vec3 ORANGE     { 0.882f, 0.100f, 0.118f };
+    const glm::vec3 YELLOW     { 1.000f, 1.000f, 0.000f };
+    const glm::vec3 GOLD       { 0.937f, 0.749f, 0.015f };
+    const glm::vec3 GREEN      { 0.000f, 1.000f, 0.000f };
+    const glm::vec3 BLUE       { 0.000f, 0.000f, 1.000f };
+    const glm::vec3 LIGHT_BLUE { 0.564f, 0.835f, 1.000f };
+    const glm::vec3 VIOLET     { 0.500f, 0.000f, 1.000f };
+    const glm::vec3 WHITE      { 1.000f, 1.000f, 1.000f };
+    const glm::vec3 BLACK      { 0.000f, 0.000f, 0.000f };
+    const glm::vec3 BROWN      { 0.439f, 0.258f, 0.078f };
+    const glm::vec3 GRAY       { 0.133f, 0.133f, 0.133f };
 }
 
 // ------------------------------ Shaders -------------------------------------------- //

@@ -18,6 +18,7 @@
 // ------------------------------ Global Variables ----------------------------------- //
 
 bool isRunning = true;
+bool isPaused  = false;
 
 float deltaTime = 0.0f;
 float lastTime  = 0.0f;
@@ -132,8 +133,12 @@ int main() {
 
         Camera::activeCamera->handle_mouse(window);
         
-        if (Input::isKeyDown(GLFW_KEY_P)) {
+        if (Input::isKeyDown(GLFW_KEY_U)) {
             deferredRender = !deferredRender;
+        }
+
+        if (Input::isKeyDown(GLFW_KEY_P)) {
+            isPaused = !isPaused;
         }
         
         // Updates // 
@@ -143,13 +148,14 @@ int main() {
         DefaultLights::instance().update();
         Camera::activeCamera->input(window, deltaTime);
 
-        // mainScene->input(window, deltaTime);
-        
-        Camera::activeCamera->update(deltaTime);
-        // mainScene->update(deltaTime);
-        scene2->update(deltaTime);
-        
         ImGui::End();
+
+        Camera::activeCamera->update(deltaTime);
+        
+        if (!isPaused) {
+            // mainScene->update(deltaTime);
+            scene2->update(deltaTime);
+        }
 
         if (Input::isKeyPressed(GLFW_KEY_GRAVE_ACCENT)) {
 

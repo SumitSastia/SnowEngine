@@ -7,44 +7,64 @@
 #include <camera.h>
 #include <input.h>
 
-// struct Particle {
-
-//     glm::vec3 position;
-//     glm::vec3 velocity;
-
-//     glm::vec4 color;
-//     glm::vec3 startColor;
-//     glm::vec3 endColor;
-
-//     float size;
-//     float shrinking_rate;
-
-//     float lifetime;
-//     float remainingLife;
-
-//     bool isActive = false;
-// };
-
 namespace gfx::particles {
     
     void init() {
 
         Fire.acceleration = glm::vec3(
-            Random::Float(0.0f, 0.2f),
-            2.0f,
-            Random::Float(0.0f, 0.2f)
+            Random::Float(0.2f),
+            0.2f,
+            Random::Float(0.2f)
         );
 
         Fire.velocity   = glm::vec3(0.0f, Random::Float(0.5f, 0.8f), 0.0f);
         Fire.startColor = colors::ORANGE;
         Fire.endColor   = colors::YELLOW;
 
-        Fire.color = glm::vec4(1.0f);
+        // Fire.startColor = colors::BLUE;
+        // Fire.endColor   = colors::LIGHT_BLUE;
 
-        Fire.size     = 0.5f;
-        Fire.lifetime = 1.5f;
+        Fire.size     = glm::vec2(0.1f);
+        Fire.maxSize  = Fire.size;
+        Fire.lifetime = 1.2f;
 
         Fire.remainingLife = Fire.lifetime;
+
+        // Based on Origin {0,0,0}
+        FireProperties.position_min = glm::vec3(-0.1f);
+        FireProperties.position_max = glm::vec3( 0.1f);
+
+        FireProperties.velocity_min = {-0.1f, 0.5f,-0.1f };
+        FireProperties.velocity_max = { 0.1f, 0.8f, 0.1f };
+
+        FireProperties.size_min = 1.0f;
+        FireProperties.size_max = 1.5f;
+
+        FireProperties.lifetime_min = 1.0f;
+        FireProperties.lifetime_max = 3.0f;
+
+        //-------------------------------------------------------------------//
+
+        Rain.acceleration = glm::vec3(
+            -2.0f,
+            -1.0f,
+             0.0f
+        );
+
+        Rain.velocity = glm::vec3(
+            -30.0f,
+            -20.0f,
+             0.0f
+        );
+
+        Rain.startColor = colors::BLUE;
+        Rain.endColor   = colors::LIGHT_BLUE;
+
+        Rain.size     = glm::vec2(0.1f, 0.2f);
+        Rain.maxSize  = Rain.size;
+        Rain.lifetime = 4.0f;
+
+        Rain.remainingLife = Rain.lifetime;
     }
 };
 
@@ -57,32 +77,84 @@ ParticleEmitter::ParticleEmitter():
     particleTexture = AssetManager::loadTexture("assets/particles/scorch_01.png", true);
 }
 
-void ParticleEmitter::create(Particle& particle, uint32_t count) {
+void ParticleEmitter::create(const Particle& particle, const glm::vec3& velocity_variation, const uint32_t count) {
 
     uint32_t amount = 0;
     for (Particle& p : particles) {
 
         if (!p.isActive) {
             
+            p = particle;
             p.isActive = true;
-            p.position = particle.position;
-            p.lifetime = particle.lifetime;
-            p.velocity = particle.velocity;
 
-            p.velocity.x = Random::Float(0.2f);
-            p.velocity.z = Random::Float(0.2f);
-
-            p.startColor = particle.startColor;
-            p.endColor   = particle.endColor;
-
-            p.color = glm::vec4(1.0f);
-            p.size  = particle.size;
-
-            p.remainingLife = particle.remainingLife;
+            p.velocity = p.velocity + Random::Float(-1.0f, 1.0f) * velocity_variation;
 
             if (++amount == count) break;
         }
+    }
+}
 
+void ParticleEmitter::create(const Particle& particle, const uint32_t count, const uint8_t flags) {
+    
+    uint32_t amount = 0;
+
+    for (Particle& p : particles) {
+
+        if (!p.isActive) {
+            
+            p = particle;
+            p.isActive = true;
+
+            if (flags & RANDOM_POSITION) {
+                p.position.x += Random::Float(-0.5f, 0.5f) * p.position.x;
+                p.position.y += Random::Float(-0.5f, 0.5f) * p.position.y;
+                p.position.z += Random::Float(-0.5f, 0.5f) * p.position.z;
+            }
+
+            if (flags & RANDOM_VELOCITY) {
+                p.velocity.x += Random::Float(-0.5f, 0.5f) * p.velocity.x;
+                p.velocity.y += Random::Float(-0.5f, 0.5f) * p.velocity.y;
+                p.velocity.z += Random::Float(-0.5f, 0.5f) * p.velocity.z;
+            }
+
+            if (flags & RANDOM_LIFETIME) {
+                p.lifetime += Random::Float(-0.1f, 0.1f) * p.lifetime;
+            }
+            
+            if (flags & RANDOM_SIZE) {
+                p.size.x += Random::Float(0.1f, 0.2f) * p.size.x;
+                p.size.y += Random::Float(0.1f, 0.2f) * p.size.y;
+            }
+            
+            p.maxSize       = p.size;
+            p.remainingLife = p.lifetime;
+
+            if (++amount == count) break;
+        }
+    }
+}
+
+void ParticleEmitter::create(const Particle& particle, const ParticleInitProperties& property, const uint32_t count) {
+
+    uint32_t amount = 0;
+    for (Particle& p : particles) {
+
+        if (!p.isActive) {
+            
+            p = particle;
+            p.isActive = true;
+
+            p.position = Random::vec3(property.position_min, property.position_max);
+            p.velocity = Random::vec3(property.velocity_min, property.velocity_max);
+
+            p.size    *= Random::Float(property.size_min,     property.size_max);
+            p.lifetime = Random::Float(property.lifetime_min, property.lifetime_max);
+
+            p.maxSize       = p.size;
+            p.remainingLife = p.lifetime;
+
+            if (++amount == count) break;
+        }
     }
 }
 
@@ -99,7 +171,8 @@ void ParticleEmitter::emit(const glm::vec3& position) {
             p.isActive = true;
             p.lifetime = lifetime;
             p.position = position;
-            p.color    = glm::vec4(1.0f);
+
+            p.color = glm::vec4(1.0f);
 
             p.remainingLife = p.lifetime;
 
@@ -111,7 +184,8 @@ void ParticleEmitter::emit(const glm::vec3& position) {
             p.endColor   = Random::vec3(0.0f, 1.0f);
 
             p.velocity = Random::vec3(10.0f);
-            p.size     = Random::Float(0.2f);
+            p.size     = glm::vec2(Random::Float(0.1f, 0.2f));
+            p.maxSize  = p.size;
 
             p.acceleration = Random::vec3(2.0f);
 
@@ -137,7 +211,10 @@ void ParticleEmitter::update(const float dt) {
         float t = 1.0f - particle.remainingLife / particle.lifetime;
         particle.color = glm::vec4(glm::mix(particle.startColor, particle.endColor, t), 1.0f);
 
-        particle.size = glm::mix(0.1f, 0.01f, t);
+        // particle.size = glm::mix(particle.maxSize, 0.01f, t);
+
+        particle.size.x = glm::mix(particle.maxSize.x, 0.01f, t);
+        particle.size.y = glm::mix(particle.maxSize.y, 0.01f, t);
 
         if (particle.remainingLife <= 0.0f) {
             particle.isActive = false;
@@ -145,9 +222,6 @@ void ParticleEmitter::update(const float dt) {
         }
 
         particle.velocity += particle.acceleration * dt;
-        particle.velocity.z += Random::Float(0.2f) * dt;
-        particle.velocity.z += Random::Float(0.2f) * dt;
-
         particle.position += particle.velocity * dt;
     }
 }
@@ -173,12 +247,21 @@ void ParticleEmitter::render() const {
 
         if (!particle.isActive) continue;
 
+        const glm::vec3 up    = glm::normalize(particle.velocity);
+        const glm::vec3 right = glm::normalize(glm::cross(up, cameraFront));
+        const glm::vec3 front = glm::normalize(glm::cross(right, up));
+
         // Billboarding
         glm::mat4 modelMatrix;
-        modelMatrix[0] = glm::vec4(cameraRight * particle.size, 0.0f);
-        modelMatrix[1] = glm::vec4(cameraUp    * particle.size, 0.0f);
-        modelMatrix[2] = glm::vec4(cameraFront,                 0.0f);
-        modelMatrix[3] = glm::vec4(particle.position,           1.0f);
+        // modelMatrix[0] = glm::vec4(cameraRight * particle.size.x, 0.0f);
+        // modelMatrix[1] = glm::vec4(cameraUp    * particle.size.y, 0.0f);
+        // modelMatrix[2] = glm::vec4(cameraFront,                 0.0f);
+        // modelMatrix[3] = glm::vec4(particle.position,           1.0f);
+
+        modelMatrix[0] = glm::vec4(right * particle.size.x, 0.0f);
+        modelMatrix[1] = glm::vec4(up    * particle.size.y, 0.0f);
+        modelMatrix[2] = glm::vec4(front,                   0.0f);
+        modelMatrix[3] = glm::vec4(particle.position,       1.0f);
         
         if (particleType == gfx::particles::TEXTURED) {
 

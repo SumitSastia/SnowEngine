@@ -14,11 +14,12 @@ public:
 
     static void init();
 
-    static int       Int  (const int   min, const int   max);
-    static float     Float(const float min, const float max);
-    static glm::vec3 vec3 (const float min, const float max);
+    static int       Int  (const int        min, const int        max);
+    static float     Float(const float      min, const float      max);
+    static glm::vec3 vec3 (const float      min, const float      max);
+    static glm::vec3 vec3 (const glm::vec3& min, const glm::vec3& max);
 
-    static int Int (const int   range) {
+    static int Int (const int range) {
         if (range > 0) return Int(-range, range);
         return(range, -range);
     }

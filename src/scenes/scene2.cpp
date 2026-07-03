@@ -11,7 +11,8 @@
 
 void Scene2::init() {
 
-    // emitter.create();
+    // Particles
+    fire_emitter.particleType = gfx::particles::COLORED;
 
     EntityManager&    entityManager    = ecs.entityManager;
     ComponentManager& componentManager = ecs.componentManager;
@@ -497,6 +498,7 @@ void Scene2::init() {
 
     DebugMenu::log("Light2: " + running::globalTimer::endInterval());
 
+    // Campfire
     {
         TransformComponent transform;
         transform.position = glm::vec3(-1.0f, -1.7f, 1.0f);
@@ -513,10 +515,10 @@ void Scene2::init() {
         material.shader = Shaders::get(PBR3D);
         material.gbufferShader = Shaders::get(GBUFFER3D);
 
+        ModelComponent model = AssetManager::loadModel("assets/models/campfire/campfire.obj");
+        
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
-
-        ModelComponent model = AssetManager::loadModel("assets/models/campfire/campfire.obj");
 
         BoundingAABBComponent AABB = createAABB(transform, model);
 
@@ -563,6 +565,8 @@ void Scene2::init() {
     ChildComponent camChild;
     camChild.children = { gun };
     componentManager.addComponent(mainCamera, camChild);
+
+    DebugMenu::printAssetsInitTime();
 
     // Multi-threaded Work
     AssetManager::compileTextures();
@@ -648,10 +652,10 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
     
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 
-        const float length = 5.0f;
+        const float length = 10.0f;
         const glm::vec3 position = Camera::activeCamera->getPos() + glm::normalize(Camera::activeCamera->getTarget()) * length;
 
-        emitter.emit(position);
+        bullet_emitter.emit(position);
     }
 }
 
@@ -686,27 +690,50 @@ void Scene2::update(const float deltaTime) {
     
     updateTransform(ecs);
 
-    emitter.particleType = gfx::particles::COLORED;
-
+    // CampFire
     Particle fire = gfx::particles::Fire;
+    const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
     
     fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
-    emitter.create(fire, 1);
+    fire.position.y += 0.2f;
+    // fire_emitter.create(fire, fire_variation, 1);
 
-    fire.position.x -= 0.1f;
-    emitter.create(fire, 1);
+    // fire.position.x -= 0.1f;
+    // fire_emitter.create(fire, fire_variation, 1);
 
-    fire.position.x += 0.2f;
-    emitter.create(fire, 1);
+    // fire.position.x += 0.2f;
+    // fire_emitter.create(fire, fire_variation, 1);
 
-    fire.position.z -= 0.1f;
-    emitter.create(fire, 1);
+    // fire.position.x -= 0.1f;
+    // fire.position.z -= 0.1f;
+    // fire_emitter.create(fire, fire_variation, 1);
 
-    fire.position.z += 0.2f;
-    emitter.create(fire, 1);
+    // fire.position.z += 0.2f;
+    // fire_emitter.create(fire, fire_variation, 1);
 
-    // emitter.emit(fire.position);
-    emitter.update(deltaTime);
+    // fire_emitter.create(fire, 3, RANDOM_POSITION | RANDOM_LIFETIME);
+
+    ParticleInitProperties property = gfx::particles::FireProperties;
+    property.position_min += fire.position;
+    property.position_max += fire.position;
+
+    fire_emitter.create(fire, property, 1);
+
+    // Rain
+    Particle rain = gfx::particles::Rain;
+
+    rain.position.x = Random::Float(10.0f, 40.0f);
+    rain.position.z = Random::Float(20.0f);
+    rain.position.y = 15.0f;
+
+    const glm::vec3 spawnCenter = camera.getPos();
+    rain.position += spawnCenter;
+
+    rain_emitter.create(rain, 2);
+
+    fire_emitter.update(deltaTime);
+    rain_emitter.update(deltaTime);
+    bullet_emitter.update(deltaTime);
 }
 
 void Scene2::render() const {
@@ -743,7 +770,9 @@ void Scene2::renderLight() const {
     const CameraComponent& cameraComponent = ecs.componentManager.get<CameraComponent>(mainCamera);
     if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
 
-    emitter.render();
+    fire_emitter.render();
+    rain_emitter.render();
+    bullet_emitter.render();
 }
 
 void Scene2::renderPointShadow() const {

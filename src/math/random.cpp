@@ -43,3 +43,16 @@ glm::vec3 Random::vec3(const float min, const float max) {
         dist(random_engine)
     );
 }
+
+glm::vec3 Random::vec3(const glm::vec3& min, const glm::vec3& max) {
+
+    std::uniform_real_distribution<float> dist_x(min.x, max.x);
+    std::uniform_real_distribution<float> dist_y(min.y, max.y);
+    std::uniform_real_distribution<float> dist_z(min.z, max.z);
+
+    return glm::vec3(
+        dist_x(random_engine),
+        dist_y(random_engine),
+        dist_z(random_engine)
+    );
+}

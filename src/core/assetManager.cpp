@@ -37,7 +37,13 @@ const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color, 
     textures[handle].load(hex, isRGBA);
     textureLookup_flat[hex] = handle;
 
-    std::cout << "Color Loaded: " << hex << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
+    // std::cout << "Color Loaded: " << std::hex << std::setw(8) << std::setfill('0') << hex
+    //           << ", Handle: "     << std::dec << handle
+    //         //   << ", GL ID: "      << textures[handle].getID()
+    //           << '\n';
+
+    DebugMenu::addAssetInitTime(0, hex, handle);
+
     return handle;
 }
 
@@ -60,7 +66,13 @@ const TextureHandle AssetManager::loadTexture(const std::string& path, const boo
     textures[handle].load(path, isRGBA);
     // textures[handle].compile();
 
-    std::cout << "Texture Loaded: " << std::hex << index << ", Handle: " << handle << ", GL ID: " << textures[handle].getID() << '\n';
+    // std::cout << "Texture Loaded: " << std::left << std::setw(20) << std::setfill(' ') << index
+    //           << ", Handle: "       << handle
+    //         //   << ", GL ID: " << textures[handle].getID()
+    //           << '\n';
+
+    DebugMenu::addAssetInitTime(index, 0, handle);
+
     return handle;
 }
 

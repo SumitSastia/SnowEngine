@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#define MAX_TEXTURES 100
+
 namespace gfx::helper {
 
     inline const uint32_t rgba_to_hex(const glm::vec4& color) {

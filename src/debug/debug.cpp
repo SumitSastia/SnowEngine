@@ -1,4 +1,8 @@
 #include <debug.h>
+#include <texture.h>
+
+std::vector <DebugMenu::TextureDataPair> DebugMenu::textureInit_data {};
+std::vector <DebugMenu::ColorDataPair>   DebugMenu::colorInit_data   {};
 
 void DebugMenu::init(GLFWwindow* window) {
 
@@ -18,6 +22,7 @@ void DebugMenu::init(GLFWwindow* window) {
 }
 
 void DebugMenu::update() {
+    
 }
 
 void DebugMenu::beginUI() {
@@ -32,6 +37,30 @@ void DebugMenu::renderTextbox(const std::string title, const std::string desc) {
     ImGui::Begin(title.c_str());
     ImGui::Text("%s", desc.c_str());
     ImGui::End();
+}
+
+void DebugMenu::printAssetsInitTime() {
+
+    const int max_padding = 18;
+
+    for (const auto& data : textureInit_data) {
+        
+        std::cout << "Texture Loaded: "
+                  << std::left    << std::setw(max_padding) << std::setfill(' ') << data.object
+                  << ", Handle: " << data.handle
+                  << '\n';
+    }
+
+    for (const auto& data : colorInit_data) {
+
+        std::cout << "Color Loaded: "
+                  << std::setw(8) << std::setfill('0') << std::hex << data.color
+                  << ", Handle: " << std::dec          << data.handle
+                  << '\n';
+    }
+
+    textureInit_data.clear();
+    colorInit_data.clear();
 }
 
 void DebugMenu::endUI() {

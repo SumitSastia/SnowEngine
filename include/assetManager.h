@@ -14,7 +14,6 @@
 
 #include <texture.h>
 
-#define MAX_TEXTURES 100
 using TextureHandle = uint32_t;
 
 class AssetManager {

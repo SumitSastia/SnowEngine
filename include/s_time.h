@@ -25,8 +25,8 @@ namespace running::core {
 
         const std::string end() {
 
-            time_keyword stopTime = std::chrono::high_resolution_clock::now();
-            time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - startTime);
+            const time_keyword stopTime = std::chrono::high_resolution_clock::now();
+            const time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - startTime);
 
             startTime = stopTime;
 
@@ -46,16 +46,24 @@ namespace running::globalTimer {
     inline void start() {
 
         globalTimer.startTime = std::chrono::high_resolution_clock::now();
-        lastIntervalTime = globalTimer.startTime;
+        lastIntervalTime      = globalTimer.startTime;
     }
 
     // Get Time taken to process instructions from the Start of Program.
     inline const std::string getTime() {
 
-        time_keyword stopTime = std::chrono::high_resolution_clock::now();
-        time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - globalTimer.startTime);
+        const time_keyword stopTime = std::chrono::high_resolution_clock::now();
+        const time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - globalTimer.startTime);
 
         return (std::to_string(duration.count()) + unit);
+    }
+
+    inline const int64_t getTimeCount() {
+
+        const time_keyword stopTime = std::chrono::high_resolution_clock::now();
+        const time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - globalTimer.startTime);
+
+        return duration.count();
     }
 
     inline void startInterval() {
@@ -64,11 +72,21 @@ namespace running::globalTimer {
 
     inline const std::string endInterval() {
 
-        time_keyword stopTime = std::chrono::high_resolution_clock::now();
-        time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - lastIntervalTime);
+        const time_keyword stopTime = std::chrono::high_resolution_clock::now();
+        const time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - lastIntervalTime);
 
         lastIntervalTime = stopTime;
 
         return (std::to_string(duration.count()) + unit);
+    }
+
+    inline const int64_t endIntervalCount() {
+
+        const time_keyword stopTime = std::chrono::high_resolution_clock::now();
+        const time_unit    duration = std::chrono::duration_cast<time_unit>(stopTime - lastIntervalTime);
+
+        lastIntervalTime = stopTime;
+
+        return duration.count();
     }
 }

@@ -126,7 +126,9 @@ class Scene2 : public Scene {
     ECS ecs;
     Environment* env;
 
-    ParticleEmitter emitter;
+    ParticleEmitter fire_emitter;
+    ParticleEmitter rain_emitter;
+    ParticleEmitter bullet_emitter;
 
 public:
 

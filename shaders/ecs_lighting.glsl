@@ -236,5 +236,5 @@ vec3 calcSpotLight(vec3 tex, vec3 normal) {
     float epsilon   = sl.cutOffangle - sl.outerCutOff;
     float intensity = clamp((theta - sl.outerCutOff) / epsilon, 0.0, 1.0);
 
-    return (attenuation * intensity * vec3(diffuseLight + specularLight));
+    return (attenuation * intensity * vec3(diffuseLight));
 }
