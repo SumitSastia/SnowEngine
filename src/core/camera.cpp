@@ -29,7 +29,7 @@ Camera::Camera() {
     up_axis    = glm::cross(direction, right_axis);
     fov        = 45.0f;
 
-    aspectRatio = (float)WIN_W / (float)WIN_H;
+    aspectRatio = static_cast<float>(WIN_W) / static_cast<float>(WIN_H);
 
     projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
     viewMatrix = glm::lookAt(position, position + target, up_axis);

@@ -7,14 +7,16 @@
 #include <camera.h>
 #include <input.h>
 
+#include <core/config.h>
+
 namespace gfx::particles {
     
     void init() {
 
         Fire.acceleration = glm::vec3(
-            Random::Float(0.2f),
+            Random::Float(0.1f),
             0.2f,
-            Random::Float(0.2f)
+            Random::Float(0.1f)
         );
 
         Fire.velocity   = glm::vec3(0.0f, Random::Float(0.5f, 0.8f), 0.0f);
@@ -31,8 +33,15 @@ namespace gfx::particles {
         Fire.remainingLife = Fire.lifetime;
 
         // Based on Origin {0,0,0}
-        FireProperties.position_min = glm::vec3(-0.1f);
-        FireProperties.position_max = glm::vec3( 0.1f);
+        // FireProperties.position_min = glm::vec3(-0.1f);
+        // FireProperties.position_max = glm::vec3( 0.1f);
+
+        FireProperties.spawnerType = gfx::particles::BOX;
+        // FireProperties.spawnerType = gfx::particles::SPHERE;
+
+        FireProperties.center   = { 0.0f, 0.0f, 0.0f };
+        FireProperties.box_size = { 0.2f, 0.2f, 0.2f };
+        // FireProperties.radius   = 1.0f;
 
         FireProperties.velocity_min = {-0.1f, 0.5f,-0.1f };
         FireProperties.velocity_max = { 0.1f, 0.8f, 0.1f };
@@ -62,9 +71,26 @@ namespace gfx::particles {
 
         Rain.size     = glm::vec2(0.1f, 0.2f);
         Rain.maxSize  = Rain.size;
-        Rain.lifetime = 4.0f;
+        Rain.lifetime = 3.5f;
 
         Rain.remainingLife = Rain.lifetime;
+
+        // RainProperties.position_min = {-10.0f,-4.0f,-10.0f };
+        // RainProperties.position_max = { 10.0f, 4.0f, 10.0f };
+
+        RainProperties.spawnerType = gfx::particles::BOX;
+
+        RainProperties.center   = { 0.0f, 0.0f, 0.0f };
+        RainProperties.box_size = { 20.0f, 8.0f, 20.0f };
+
+        RainProperties.velocity_min = {-5.0f,-2.0f, 0.0f };
+        RainProperties.velocity_max = {-5.0f,-2.0f, 0.0f };
+
+        RainProperties.size_min = 1.0f;
+        RainProperties.size_max = 1.2f;
+
+        RainProperties.lifetime_min = 3.0f;
+        RainProperties.lifetime_max = 3.0f;
     }
 };
 
@@ -77,20 +103,42 @@ ParticleEmitter::ParticleEmitter():
     particleTexture = AssetManager::loadTexture("assets/particles/scorch_01.png", true);
 }
 
-void ParticleEmitter::create(const Particle& particle, const glm::vec3& velocity_variation, const uint32_t count) {
+const glm::vec3 ParticleEmitter::generate(const ParticleInitProperties& spawner) {
 
-    uint32_t amount = 0;
-    for (Particle& p : particles) {
+    switch (spawner.spawnerType) {
 
-        if (!p.isActive) {
-            
-            p = particle;
-            p.isActive = true;
+        case gfx::particles::POINT:
+            return spawner.center;
+        
+        case gfx::particles::SPHERE: {
 
-            p.velocity = p.velocity + Random::Float(-1.0f, 1.0f) * velocity_variation;
-
-            if (++amount == count) break;
+            const glm::vec3 direction = Random::vec3(glm::vec3(-1.0f), glm::vec3(1.0f));
+            return (spawner.center + glm::normalize(direction) * Random::Float(0, spawner.radius));
         }
+
+        case gfx::particles::BOX: {
+
+            const glm::vec3 pos_min = -spawner.box_size / 2.0f;
+            const glm::vec3 pos_max =  spawner.box_size / 2.0f;
+
+            return (spawner.center + Random::vec3(pos_min, pos_max));
+        }
+
+        case gfx::particles::CONE: {
+
+            const float height    = Random::Float(0.0f, spawner.height);
+            const float maxRadius = (height / spawner.height) * spawner.radius;
+
+            // for inverted cone: maxRadius = (1.0f - height/spawner.height) * spawner.radius;
+
+            const float angle  = Random::Float(0.0f, glm::two_pi<float>());
+            const float radius = maxRadius * glm::sqrt(Random::Float(0.0f, 1.0f));
+
+            return glm::vec3(glm::cos(angle) * radius, height, glm::sin(angle) * radius);
+        }
+
+        default:
+            return glm::vec3(0.0f);
     }
 }
 
@@ -134,7 +182,9 @@ void ParticleEmitter::create(const Particle& particle, const uint32_t count, con
     }
 }
 
-void ParticleEmitter::create(const Particle& particle, const ParticleInitProperties& property, const uint32_t count) {
+void ParticleEmitter::create(const Particle& particle, const ParticleInitProperties& property) {
+
+    properties = property;
 
     uint32_t amount = 0;
     for (Particle& p : particles) {
@@ -144,7 +194,7 @@ void ParticleEmitter::create(const Particle& particle, const ParticleInitPropert
             p = particle;
             p.isActive = true;
 
-            p.position = Random::vec3(property.position_min, property.position_max);
+            p.position = generate(property);
             p.velocity = Random::vec3(property.velocity_min, property.velocity_max);
 
             p.size    *= Random::Float(property.size_min,     property.size_max);
@@ -153,9 +203,19 @@ void ParticleEmitter::create(const Particle& particle, const ParticleInitPropert
             p.maxSize       = p.size;
             p.remainingLife = p.lifetime;
 
-            if (++amount == count) break;
+            if (++amount == property.total_count) break;
         }
     }
+}
+
+void ParticleEmitter::recreate(Particle& particle) {
+    
+    particle.position = generate(properties);
+    particle.velocity = Random::vec3(properties.velocity_min, properties.velocity_max);
+    particle.lifetime = Random::Float(properties.lifetime_min, properties.lifetime_max);
+
+    particle.size = particle.maxSize;
+    particle.remainingLife = particle.lifetime;
 }
 
 void ParticleEmitter::emit(const glm::vec3& position) {
@@ -217,8 +277,14 @@ void ParticleEmitter::update(const float dt) {
         particle.size.y = glm::mix(particle.maxSize.y, 0.01f, t);
 
         if (particle.remainingLife <= 0.0f) {
-            particle.isActive = false;
-            continue;
+
+            if (particle.isLooping) {
+                recreate(particle);
+            }
+            else {
+                particle.isActive = false;
+                continue;
+            }
         }
 
         particle.velocity += particle.acceleration * dt;

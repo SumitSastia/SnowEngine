@@ -99,43 +99,43 @@ void Scene2::init() {
     }
 
     // wood_box
-    // {
-    //     TransformComponent transform;
-    //     transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    //     transform.rotation = glm::vec3(0.0f);
-    //     transform.scale    = glm::vec3(1.0f);
-    //     transform.computeModel();
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(0.1f);
+        transform.computeModel();
 
-    //     // transform.isVisible = false;
+        transform.isVisible = false;
         
-    //     MeshComponent mesh = EntityShapes::instance().cubeNorm;
+        MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
-    //     DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
+        DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
         
-    //     MaterialComponent material;
-    //     material.shader = Shaders::get(NORMPBR3D);
+        MaterialComponent material;
+        material.shader = Shaders::get(NORMPBR3D);
         
-    //     material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png");
-    //     // material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
-    //     material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png", 1);
+        material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png");
+        // material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
+        material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png", 1);
         
-    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
         
-    //     material.metallic  = material.albedo;
-    //     material.roughness = material.albedo;
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
 
-    //     BoundingSphereComponent boundingSphere;
-    //     boundingSphere.center = transform.position;
-    //     boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
+        BoundingSphereComponent boundingSphere;
+        boundingSphere.center = transform.position;
+        boundingSphere.radius = mesh.radius * std::max({transform.scale.x, transform.scale.y, transform.scale.z});
 
-    //     BoundingAABBComponent AABB = createAABB(transform, mesh);
+        BoundingAABBComponent AABB = createAABB(transform, mesh);
         
-    //     componentManager.addComponent(wood_box, mesh);
-    //     componentManager.addComponent(wood_box, transform);
-    //     componentManager.addComponent(wood_box, material);
-    //     componentManager.addComponent(wood_box, boundingSphere);
-    //     componentManager.addComponent(wood_box, AABB);
-    // }
+        componentManager.addComponent(wood_box, mesh);
+        componentManager.addComponent(wood_box, transform);
+        componentManager.addComponent(wood_box, material);
+        componentManager.addComponent(wood_box, boundingSphere);
+        componentManager.addComponent(wood_box, AABB);
+    }
 
     DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
 
@@ -533,9 +533,9 @@ void Scene2::init() {
     // gun
     {
         TransformComponent transform;
-        transform.position = glm::vec3(-1.0f, 0.0f, 1.0f);
+        transform.position = glm::vec3(0.0f);
         transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(0.1f);
+        transform.scale    = glm::vec3(0.2f);
 
         transform.local_position = glm::vec3(0.35f, -0.5f, -1.0f);
         // transform.local_rotation = glm::vec3(0.0f, 95.0f, 5.0f);
@@ -562,6 +562,12 @@ void Scene2::init() {
 
     DebugMenu::log("Gun: " + running::globalTimer::endInterval());
 
+    // Position: 0.189843,0.173202,-0.00755653 - gunscale = 0.1
+    // Position: 0.317998,0.342213,0 - gunscale = 0.2
+
+    // Relative to {0,0,0}
+    gun_muzzle = { 0.317998f, 0.342213f, 0.0f };
+
     ChildComponent camChild;
     camChild.children = { gun };
     componentManager.addComponent(mainCamera, camChild);
@@ -571,6 +577,20 @@ void Scene2::init() {
     // Multi-threaded Work
     AssetManager::compileTextures();
     DebugMenu::log("Texture Compilation: " + running::globalTimer::endInterval());
+
+    // CampFire
+    Particle fire = gfx::particles::Fire;
+    const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
+    
+    fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
+    fire.position.y += 0.2f;
+    fire.isLooping = true;
+
+    ParticleInitProperties property = gfx::particles::FireProperties;
+    property.center = fire.position;
+    property.total_count = 1000;
+
+    fire_emitter.create(fire, property);
 }
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {
@@ -650,22 +670,26 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
         Camera::activeCamera = &ecs.componentManager.get<CameraComponent>(mainCamera).camera;
     }
     
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    // if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 
-        const float length = 10.0f;
-        const glm::vec3 position = Camera::activeCamera->getPos() + glm::normalize(Camera::activeCamera->getTarget()) * length;
+    //     const float length = 10.0f;
+    //     // const glm::vec3 position = Camera::activeCamera->getPos() + glm::normalize(Camera::activeCamera->getTarget()) * length;
+    //     const glm::vec3& position = ecs.componentManager.get<TransformComponent>(gun).position;
 
-        bullet_emitter.emit(position);
-    }
+    //     // bullet_emitter.emit(position);
+    //     // bullet_emitter.emit(gun_muzzle);
+
+    //     Particle fire = gfx::particles::Fire;
+    //     fire.position = gun_muzzle + position;
+
+    //     fire_emitter.create(fire, 10);
+    // }
 }
 
 void Scene2::update(const float deltaTime) {
 
     TransformComponent& transform = ecs.componentManager.get<TransformComponent>(gun);
     const Camera& camera = ecs.componentManager.get<CameraComponent>(mainCamera).camera;
-
-    // transform.local_position = glm::vec3(0.35f, -0.5f, -1.0f);
-    // transform.local_rotation = glm::vec3(0.0f, 95.0f, 5.0f);
 
     const auto& view = camera.getView();
 
@@ -687,53 +711,54 @@ void Scene2::update(const float deltaTime) {
         camera.getYaw()   * -1.0f + GUN_OFFSET_Y,
         camera.getPitch() *  1.0f + GUN_OFFSET_Z
     };
-    
+
     updateTransform(ecs);
 
-    // CampFire
-    Particle fire = gfx::particles::Fire;
-    const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
+    if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+        TransformComponent muzzle_transform;
+        muzzle_transform.position = transform.position;
+        muzzle_transform.rotation = transform.rotation;
+
+        muzzle_transform.computeModel();
+
+        Particle fire = gfx::particles::Fire;
+        fire.position = glm::vec3(muzzle_transform.model * glm::vec4(gun_muzzle, 1.0f));
+        // fire.velocity = glm::vec3();
+
+        bullet_emitter.create(fire, 1);
+    }
+
+    // // CampFire
+    // Particle fire = gfx::particles::Fire;
+    // const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
     
-    fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
-    fire.position.y += 0.2f;
-    // fire_emitter.create(fire, fire_variation, 1);
+    // fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
+    // fire.position.y += 0.2f;
 
-    // fire.position.x -= 0.1f;
-    // fire_emitter.create(fire, fire_variation, 1);
+    // ParticleInitProperties property = gfx::particles::FireProperties;
+    // // property.position_min += fire.position;
+    // // property.position_max += fire.position;
 
-    // fire.position.x += 0.2f;
-    // fire_emitter.create(fire, fire_variation, 1);
+    // property.center = fire.position;
 
-    // fire.position.x -= 0.1f;
-    // fire.position.z -= 0.1f;
-    // fire_emitter.create(fire, fire_variation, 1);
-
-    // fire.position.z += 0.2f;
-    // fire_emitter.create(fire, fire_variation, 1);
-
-    // fire_emitter.create(fire, 3, RANDOM_POSITION | RANDOM_LIFETIME);
-
-    ParticleInitProperties property = gfx::particles::FireProperties;
-    property.position_min += fire.position;
-    property.position_max += fire.position;
-
-    fire_emitter.create(fire, property, 1);
+    // fire_emitter.create(fire, property);
 
     // Rain
     Particle rain = gfx::particles::Rain;
+    ParticleInitProperties rain_property = gfx::particles::RainProperties;
 
-    rain.position.x = Random::Float(10.0f, 40.0f);
-    rain.position.z = Random::Float(20.0f);
-    rain.position.y = 15.0f;
+    rain_property.center = camera.getPos();
+    rain_property.total_count = 2;
 
-    const glm::vec3 spawnCenter = camera.getPos();
-    rain.position += spawnCenter;
-
-    rain_emitter.create(rain, 2);
+    rain_emitter.create(rain, rain_property);
 
     fire_emitter.update(deltaTime);
     rain_emitter.update(deltaTime);
     bullet_emitter.update(deltaTime);
+
+    // const glm::vec3& position = ecs.componentManager.get<TransformComponent>(wood_box).position;
+    // std::cout << "Position: " << position.x << "," << position.y << "," << position.z << '\n';
 }
 
 void Scene2::render() const {

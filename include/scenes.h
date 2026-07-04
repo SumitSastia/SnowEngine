@@ -130,6 +130,8 @@ class Scene2 : public Scene {
     ParticleEmitter rain_emitter;
     ParticleEmitter bullet_emitter;
 
+    glm::vec3 gun_muzzle;
+
 public:
 
     Scene2(): env(nullptr) {

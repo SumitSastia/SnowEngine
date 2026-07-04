@@ -6,7 +6,7 @@
 #define MAX_PARTICLES 1000u
 #define PARTICLE_SPEED 1.0f
 
-using TextureHandle = uint32_t;
+#include <core/config.h>
 
 struct Particle {
 
@@ -33,10 +33,16 @@ struct Particle {
 
 struct ParticleInitProperties {
 
+    // POINT
+    glm::vec3 center;
+    
+    // BOX
+    glm::vec3 box_size;
+
     // not suitable for Different Shapes
     // This will spawn particle in AABB box
-    glm::vec3 position_min;
-    glm::vec3 position_max;
+    // glm::vec3 position_min;
+    // glm::vec3 position_max;
 
     // SUITABLE
     glm::vec3 velocity_min;
@@ -47,6 +53,15 @@ struct ParticleInitProperties {
 
     float lifetime_min;
     float lifetime_max;
+
+    // SPHERE
+    float radius;
+
+    // CONE
+    uint32_t height;
+    
+    uint32_t total_count;
+    uint8_t  spawnerType;
 };
 
 struct ParticleEffect {
@@ -66,19 +81,45 @@ enum random_flags : uint8_t {
     RANDOM_SIZE     = 1 << 3
 };
 
-enum class SpawnShape : uint8_t {
-
-    POINT,
-    SPHERE,
-    BOX
-
-};
-
 namespace gfx::particles {
 
     enum Type {
         COLORED,
         TEXTURED
+    };
+
+    enum SpawnShape : uint8_t {
+        POINT,
+        SPHERE,
+        BOX,
+        CONE
+    };
+
+    struct SpawnProperties {
+        
+        // POINT
+        glm::vec3 center;
+        
+        // BOX
+        glm::vec3 box_size;
+        
+        // SPHERE
+        float radius;
+
+        // CONE
+        uint32_t height;
+        
+        uint32_t total_count;
+        uint8_t  spawnerType;
+
+        SpawnProperties():
+            center({0.0f}),
+            box_size({1.0f}),
+            radius(1.0f),
+            total_count(1u),
+            spawnerType(0u) {
+        }
+
     };
 
     inline Particle Fire;
@@ -95,19 +136,27 @@ namespace gfx::particles {
 class ParticleEmitter {
 
     std::vector <Particle> particles;
+    ParticleInitProperties properties;
 
     TextureHandle particleTexture;
     uint32_t      activeParticles;
+
+    // void generate(const float radius);                         // SPHERE
+    // void generate(const glm::vec3& min, const glm::vec3& max); // BOX
+
+    const glm::vec3 generate(const ParticleInitProperties& spawner);
 
 public:
     
     bool particleType;
 
     ParticleEmitter();
-    
-    void create(const Particle& particle, const glm::vec3& velocity_variation, const uint32_t count);
+
     void create(const Particle& particle, const uint32_t count, const uint8_t flags = 0);
-    void create(const Particle& particle, const ParticleInitProperties& property, const uint32_t count);
+    void create(const Particle& particle, const ParticleInitProperties& property);
+    void recreate(Particle& particle);
+
+    void set(const ParticleInitProperties& properties) { this->properties = properties; }
 
     void emit(const glm::vec3& position);
 

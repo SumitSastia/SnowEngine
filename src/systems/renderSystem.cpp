@@ -195,6 +195,8 @@ void RenderSystem::render(const ECS& ecs) {
         const ModelComponent&     model     = componentManager.get<ModelComponent>(entity);
         const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
 
+        // if (entity == 10) std::cout << "Render: " << transform.position.x << "," << transform.position.y << "," << transform.position.z << "\n";
+
         if (!transform.isVisible) continue;
         const uint total_meshes = model.meshes.size();
 
