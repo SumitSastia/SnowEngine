@@ -58,6 +58,7 @@ public:
 
     std::vector <Entity> visibleEntities;
     std::vector <Entity> emissiveEntities;
+    std::vector <Entity> transparentEntities;
 
     EntityManager(): nextEntity(0) {};
 
@@ -170,6 +171,26 @@ struct ECS {
                 componentManager.has<Component0>(entity) &&
                 componentManager.has<Component1>(entity) &&
                 componentManager.has<Component2>(entity)
+            ) {
+                entities.push_back(entity);
+            }
+        }
+
+        return entities;
+    }
+
+    template <typename Component0, typename Component1, typename Component2, typename Component3>
+    const std::vector<Entity> view() const {
+
+        std::vector <Entity> entities;
+
+        for (Entity entity = 0; entity < entityManager.total_entities(); entity++) {
+
+            if (
+                componentManager.has<Component0>(entity) &&
+                componentManager.has<Component1>(entity) &&
+                componentManager.has<Component2>(entity) &&
+                componentManager.has<Component3>(entity)
             ) {
                 entities.push_back(entity);
             }

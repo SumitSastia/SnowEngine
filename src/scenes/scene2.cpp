@@ -31,19 +31,18 @@ void Scene2::init() {
     sun       = entityManager.createEntity();
     gun       = entityManager.createEntity();
     campfire  = entityManager.createEntity();
+    flames    = entityManager.createEntity();
 
     mainCamera = entityManager.createEntity();
 
-    // entityManager.visibleEntities.push_back(wood_box);
-    // entityManager.visibleEntities.push_back(floor);
-    // entityManager.visibleEntities.push_back(wall);
-    // entityManager.visibleEntities.push_back(cubes);
-    // entityManager.visibleEntities.push_back(sphere);
-    // entityManager.visibleEntities.push_back(brickWall);
-    // entityManager.visibleEntities.push_back(headcam);
+    entityManager.emissiveEntities = {
+        light1,
+        light2
+    };
 
-    entityManager.emissiveEntities.push_back(light1);
-    entityManager.emissiveEntities.push_back(light2);
+    entityManager.transparentEntities = {
+        flames
+    };
 
     // Directional Light
     float near_plane = 1.0f, far_plane = 10.0f, size = 10.0f;
@@ -528,7 +527,52 @@ void Scene2::init() {
         componentManager.addComponent(campfire, AABB);
     }
 
-    DebugMenu::log("Campfire: " + running::globalTimer::endInterval());
+    // flameSprite
+    {
+        TransformComponent transform;
+        transform.position = glm::vec3(-1.0f, -1.0f, 1.0f);
+        transform.rotation = glm::vec3(0.0f);
+        transform.scale    = glm::vec3(1.0f);
+
+        transform.computeModel();
+
+        MeshComponent mesh = EntityShapes::instance().square;
+
+        MaterialComponent material;
+        material.shader = Shaders::get(ALBEDO2D);
+        material.gbufferShader = Shaders::get(GBUFFER2D);
+        
+        material.metallic  = material.albedo;
+        material.roughness = material.albedo;
+
+        BoundingAABBComponent AABB = createAABB(transform, mesh);
+
+        AnimatedSprite animSprite;
+        animSprite.sprites = {
+
+            AssetManager::loadTexture("assets/sprites/flame1.png"),
+            AssetManager::loadTexture("assets/sprites/flame2.png"),
+            AssetManager::loadTexture("assets/sprites/flame3.png"),
+            AssetManager::loadTexture("assets/sprites/flame4.png"),
+            AssetManager::loadTexture("assets/sprites/flame5.png"),
+            AssetManager::loadTexture("assets/sprites/flame6.png"),
+            AssetManager::loadTexture("assets/sprites/flame7.png"),
+            AssetManager::loadTexture("assets/sprites/flame8.png")
+        };
+
+        animSprite.activeSprite  = animSprite.sprites[0];
+        animSprite.total_sprites = animSprite.sprites.size();
+
+        animSprite.transition_rate = 0.1f;
+
+        componentManager.addComponent(flames, mesh);
+        componentManager.addComponent(flames, material);
+        componentManager.addComponent(flames, transform);
+        componentManager.addComponent(flames, animSprite);
+        componentManager.addComponent(flames, AABB);
+    }
+
+    DebugMenu::log("Flame Sprite: " + running::globalTimer::endInterval());
 
     // gun
     {
@@ -590,7 +634,7 @@ void Scene2::init() {
     property.center = fire.position;
     property.total_count = 1000;
 
-    fire_emitter.create(fire, property);
+    // fire_emitter.create(fire, property);
 }
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {
@@ -688,7 +732,6 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
 
 void Scene2::update(const float deltaTime) {
 
-    TransformComponent& transform = ecs.componentManager.get<TransformComponent>(gun);
     const Camera& camera = ecs.componentManager.get<CameraComponent>(mainCamera).camera;
 
     const auto& view = camera.getView();
@@ -696,6 +739,24 @@ void Scene2::update(const float deltaTime) {
     const glm::vec3 cameraRight(view[0][0], view[1][0], view[2][0]);
     const glm::vec3 cameraUp   (view[0][1], view[1][1], view[2][1]);
     const glm::vec3 cameraFront(view[0][2], view[1][2], view[2][2]);
+
+    // Animated Sprites
+    updateAnimSprites(ecs.componentManager.get<AnimatedSprite>(flames), deltaTime);
+
+    TransformComponent& flameTransform = ecs.componentManager.get<TransformComponent>(flames);
+
+    glm::mat4 matrix;
+
+    matrix[0] = glm::vec4(cameraRight * flameTransform.scale.x, 0.0f);
+    matrix[1] = glm::vec4(cameraUp    * flameTransform.scale.y, 0.0f);
+    matrix[2] = glm::vec4(cameraFront            , 0.0f);
+    matrix[3] = glm::vec4(flameTransform.position, 1.0f);
+
+    flameTransform.model.setMatrix(matrix);
+    flameTransform.computePosition();
+
+    // FPS Gun
+    TransformComponent& transform = ecs.componentManager.get<TransformComponent>(gun);
 
     transform.local_position = {
         cameraRight * 0.35f -
@@ -714,6 +775,7 @@ void Scene2::update(const float deltaTime) {
 
     updateTransform(ecs);
 
+    // Particles
     if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 
         TransformComponent muzzle_transform;
@@ -722,27 +784,27 @@ void Scene2::update(const float deltaTime) {
 
         muzzle_transform.computeModel();
 
-        Particle fire = gfx::particles::Fire;
-        fire.position = glm::vec3(muzzle_transform.model * glm::vec4(gun_muzzle, 1.0f));
-        // fire.velocity = glm::vec3();
+        Particle flash = gfx::particles::flash;
+        flash.position = glm::vec3(muzzle_transform.model * glm::vec4(gun_muzzle, 1.0f));
+        
+        ParticleInitProperties flash_properties = gfx::particles::flashProperties;
+        flash_properties.center = flash.position;
 
-        bullet_emitter.create(fire, 1);
+        const glm::vec3 cam_direction = glm::normalize(camera.getTarget());
+
+        flash_properties.velocity_min = 5.0f * cam_direction;
+        flash_properties.velocity_max = 5.0f * cam_direction;
+
+        flash_properties.acc_min = 2.0f * cam_direction;
+        flash_properties.acc_max = 2.0f * cam_direction;
+
+        flash_properties.acc_min = flash.acceleration;
+        flash_properties.acc_max = flash.acceleration;
+
+        flash_properties.total_count = 10;
+
+        bullet_emitter.create(flash, flash_properties);
     }
-
-    // // CampFire
-    // Particle fire = gfx::particles::Fire;
-    // const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
-    
-    // fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
-    // fire.position.y += 0.2f;
-
-    // ParticleInitProperties property = gfx::particles::FireProperties;
-    // // property.position_min += fire.position;
-    // // property.position_max += fire.position;
-
-    // property.center = fire.position;
-
-    // fire_emitter.create(fire, property);
 
     // Rain
     Particle rain = gfx::particles::Rain;
@@ -798,6 +860,8 @@ void Scene2::renderLight() const {
     fire_emitter.render();
     rain_emitter.render();
     bullet_emitter.render();
+
+    RenderSystem::instance().renderTransparent(ecs);
 }
 
 void Scene2::renderPointShadow() const {

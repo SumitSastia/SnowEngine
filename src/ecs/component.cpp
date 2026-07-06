@@ -533,6 +533,11 @@ ComponentPool<SpotLightComponent>& ComponentManager::getPool() {
 }
 
 template <>
+ComponentPool<AnimatedSprite>& ComponentManager::getPool() {
+    return animSprites;
+}
+
+template <>
 const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
     return transforms;
 }
@@ -600,6 +605,11 @@ const ComponentPool<ChildComponent>& ComponentManager::getPool() const {
 template <>
 const ComponentPool<SpotLightComponent>& ComponentManager::getPool() const {
     return spotlights;
+}
+
+template <>
+const ComponentPool<AnimatedSprite>& ComponentManager::getPool() const {
+    return animSprites;
 }
 
 // ------------------------------ Components ----------------------------------------- //

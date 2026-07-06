@@ -73,6 +73,7 @@ public:
 
     void render      (const ECS& ecs);
     void renderLights(const ECS& ecs);
+    void renderTransparent(const ECS& ecs);
 
     void renderGbuffer(const ECS& ecs);
     void lightningPass(const ECS& ecs, const Shader* shader);

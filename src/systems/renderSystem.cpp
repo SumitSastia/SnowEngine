@@ -120,6 +120,7 @@ void RenderSystem::render(const ECS& ecs) {
     const std::vector<Entity> objects   = ecs.view<MeshComponent, TransformComponent, MaterialComponent>();
     const std::vector<Entity> instances = ecs.view<InstanceComponent, MaterialComponent>();
     const std::vector<Entity> models    = ecs.view<ModelComponent, TransformComponent, MaterialComponent>();
+    // const std::vector<Entity> animObjs  = ecs.view<MeshComponent, TransformComponent, MaterialComponent, AnimatedSprite>();
 
     const std::vector<Entity> objects_with_LOD = ecs.view<MeshLODComponent, TransformComponent, MaterialComponent>();
     const std::vector<Entity> models_with_LOD  = ecs.view<ModelLODComponent, TransformComponent, MaterialComponent>();
@@ -132,6 +133,9 @@ void RenderSystem::render(const ECS& ecs) {
 
         // Temporary Fix: Prevents Light Meshes to render
         if (componentManager.has<PointLightComponent>(entity)) continue;
+
+        // Temporary Fix: Prevents Animated Sprites
+        if (componentManager.has<AnimatedSprite>(entity)) continue;
 
         // Frustum Culling
         if (componentManager.has<BoundingAABBComponent>(entity)) {
@@ -213,6 +217,29 @@ void RenderSystem::render(const ECS& ecs) {
 
         drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
     }
+
+    // for (const Entity& entity : animObjs) {
+
+    //     // Frustum Culling
+    //     if (componentManager.has<BoundingAABBComponent>(entity)) {
+
+    //         const BoundingAABBComponent& boundingAABB = componentManager.get<BoundingAABBComponent>(entity);
+    //         if (!frustum.isMeshInside(boundingAABB)) continue;
+    //     }
+
+    //     const TransformComponent& transform = componentManager.get<TransformComponent>(entity);
+    //     if (!transform.isVisible) continue;
+
+    //     const MeshComponent&  mesh        = componentManager.get<MeshComponent>(entity);
+    //     const AnimatedSprite& animSprites = componentManager.get<AnimatedSprite>(entity);
+
+    //     MaterialComponent material = componentManager.get<MaterialComponent>(entity);
+    //     material.albedo = animSprites.activeSprite;
+
+    //     draw(mesh, transform, material);
+
+    //     drawWireframe(Wireframes::instance().cube, componentManager.get<BoundingAABBComponent>(entity));
+    // }
     
     // LOD System
     for (const Entity& entity : objects_with_LOD) {
@@ -283,6 +310,27 @@ void RenderSystem::renderLights(const ECS& ecs) {
             const PointLightComponent& pointlight = componentManager.get<PointLightComponent>(entity);
             
             draw(mesh, transform, material, pointlight);
+        }
+    }
+}
+
+void RenderSystem::renderTransparent(const ECS& ecs) {
+
+    const EntityManager&    entityManager    = ecs.entityManager;
+    const ComponentManager& componentManager = ecs.componentManager;
+
+    for (const Entity& entity : ecs.entityManager.transparentEntities) {
+
+        if (componentManager.has<AnimatedSprite>(entity)) {
+
+            const MeshComponent&      mesh       = componentManager.get<MeshComponent>(entity);
+            const TransformComponent& transform  = componentManager.get<TransformComponent>(entity);
+            const AnimatedSprite&     animSprite = componentManager.get<AnimatedSprite>(entity);
+
+            MaterialComponent material   = componentManager.get<MaterialComponent>(entity);
+            material.albedo = animSprite.activeSprite;
+            
+            draw(mesh, transform, material);
         }
     }
 }

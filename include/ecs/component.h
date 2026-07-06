@@ -13,6 +13,7 @@
 #include <camera.h>
 
 #include <debug.h>
+#include <core/config.h>
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
@@ -32,7 +33,6 @@ class PointShadowFrame;
 class DirectShadowFrame;
 
 using Entity = uint32_t;
-using TextureHandle = uint32_t;
 
 // ------------------------------ Components ----------------------------------------- //
 
@@ -225,10 +225,19 @@ struct MaterialComponent {
         gbufferShader(nullptr) {
     }
 
-    void bind();
-
     // SHOULD BE IMPLEMENTED WITH ASSET MANAGER
     void destroy() {}
+};
+
+struct AnimatedSprite {
+
+    std::vector <TextureHandle> sprites;
+
+    float transition_rate = 1.0f;
+    float timer = 0.0f;
+
+    uint32_t total_sprites = 0;
+    TextureHandle activeSprite = 0;
 };
 
 struct BoundingSphereComponent {
@@ -441,6 +450,7 @@ public:
     ComponentPool <CameraComponent>         cameras;
     ComponentPool <ChildComponent>          childrens;
     ComponentPool <SpotLightComponent>      spotlights;
+    ComponentPool <AnimatedSprite>          animSprites;
     
     // @note Currently only use for Model3D to Entity Conversion.
     void addShader(Shader* shader);

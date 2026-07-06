@@ -22,10 +22,13 @@ struct Particle {
     glm::vec2 size;
     glm::vec2 maxSize;
 
-    float shrinking_rate;
+    float shrinking_rate; // slope, currently linear
 
     float lifetime;
     float remainingLife;
+
+    float rotation_angle   = 0.0f;
+    float angular_velocity = 0.0f;
 
     bool isActive  = false;
     bool isLooping = false;
@@ -39,12 +42,9 @@ struct ParticleInitProperties {
     // BOX
     glm::vec3 box_size;
 
-    // not suitable for Different Shapes
-    // This will spawn particle in AABB box
-    // glm::vec3 position_min;
-    // glm::vec3 position_max;
+    glm::vec3 acc_min;
+    glm::vec3 acc_max;
 
-    // SUITABLE
     glm::vec3 velocity_min;
     glm::vec3 velocity_max;
 
@@ -66,11 +66,12 @@ struct ParticleInitProperties {
 
 struct ParticleEffect {
 
-    glm::vec3 random_position;
-    glm::vec3 random_velocity;
-    glm::vec3 random_color;
-    glm::vec2 random_size;
-    float     random_lifetime;
+    glm::vec3 acceleration;
+    glm::vec3 velocity;
+    glm::vec3 color;
+
+    float size;
+    float random_lifetime;
 };
 
 enum random_flags : uint8_t {
@@ -125,10 +126,12 @@ namespace gfx::particles {
     inline Particle Fire;
     inline Particle Rain;
     inline Particle Smoke;
+    inline Particle flash;
 
     inline ParticleInitProperties FireProperties;
     inline ParticleInitProperties RainProperties;
     inline ParticleInitProperties SmokeProperties;
+    inline ParticleInitProperties flashProperties;
     
     void init();
 };
@@ -139,10 +142,7 @@ class ParticleEmitter {
     ParticleInitProperties properties;
 
     TextureHandle particleTexture;
-    uint32_t      activeParticles;
-
-    // void generate(const float radius);                         // SPHERE
-    // void generate(const glm::vec3& min, const glm::vec3& max); // BOX
+    uint32_t      activeParticles; // not implemented
 
     const glm::vec3 generate(const ParticleInitProperties& spawner);
 
@@ -157,6 +157,7 @@ public:
     void recreate(Particle& particle);
 
     void set(const ParticleInitProperties& properties) { this->properties = properties; }
+    void setTexture(const TextureHandle& handle) { particleTexture = handle; }
 
     void emit(const glm::vec3& position);
 

@@ -19,22 +19,24 @@ namespace gfx::particles {
             Random::Float(0.1f)
         );
 
-        Fire.velocity   = glm::vec3(0.0f, Random::Float(0.5f, 0.8f), 0.0f);
+        Fire.velocity = glm::vec3(
+            0.0f, Random::Float(0.5f, 0.8f), 0.0f
+        );
+
         Fire.startColor = colors::ORANGE;
         Fire.endColor   = colors::YELLOW;
 
         // Fire.startColor = colors::BLUE;
         // Fire.endColor   = colors::LIGHT_BLUE;
 
-        Fire.size     = glm::vec2(0.1f);
-        Fire.maxSize  = Fire.size;
+        Fire.size    = glm::vec2(0.1f);
+        Fire.maxSize = Fire.size;
+
         Fire.lifetime = 1.2f;
-
         Fire.remainingLife = Fire.lifetime;
-
-        // Based on Origin {0,0,0}
-        // FireProperties.position_min = glm::vec3(-0.1f);
-        // FireProperties.position_max = glm::vec3( 0.1f);
+        
+        Fire.rotation_angle   = 0.0f;
+        Fire.angular_velocity = 20.0f;
 
         FireProperties.spawnerType = gfx::particles::BOX;
         // FireProperties.spawnerType = gfx::particles::SPHERE;
@@ -50,7 +52,10 @@ namespace gfx::particles {
         FireProperties.size_max = 1.5f;
 
         FireProperties.lifetime_min = 1.0f;
-        FireProperties.lifetime_max = 3.0f;
+        FireProperties.lifetime_max = 2.0f;
+
+        FireProperties.acc_min = glm::vec3(-0.1f, 0.1f,-0.1f);
+        FireProperties.acc_max = glm::vec3( 0.1f, 0.4f, 0.1f);
 
         //-------------------------------------------------------------------//
 
@@ -71,8 +76,8 @@ namespace gfx::particles {
 
         Rain.size     = glm::vec2(0.1f, 0.2f);
         Rain.maxSize  = Rain.size;
+        
         Rain.lifetime = 3.5f;
-
         Rain.remainingLife = Rain.lifetime;
 
         // RainProperties.position_min = {-10.0f,-4.0f,-10.0f };
@@ -91,6 +96,40 @@ namespace gfx::particles {
 
         RainProperties.lifetime_min = 3.0f;
         RainProperties.lifetime_max = 3.0f;
+
+        RainProperties.acc_min = Rain.acceleration;
+        RainProperties.acc_max = Rain.acceleration;
+
+        //-------------------------------------------------------------------//
+
+        flash.velocity     = { 0.0f, 0.0f,-5.0f };
+        flash.acceleration = { 0.0f, 0.0f,-5.0f };
+
+        flash.startColor = { 0.976f, 0.811f, 0.341f };
+        flash.endColor   = colors::BLACK;
+
+        flash.size    = { 0.05f, 0.05f };
+        flash.maxSize = flash.size;
+
+        flash.lifetime = 0.1f;
+        flash.remainingLife = flash.lifetime;
+
+        flashProperties.spawnerType = gfx::particles::BOX;
+        
+        flashProperties.center = { 0.0f, 0.0f, 0.0f };
+        flashProperties.box_size = { 0.1f, 0.1f, 0.1f};
+
+        flashProperties.velocity_min = flash.velocity;
+        flashProperties.velocity_max = flash.velocity;
+
+        flashProperties.size_min = 1.0f;
+        flashProperties.size_max = 1.5f;
+
+        flashProperties.lifetime_min = 1.0f * flash.lifetime;
+        flashProperties.lifetime_max = 1.5f * flash.lifetime;
+
+        flashProperties.acc_min = flash.acceleration;
+        flashProperties.acc_max = flash.acceleration;
     }
 };
 
@@ -197,6 +236,8 @@ void ParticleEmitter::create(const Particle& particle, const ParticleInitPropert
             p.position = generate(property);
             p.velocity = Random::vec3(property.velocity_min, property.velocity_max);
 
+            p.acceleration = Random::vec3(property.acc_min, property.acc_max);
+
             p.size    *= Random::Float(property.size_min,     property.size_max);
             p.lifetime = Random::Float(property.lifetime_min, property.lifetime_max);
 
@@ -287,6 +328,9 @@ void ParticleEmitter::update(const float dt) {
             }
         }
 
+        particle.rotation_angle += particle.angular_velocity * dt;
+        if (particle.rotation_angle > 360.0f) particle.rotation_angle -= 360.0f;
+
         particle.velocity += particle.acceleration * dt;
         particle.position += particle.velocity * dt;
     }
@@ -317,17 +361,19 @@ void ParticleEmitter::render() const {
         const glm::vec3 right = glm::normalize(glm::cross(up, cameraFront));
         const glm::vec3 front = glm::normalize(glm::cross(right, up));
 
+        const float cos = glm::cos(glm::radians(particle.rotation_angle));
+        const float sin = glm::sin(glm::radians(particle.rotation_angle));
+
+        const auto& newRight =  right * cos + up * sin;
+        const auto& newUp    = -right * sin + up * cos;
+
         // Billboarding
         glm::mat4 modelMatrix;
-        // modelMatrix[0] = glm::vec4(cameraRight * particle.size.x, 0.0f);
-        // modelMatrix[1] = glm::vec4(cameraUp    * particle.size.y, 0.0f);
-        // modelMatrix[2] = glm::vec4(cameraFront,                 0.0f);
-        // modelMatrix[3] = glm::vec4(particle.position,           1.0f);
 
-        modelMatrix[0] = glm::vec4(right * particle.size.x, 0.0f);
-        modelMatrix[1] = glm::vec4(up    * particle.size.y, 0.0f);
-        modelMatrix[2] = glm::vec4(front,                   0.0f);
-        modelMatrix[3] = glm::vec4(particle.position,       1.0f);
+        modelMatrix[0] = glm::vec4(newRight * particle.size.x, 0.0f);
+        modelMatrix[1] = glm::vec4(newUp    * particle.size.y, 0.0f);
+        modelMatrix[2] = glm::vec4(front,                      0.0f);
+        modelMatrix[3] = glm::vec4(particle.position,          1.0f);
         
         if (particleType == gfx::particles::TEXTURED) {
 

@@ -46,3 +46,16 @@ void updateTransform(ECS& ecs) {
         AABB.recompute(transform.model);
     }
 }
+
+void updateAnimSprites(AnimatedSprite& animSprite, const float dt) {
+
+    animSprite.timer += dt;
+
+    if (animSprite.timer > animSprite.transition_rate) {
+
+        const uint index = (animSprite.activeSprite + 1) % animSprite.total_sprites;
+        animSprite.activeSprite = animSprite.sprites[index];
+
+        animSprite.timer = 0.0f;
+    }
+}
