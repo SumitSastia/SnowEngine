@@ -29,8 +29,8 @@ namespace gfx::particles {
         // Fire.startColor = colors::BLUE;
         // Fire.endColor   = colors::LIGHT_BLUE;
 
-        Fire.size    = glm::vec2(0.1f);
-        Fire.maxSize = Fire.size;
+        Fire.size      = glm::vec2(0.1f);
+        Fire.startSize = Fire.size;
 
         Fire.lifetime = 1.2f;
         Fire.remainingLife = Fire.lifetime;
@@ -75,7 +75,7 @@ namespace gfx::particles {
         Rain.endColor   = colors::LIGHT_BLUE;
 
         Rain.size     = glm::vec2(0.1f, 0.2f);
-        Rain.maxSize  = Rain.size;
+        Rain.startSize  = Rain.size;
         
         Rain.lifetime = 3.5f;
         Rain.remainingLife = Rain.lifetime;
@@ -109,7 +109,7 @@ namespace gfx::particles {
         flash.endColor   = colors::BLACK;
 
         flash.size    = { 0.05f, 0.05f };
-        flash.maxSize = flash.size;
+        flash.startSize = flash.size;
 
         flash.lifetime = 0.1f;
         flash.remainingLife = flash.lifetime;
@@ -130,6 +130,54 @@ namespace gfx::particles {
 
         flashProperties.acc_min = flash.acceleration;
         flashProperties.acc_max = flash.acceleration;
+
+        //-------------------------------------------------------------------//
+
+        smoke.acceleration = glm::vec3(
+            Random::Float(0.1f),
+            0.2f,
+            Random::Float(0.1f)
+        );
+
+        smoke.velocity = glm::vec3(
+            0.0f, Random::Float(0.5f, 0.8f), 0.0f
+        );
+
+        smoke.startColor = colors::GRAY;
+        smoke.endColor   = colors::WHITE;
+
+        smoke.size    = glm::vec2(0.1f);
+
+        // smoke.startSize = glm::vec2(0.0f);
+        // smoke.endSize = glm::vec2(0.1f);
+
+        smoke.startSize = glm::vec2(0.01f);
+        smoke.endSize = glm::vec2(0.5f);
+
+        smoke.lifetime = 2.0f;
+        smoke.remainingLife = smoke.lifetime;
+        
+        smoke.rotation_angle   = 0.0f;
+        smoke.angular_velocity = 0.0f;
+
+        smokeProperties.spawnerType = gfx::particles::BOX;
+        // FireProperties.spawnerType = gfx::particles::SPHERE;
+
+        smokeProperties.center   = { 0.0f, 0.0f, 0.0f };
+        smokeProperties.box_size = { 0.1f, 0.1f, 0.1f };
+        // FireProperties.radius   = 1.0f;
+
+        smokeProperties.velocity_min = {-0.1f, 0.5f,-0.1f };
+        smokeProperties.velocity_max = { 0.1f, 0.8f, 0.1f };
+
+        smokeProperties.size_min = 1.0;
+        smokeProperties.size_max = 2.0;
+
+        smokeProperties.lifetime_min = smoke.lifetime;
+        smokeProperties.lifetime_max = 1.5 * smoke.lifetime;
+
+        smokeProperties.acc_min = glm::vec3(-0.1f, 0.1f,-0.1f);
+        smokeProperties.acc_max = glm::vec3( 0.1f, 0.4f, 0.1f);
     }
 };
 
@@ -213,7 +261,7 @@ void ParticleEmitter::create(const Particle& particle, const uint32_t count, con
                 p.size.y += Random::Float(0.1f, 0.2f) * p.size.y;
             }
             
-            p.maxSize       = p.size;
+            p.startSize       = p.size;
             p.remainingLife = p.lifetime;
 
             if (++amount == count) break;
@@ -241,7 +289,7 @@ void ParticleEmitter::create(const Particle& particle, const ParticleInitPropert
             p.size    *= Random::Float(property.size_min,     property.size_max);
             p.lifetime = Random::Float(property.lifetime_min, property.lifetime_max);
 
-            p.maxSize       = p.size;
+            p.startSize       = p.size;
             p.remainingLife = p.lifetime;
 
             if (++amount == property.total_count) break;
@@ -255,7 +303,7 @@ void ParticleEmitter::recreate(Particle& particle) {
     particle.velocity = Random::vec3(properties.velocity_min, properties.velocity_max);
     particle.lifetime = Random::Float(properties.lifetime_min, properties.lifetime_max);
 
-    particle.size = particle.maxSize;
+    particle.size = particle.startSize;
     particle.remainingLife = particle.lifetime;
 }
 
@@ -286,7 +334,7 @@ void ParticleEmitter::emit(const glm::vec3& position) {
 
             p.velocity = Random::vec3(10.0f);
             p.size     = glm::vec2(Random::Float(0.1f, 0.2f));
-            p.maxSize  = p.size;
+            p.startSize  = p.size;
 
             p.acceleration = Random::vec3(2.0f);
 
@@ -310,12 +358,12 @@ void ParticleEmitter::update(const float dt) {
         particle.remainingLife -= dt;
 
         float t = 1.0f - particle.remainingLife / particle.lifetime;
-        particle.color = glm::vec4(glm::mix(particle.startColor, particle.endColor, t), 1.0f);
+        particle.color = glm::mix(particle.startColor, particle.endColor, t);
 
-        // particle.size = glm::mix(particle.maxSize, 0.01f, t);
+        particle.size.x = glm::mix(particle.startSize.x, particle.endSize.x, t);
+        particle.size.y = glm::mix(particle.startSize.y, particle.endSize.y, t);
 
-        particle.size.x = glm::mix(particle.maxSize.x, 0.01f, t);
-        particle.size.y = glm::mix(particle.maxSize.y, 0.01f, t);
+        particle.alpha = glm::mix(1.0f, 0.0f, t);
 
         if (particle.remainingLife <= 0.0f) {
 
@@ -338,9 +386,8 @@ void ParticleEmitter::update(const float dt) {
 
 void ParticleEmitter::render() const {
 
-    const Shader& shader = *Shaders::get(gfx::shader::TETXURED_PARTICLE);
-    // const Shader& shader = *Shaders::get(gfx::shader::COLORED_PARTICLE);
-    shader.use();
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
 
     const MeshComponent& mesh = EntityShapes::instance().square;
 
@@ -350,8 +397,6 @@ void ParticleEmitter::render() const {
     const glm::vec3 cameraRight(view[0][0], view[1][0], view[2][0]);
     const glm::vec3 cameraUp   (view[0][1], view[1][1], view[2][1]);
     const glm::vec3 cameraFront(view[0][2], view[1][2], view[2][2]);
-
-    glEnable(GL_BLEND);
 
     for (const Particle& particle : particles) {
 
@@ -377,22 +422,29 @@ void ParticleEmitter::render() const {
         
         if (particleType == gfx::particles::TEXTURED) {
 
-            const Shader& shader = *Shaders::get(gfx::shader::TETXURED_PARTICLE);
+            // const Shader& shader = *ShaderManager::get(gfx::shader::TETXURED_PARTICLE);
+            const Shader& shader = ShaderManager::getUtil(gfx::shader::PARTICLE_TEXTURED);
             shader.use();
 
             shader.setMat4("finalMatrix", projection * view * modelMatrix);
+            shader.setFloat("alpha", particle.alpha);
+
             shader.setInt("particle", 0);
             AssetManager::getTexture(particleTexture).bind(0);
         }
         else {
 
-            const Shader& shader = *Shaders::get(gfx::shader::COLORED_PARTICLE);
+            // const Shader& shader = *ShaderManager::get(gfx::shader::COLORED_PARTICLE);
+            const Shader& shader = ShaderManager::getUtil(gfx::shader::PARTICLE_COLORED);
             shader.use();
 
             shader.setMat4("finalMatrix", projection * view * modelMatrix);
-            shader.setVec4("color", particle.color);
+            shader.setFloat("alpha", particle.alpha);
+            shader.setVec3("color", particle.color);
         }
 
         mesh.draw();
     }
+
+    glDepthMask(GL_TRUE);
 }

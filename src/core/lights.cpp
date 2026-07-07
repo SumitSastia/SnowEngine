@@ -39,7 +39,7 @@ void DefaultLights::update() {
 LightSource::LightSource() {
 
     src      = DefaultLights::instance().cubelight;
-    srcShape = new Shape(DefaultShapes::instance().cube.copy());
+    // srcShape = new Shape(DefaultShapes::instance().cube.copy());
 }
 
 void LightSource::setX(const float& x) {
@@ -55,5 +55,5 @@ void LightSource::setZ(const float& z) {
 }
 
 void LightSource::draw() const {
-    srcShape->draw();
+    // srcShape->draw();
 }

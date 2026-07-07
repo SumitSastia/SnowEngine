@@ -51,7 +51,7 @@ A custom game engine written in C++ and OpenGL, developed to explore modern rend
 ### Linux
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/SumitSastia/SnowEngine.git
 cd SnowEngine
 
 mkdir build

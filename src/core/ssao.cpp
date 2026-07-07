@@ -22,13 +22,16 @@ bool SSAO::enable = false;
 
 void SSAO::init() {
 
+    shader = new Shader();
+    shaderBlur = new Shader();
+
     // Shader
-    shader = new Shader(
+    shader->loadFromFile(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/ssao/ssao.frag"
     );
 
-    shaderBlur = new Shader(
+    shaderBlur->loadFromFile(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/ssao/ssaoBlur.frag"
     );

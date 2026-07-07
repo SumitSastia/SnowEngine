@@ -3,12 +3,12 @@
 #include <renderer.h>
 #include <shapes.h>
 #include <frame.h>
+#include <cubemap.h>
 
 #include <stb_image.h>
 #include <debug/assert.h>
 
 #include <iostream>
-#include <thread>
 
 IBLFrame::IBLFrame(const char* path, const uint16_t resolution): isInit(false) {
 
@@ -34,22 +34,27 @@ IBLFrame::IBLFrame(const char* path, const uint16_t resolution): isInit(false) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    shader = new Shader(
+    shader = new Shader();
+    shaderBlur = new Shader();
+    shaderPrefilter = new Shader();
+    shaderBRDF = new Shader();
+
+    shader->loadFromFile(
         "../shaders/cubeMap/rect2cube.vert",
         "../shaders/cubeMap/rect2cube.frag"
     );
 
-    shaderBlur = new Shader(
+    shaderBlur->loadFromFile(
         "../shaders/cubeMap/env.vert",
         "../shaders/cubeMap/convolution.frag"
     );
 
-    shaderPrefilter = new Shader(
+    shaderPrefilter->loadFromFile(
         "../shaders/cubeMap/env.vert",
         "../shaders/cubeMap/prefilter.frag"
     );
 
-    shaderBRDF = new Shader(
+    shaderBRDF->loadFromFile(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/cubeMap/brdf.frag"
     );

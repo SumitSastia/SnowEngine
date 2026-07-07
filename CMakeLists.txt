@@ -20,7 +20,7 @@ set(
     src/core/main.cpp
     src/core/shader.cpp
     src/core/camera.cpp
-    src/core/shapes.cpp
+    # src/core/shapes.cpp
     src/core/renderer.cpp
     src/core/input.cpp
     src/core/lights.cpp
@@ -32,6 +32,7 @@ set(
     src/core/frustum.cpp
     src/core/assetManager.cpp
     src/core/texture.cpp
+    src/core/cubemap.cpp
 )
 
 set(

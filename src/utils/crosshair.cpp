@@ -44,7 +44,8 @@ void Crosshair::init() {
 
 void Crosshair::render(const glm::vec3& color) {
 
-    const Shader& shader = *Shaders::getLineShader();
+    // const Shader& shader = *ShaderManager::getLineShader();
+    const Shader& shader = ShaderManager::getUtil(gfx::shader::LINE);
 
     shader.use();
     shader.setVec3("color", color);

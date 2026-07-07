@@ -45,7 +45,7 @@ int main() {
 
     SSAO::init();
     
-    Shaders::initShaders();
+    ShaderManager::initShaders();
     AssetManager::init();
     Line::init();
     Crosshair::init();
@@ -72,14 +72,14 @@ int main() {
 
     // Scene1* scene1 = new Scene1();
     // Scene* mainScene = scene1;
-    DebugMenu::log("Time taken to initialize - scene1: " + t.end());
+    // DebugMenu::log("Time taken to initialize - scene1: " + t.end());
 
     // running::time::startInterval();
     Scene2* scene2   = new Scene2();
     // Scene* mainScene = scene2;
     // std::cout << "Time taken to initialize - scene2: " << running::time::endInterval() << std::endl;
 
-    DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
+    // DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
     HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
     // BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
 

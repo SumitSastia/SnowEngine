@@ -12,8 +12,6 @@ const uint8_t MAX_SHADERS = 8;
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-class IBLFrame;
-
 namespace lights {
 
     struct DirectionalLight;
@@ -21,36 +19,12 @@ namespace lights {
     struct SpotLight;
 }
 
-namespace gfx::cubemap {
-
-    class Cube {
-
-        static unsigned int vbo, vao;
-        Cube();
-
-    public:
-
-        static const unsigned int getVAO() {
-
-            static Cube instance {};
-            return instance.vao;
-        }
-
-        static void draw() {
-
-            glBindVertexArray(vao);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glBindVertexArray(0);
-        }
-    };
-
-};
-
 // ------------------------------ Classes -------------------------------------------- //
 
 class Shader {
 
-    unsigned int shaderProgram;
+    unsigned int shaderProgram = 0u;
+    
     static std::string loadShaderFile(const char* path);
     static std::string preprocessFile(const char* path);
 
@@ -58,26 +32,34 @@ class Shader {
     Compile Shaders
     @note Both parameters requires string of Shader Source.
     */
-    Shader(const std::string vertexStr, const std::string fragmentStr);
+    // Shader(const std::string vertexStr, const std::string fragmentStr);
 
 public:
 
-    Shader(const char* vertPath, const char* fragPath): 
-        Shader(loadShaderFile(vertPath), loadShaderFile(fragPath)) {
-    }
+    Shader() = default;
+    
+    void loadFromFile(const char* vertPath, const char* fragPath, const bool preprocess = false);
+    void loadFromFile(const char* vertPath, const char* geomPath, const char* fragPath);
 
-    // Preprocess header files, (if #include <> is present)
-    Shader(const char* vertPath, const char* fragPath, const bool preprocess):
-        Shader(loadShaderFile(vertPath), preprocessFile(fragPath)) {
-    }
+    void loadFromString(const std::string& vertStr, const std::string& fragStr);
+    void loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr);
+
+    // Shader(const char* vertPath, const char* fragPath): 
+    //     Shader(loadShaderFile(vertPath), loadShaderFile(fragPath)) {
+    // }
+
+    // // Preprocess header files, (if #include <> is present)
+    // Shader(const char* vertPath, const char* fragPath, const bool preprocess):
+    //     Shader(loadShaderFile(vertPath), preprocessFile(fragPath)) {
+    // }
 
     /*
     Vertex -> Geometry -> Fragment
     @note No preprocess functionality.
     */
-    Shader(const char* vertPath, const char* geomPath, const char* fragPath);
+    // Shader(const char* vertPath, const char* geomPath, const char* fragPath);
 
-    const unsigned int getShader() const { return shaderProgram; }
+    const unsigned int& getShader() const { return shaderProgram; }
 
     void use() const;
     void destroy();
@@ -98,131 +80,9 @@ public:
     void setDirectionalLight(const std::string& target, const lights::DirectionalLight& dl) const;
 };
 
-class Texture2D {
-
-    int width  = 0;
-    int height = 0;
-    
-    unsigned int textureID = 0;
-    
-public:
-
-    Texture2D() = default;
-
-    // Texture2D(uint textureID): textureID(textureID) {}
-
-    Texture2D(const char* path, const bool format = 0) {
-        load(path, format);
-    }
-
-    /*
-    Loads the image and allocate it into the Memory.
-    NOTE: "path" should start with '/' and rest should continue after the Main Directory (/SnowEngine).
-    @param format 0 - GL_RGB, 1 - GL_SRGB
-    */
-    void load(const char* path, const bool format = 0);
-    void bind(const unsigned int textureUnit) const;
-
-    void setID(uint textureID) { this->textureID = textureID; }
-    void destroy();
-
-    const unsigned int& getID()  const { return textureID; }
-};
-
-class CubeMap {
-    
-    unsigned int textureID;
-
-public:
-
-    /* 
-    Cubemap with custom modifications 
-    @param internal_format GL_RGB / GL_SRGB / GL_RGB16F (for HDR)
-    @param type GL_UNSIGNED_BYTE / GL_FLOAT
-    @param res_size Resolution of the Texture
-    */
-    CubeMap(const std::vector <std::string>& textureFaces, const uint16_t internal_format, const uint16_t type, const uint16_t res_size);
-
-    /* Cubemap designed for Irradiance Maps. @param res_size Resolution of the Irradiance Map */
-    CubeMap(const std::vector <std::string>& textureFaces, const uint16_t res_size) : CubeMap(textureFaces, GL_RGB, GL_UNSIGNED_BYTE, res_size) {}
-
-    /* General purpose cubemap */
-    CubeMap(const std::vector <std::string>& textureFaces) : CubeMap(textureFaces, GL_SRGB8, GL_UNSIGNED_BYTE, 0) {}
-
-    void bindTexture(const unsigned int textureUnit) const;
-    void destroy();
-};
-
-class Skybox {
-
-    CubeMap* _cubeMap;
-    CubeMap* _irradianceMap;
-    
-    bool  isVisible;
-    float lightIntensity;
-
-public:
-
-    Skybox(const std::vector <std::string>& textureFaces);
-
-    void setVisibility(const bool visible) { isVisible = visible; }
-    bool getVisibility() const { return isVisible; }
-
-    void  setIntensity(const float intensity) { lightIntensity = intensity; }
-    float getIntensity() const { return lightIntensity; }
-
-    void setIrradianceMap(const std::vector <std::string>& textureFaces);
-
-    void bindTexture(const unsigned int textureUnit) const;
-    void bindIrradiance(const unsigned int textureUni) const;
-
-    void draw() const;
-    void destroy();
-};
-
-class Environment {
-
-    CubeMap* m_cubeMap;
-    CubeMap* m_irradianceMap;
-    
-    bool isVisible;
-
-    IBLFrame* iblFrame;
-
-public:
-
-    Environment(const char* path, const uint16_t resolution = 512);
-    Environment(const std::vector <std::string>& textureFaces);
-
-    void setVisibility(const bool visible) { isVisible = visible; }
-    bool getVisibility() const { return isVisible; }
-
-    // @note IrradianceMap is auto-generated by default.
-    // Use this function if irradiance map textures (images) are available.
-    void setIrradianceMap(const std::vector <std::string>& textureFaces);
-
-    void bindTexture(const unsigned int textureUnit) const;
-    void bindIrradiance(const unsigned int textureUni) const;
-    void bindPrefilter(const unsigned int textureUnit) const;
-    void bindBRDF(const unsigned int textureUnit) const;
-
-    void draw() const;
-    void destroy();
-};
-
 // ------------------------------ Colors --------------------------------------------- //
 
 namespace colors {
-
-    // const glm::vec3 RED    { 1.000f, 0.000f, 0.000f };
-    // const glm::vec3 ORANGE { 0.945f, 0.352f, 0.133f };
-    // const glm::vec3 YELLOW { 1.000f, 1.000f, 0.000f };
-    // const glm::vec3 GREEN  { 0.000f, 1.000f, 0.000f };
-    // const glm::vec3 BLUE   { 0.000f, 0.000f, 1.000f };
-    // const glm::vec3 PINK   { 0.890f, 0.239f, 0.580f };
-    // const glm::vec3 WHITE  { 1.000f, 1.000f, 1.000f };
-    // const glm::vec3 BLACK  { 0.000f, 0.000f, 0.000f };
-    // const glm::vec3 GRAY   { 0.392f, 0.392f, 0.392f };
 
     const glm::vec3 RED        { 1.000f, 0.000f, 0.000f };
     const glm::vec3 PINK       { 0.773f, 0.042f, 0.301f };
@@ -279,6 +139,35 @@ enum shaderNames {
 
 namespace gfx::shader {
 
+    enum shaders : uint8_t {
+
+        ALBEDO,
+        PHONG,
+        PHONG_NORM,
+        PHONG_INSTANCE,
+        PBR,
+        PBR_NORM,
+        PBR_INSTANCE,
+        GBUFFER,
+        GBUFFER_NORM,
+        GBUFFER_INSTANCE,
+        PARALLAX,
+
+        SHADER_TOTAL_COUNT
+    };
+
+    enum shadersUtil : uint8_t {
+        
+        LINE,
+        LIGHT,
+        WIREFRAME,
+        ENVIRONMENT,
+        PARTICLE_COLORED,
+        PARTICLE_TEXTURED,
+
+        SHADERUTIL_TOTAL_COUNT
+    };
+
     enum special {
         COLORED_PARTICLE,
         TETXURED_PARTICLE,
@@ -287,13 +176,13 @@ namespace gfx::shader {
     };
 };
 
-struct shader_paths {
+struct ShaderPath {
 
     std::string vert;
     std::string frag;
     bool preprocess;
 
-    shader_paths(
+    ShaderPath(
         const std::string& vert,
         const std::string& frag,
         const bool preprocess = false
@@ -303,13 +192,13 @@ struct shader_paths {
     }
 };
 
-class Shaders {
+class ShaderManager {
 
     static std::vector <bool>    isLoaded;
     static std::vector <Shader*> loadedShaders;
 
-    static std::vector <bool>         preprocess;
-    static std::vector <shader_paths> path;
+    static std::vector <bool>       preprocess;
+    static std::vector <ShaderPath> path;
 
     static std::vector <Shader*> specialShaders;
 
@@ -319,8 +208,16 @@ class Shaders {
     static Shader* pointLightShadow_instanced;
     static Shader* directLightShadow_instanced;
 
-    static Shader* lineShader;
-    static Shader* particleShader;
+    // static Shader* lineShader;
+    // static Shader* particleShader;
+
+    static std::vector <ShaderPath> path3D;
+    static std::vector <ShaderPath> path2D;
+    static std::vector <ShaderPath> pathUtil;
+
+    static std::vector <Shader> lShaders3D;
+    static std::vector <Shader> lShaders2D;
+    static std::vector <Shader> lShadersUtil;
 
 public:
 
@@ -332,11 +229,15 @@ public:
     static Shader* getPointLightShadow_Instanced() { return pointLightShadow_instanced; }
     static Shader* getDirectLightShadow_Instanced() { return directLightShadow_instanced; }
 
-    static Shader* getLineShader() { return lineShader; }
-    static Shader* getParticleShader() { return particleShader; }
+    // static Shader* getLineShader() { return lineShader; }
+    // static Shader* getParticleShader() { return particleShader; }
 
-    static Shader* get(shaderNames shader);
+    // static Shader* get(shaderNames shader);
     static Shader* get(gfx::shader::special shader);
+
+    static Shader& get3D(const gfx::shader::shaders index);
+    static Shader& get2D(const gfx::shader::shaders index);
+    static Shader& getUtil(const gfx::shader::shadersUtil index);
     
     static uint32_t totat() { return SHADER_COUNT; }
 };

@@ -29,6 +29,38 @@ void FrameBuffer::destroy() {
     glDeleteFramebuffers(1, &fbo);
 }
 
+void DepthFrame::create(const UintRes frameWidth, const UintRes frameHeight) {
+
+    width  = frameWidth;
+    height = frameHeight;
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    glGenTextures(1, &depth_texture);
+    glBindTexture(GL_TEXTURE_2D, depth_texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+        width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
+
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "ERROR: DepthFrame-Buffer incomplete!" << std::endl;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 DebugFrame::DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
     glGenFramebuffers(1, &fbo);
@@ -71,10 +103,10 @@ DebugFrame::DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) 
 
 void DebugFrame::init() {
 
-    shader = new Shader(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/frameBuffs/default_fb.frag"
-    );
+    // shader = new Shader(
+    //     "../shaders/frameBuffs/default_fb.vert",
+    //     "../shaders/frameBuffs/default_fb.frag"
+    // );
 }
 
 void DebugFrame::render() const {
@@ -225,7 +257,14 @@ HDRFrame::HDRFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
 void HDRFrame::init() {
 
-    shader = new Shader(
+    // shader = new Shader(
+    //     "../shaders/frameBuffs/default_fb.vert",
+    //     "../shaders/frameBuffs/hdr_frame.frag"
+    // );
+
+    shader = new Shader();
+
+    shader->loadFromFile(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/frameBuffs/hdr_frame.frag"
     );
@@ -313,10 +352,10 @@ BloomFrame::BloomFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) 
 
     _blur = new BlurFrame(frameWidth, frameHeight);
 
-    shader = new Shader(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/frameBuffs/bloom.frag"
-    );
+    // shader = new Shader(
+    //     "../shaders/frameBuffs/default_fb.vert",
+    //     "../shaders/frameBuffs/bloom.frag"
+    // );
 }
 
 void BloomFrame::render() const {
@@ -379,10 +418,10 @@ BlurFrame::BlurFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongTex[i], 0);
     }
 
-    shader = new Shader(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/frameBuffs/blur.frag"
-    );
+    // shader = new Shader(
+    //     "../shaders/frameBuffs/default_fb.vert",
+    //     "../shaders/frameBuffs/blur.frag"
+    // );
 }
 
 Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {
@@ -440,7 +479,9 @@ Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    shader = new Shader(
+    shader = new Shader();
+
+    shader->loadFromFile(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/frameBuffs/deferred.frag", true
     );

@@ -79,7 +79,9 @@ bool Text::init(const char* path) {
     FT_Done_Face(font);
     FT_Done_FreeType(ft);
 
-    shader = new Shader(
+    shader = new Shader();
+
+    shader->loadFromFile(
         "../shaders/text/text.vert",
         "../shaders/text/text.frag"
     );

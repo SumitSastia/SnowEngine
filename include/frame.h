@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <core/config.h>
+
 class Shader;
 
 namespace gfx::internal {
@@ -64,7 +66,13 @@ protected:
 
     unsigned int fbo;
 
+	UintRes width;
+	UintRes height;
+
 public:
+
+	const UintRes& getWidth()  const { return width; }
+	const UintRes& getHeight() const { return height; }
 
 	void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
 
@@ -73,6 +81,13 @@ public:
     virtual void init() = 0;
     virtual void render() const = 0;
     virtual void destroy();
+};
+
+class DepthFrame : public FrameBuffer {
+
+	unsigned int depth_texture;
+
+	void create(const UintRes frameWidth, const UintRes frameHeight);
 };
 
 class DebugFrame : public FrameBuffer {

@@ -3,14 +3,14 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#define MAX_PARTICLES 1000u
+#define MAX_PARTICLES 10000u
 #define PARTICLE_SPEED 1.0f
 
 #include <core/config.h>
 
 struct Particle {
 
-    glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glm::vec3 color = { 1.0f, 1.0f, 1.0f };
     
     glm::vec3 position;
     glm::vec3 velocity;
@@ -20,8 +20,10 @@ struct Particle {
     glm::vec3 endColor;
 
     glm::vec2 size;
-    glm::vec2 maxSize;
+    glm::vec2 startSize = { 1.00f, 1.00f };
+    glm::vec2 endSize   = { 0.01f, 0.01f };
 
+    float alpha = 1.0f;
     float shrinking_rate; // slope, currently linear
 
     float lifetime;
@@ -84,7 +86,7 @@ enum random_flags : uint8_t {
 
 namespace gfx::particles {
 
-    enum Type {
+    enum Type : uint8_t {
         COLORED,
         TEXTURED
     };
@@ -125,12 +127,12 @@ namespace gfx::particles {
 
     inline Particle Fire;
     inline Particle Rain;
-    inline Particle Smoke;
+    inline Particle smoke;
     inline Particle flash;
 
     inline ParticleInitProperties FireProperties;
     inline ParticleInitProperties RainProperties;
-    inline ParticleInitProperties SmokeProperties;
+    inline ParticleInitProperties smokeProperties;
     inline ParticleInitProperties flashProperties;
     
     void init();

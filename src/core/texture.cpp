@@ -10,8 +10,6 @@
 #include <glad/glad.h>
 #include <glm/gtx/quaternion.hpp>
 
-#include <filesystem>
-
 void Texture::load(const uint32_t color, const bool isRGBA) {
 
     width  = 1;
@@ -112,7 +110,8 @@ void Line::renderHelper(
     const glm::mat4& model,
     const glm::vec3& color
 ) {
-    const Shader& shader = *Shaders::getLineShader();
+    // const Shader& shader = *ShaderManager::getLineShader();
+    const Shader& shader = ShaderManager::getUtil(gfx::shader::LINE);
 
     shader.use();
 
@@ -166,3 +165,5 @@ void Line::renderDirection(
 
     renderHelper(modelMatrix, color);
 }
+
+//-------------------------------------------------------------------------------------//

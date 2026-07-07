@@ -10,6 +10,8 @@
 #include <input.h>
 #include <frustum.h>
 
+#include <cubemap.h>
+
 #include <iostream>
 
 void RenderSystem::bindCameraGlobals(const Shader* shader) {
@@ -316,6 +318,8 @@ void RenderSystem::renderLights(const ECS& ecs) {
 
 void RenderSystem::renderTransparent(const ECS& ecs) {
 
+    glEnable(GL_BLEND);
+
     const EntityManager&    entityManager    = ecs.entityManager;
     const ComponentManager& componentManager = ecs.componentManager;
 
@@ -344,7 +348,8 @@ void RenderSystem::drawWireframe(
     if (Input::isKeyDown(GLFW_KEY_Y)) toggle = !toggle;
 
     if (toggle) {
-        const Shader& shader = *Shaders::get(WIREFRAME);
+        // const Shader& shader = *ShaderManager::get(WIREFRAME);
+        const Shader& shader = ShaderManager::getUtil(gfx::shader::WIREFRAME);
     
         shader.use();
         bindCameraGlobals(&shader);
@@ -368,7 +373,8 @@ void RenderSystem::drawWireframe(
     if (Input::isKeyDown(GLFW_KEY_Y)) toggle = !toggle;
 
     if (toggle) {
-        const Shader& shader = *Shaders::get(WIREFRAME);
+        // const Shader& shader = *ShaderManager::get(WIREFRAME);
+        const Shader& shader = ShaderManager::getUtil(gfx::shader::WIREFRAME);
     
         shader.use();
         bindCameraGlobals(&shader);
@@ -783,8 +789,8 @@ void ShadowSystem::render(const ECS& ecs) {
     const ComponentManager& componentManager = ecs.componentManager;
 
     Shader shader[2] = {
-        *Shaders::getPointLightShadow(),
-        *Shaders::getPointLightShadow_Instanced()
+        *ShaderManager::getPointLightShadow(),
+        *ShaderManager::getPointLightShadow_Instanced()
     };
 
     for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
@@ -893,8 +899,8 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
     for (const DirectShadowData& directShadow : componentManager.directShadowFrames) {
 
         const Shader shader[2] = {
-            *Shaders::getDirectLightShadow(),
-            *Shaders::getDirectLightShadow_Instanced()
+            *ShaderManager::getDirectLightShadow(),
+            *ShaderManager::getDirectLightShadow_Instanced()
         };
 
         for (uint8_t i = 0; i < 2; i++) {

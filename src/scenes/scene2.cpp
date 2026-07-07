@@ -6,6 +6,7 @@
 #include <systems/update.h>
 #include <assetManager.h>
 #include <math/random.h>
+#include <cubemap.h>
 
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -112,13 +113,15 @@ void Scene2::init() {
         DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
         
         MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR3D);
+        // material.shader = ShaderManager::get(NORMPBR3D);
+        material.shader = &ShaderManager::get3D(gfx::shader::PBR_NORM);
         
         material.albedo = AssetManager::loadTexture("assets/textures/wood_box.png");
         // material.albedo = AssetManager::loadTexture_flatColor(glm::vec4(colors::WHITE, 1.0f));
         material.normal = AssetManager::loadTexture("assets/textures/wood_box_normal.png", 1);
         
-        material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+        // material.gbufferShader = ShaderManager::get(GBUFFERNORM_3D);
+        material.gbufferShader = &ShaderManager::get3D(gfx::shader::GBUFFER_NORM);
         
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -152,12 +155,12 @@ void Scene2::init() {
     //     mesh = EntityShapes::instance().cubeNorm;
         
     //     MaterialComponent material;
-    //     material.shader = Shaders::get(NORMPBR3D);
+    //     material.shader = ShaderManager::get(NORMPBR3D);
         
     //     material.albedo = componentManager.get<MaterialComponent>(wood_box).albedo;
     //     material.normal = componentManager.get<MaterialComponent>(wood_box).normal;
         
-    //     material.gbufferShader = Shaders::get(GBUFFERNORM_3D);
+    //     material.gbufferShader = ShaderManager::get(GBUFFERNORM_3D);
         
     //     material.metallic  = material.albedo;
     //     material.roughness = material.albedo;
@@ -194,7 +197,8 @@ void Scene2::init() {
         MeshComponent mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR2D);
+        // material.shader = ShaderManager::get(NORMPBR2D);
+        material.shader = &ShaderManager::get2D(gfx::shader::PBR_NORM);
 
         material.albedo   = AssetManager::loadTexture("assets/textures/brickwall.jpg");
         material.normal   = AssetManager::loadTexture("assets/textures/brickwall_normal.png", 1);
@@ -203,7 +207,8 @@ void Scene2::init() {
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
 
-        material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
+        // material.gbufferShader = ShaderManager::get(GBUFFERNORM_2D);
+        material.gbufferShader = &ShaderManager::get2D(gfx::shader::GBUFFER_NORM);
 
         BoundingSphereComponent boundingSphere;
         boundingSphere.center = glm::vec3(transform.model.getMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -231,12 +236,14 @@ void Scene2::init() {
         MeshComponent mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader   = Shaders::get(NORMPBR2D);
+        // material.shader   = ShaderManager::get(NORMPBR2D);
+        material.shader = &ShaderManager::get2D(gfx::shader::PBR_NORM);
         material.albedo   = componentManager.get<MaterialComponent>(floor).albedo;
         material.normal   = componentManager.get<MaterialComponent>(floor).normal;
         material.specular = componentManager.get<MaterialComponent>(floor).specular;
 
-        material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
+        // material.gbufferShader = ShaderManager::get(GBUFFERNORM_2D);
+        material.gbufferShader = &ShaderManager::get2D(gfx::shader::GBUFFER_NORM);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -267,8 +274,11 @@ void Scene2::init() {
         MeshComponent mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(PARALLAX2D);
-        // material.gbufferShader = Shaders::get(GBUFFERNORM_2D);
+        // material.shader = ShaderManager::get(PARALLAX2D);
+        // material.gbufferShader = ShaderManager::get(GBUFFERNORM_2D);
+
+        material.shader = &ShaderManager::get2D(gfx::shader::PARALLAX);
+        material.gbufferShader = &ShaderManager::get2D(gfx::shader::GBUFFER_NORM);
         
         material.albedo = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2.jpg");
         material.normal = AssetManager::loadTexture("assets/textures/parallax_maps/bricks2_normal.jpg", true);
@@ -301,8 +311,11 @@ void Scene2::init() {
         transform.computeModel();
 
         MaterialComponent material;
-        material.shader = Shaders::get(NORMPBR3D);
-        material.gbufferShader = Shaders::get(GBUFFER3D);
+        // material.shader = ShaderManager::get(NORMPBR3D);
+        // material.gbufferShader = ShaderManager::get(GBUFFER3D);
+
+        material.shader = &ShaderManager::get3D(gfx::shader::PBR_NORM);
+        material.gbufferShader = &ShaderManager::get3D(gfx::shader::GBUFFER_NORM);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -329,8 +342,8 @@ void Scene2::init() {
     //     transform.computeModel();
 
     //     MaterialComponent material;
-    //     material.shader        = Shaders::get(NORMPBR3D);
-    //     material.gbufferShader = Shaders::get(GBUFFER3D);
+    //     material.shader        = ShaderManager::get(NORMPBR3D);
+    //     material.gbufferShader = ShaderManager::get(GBUFFER3D);
 
     //     material.metallic  = material.albedo;
     //     material.roughness = material.albedo;
@@ -387,8 +400,11 @@ void Scene2::init() {
         transform.local_scale    = glm::vec3(0.5f);
 
         MaterialComponent material;
-        material.shader = Shaders::get(PHONG3D);
-        material.gbufferShader = Shaders::get(GBUFFER3D);
+        // material.shader = ShaderManager::get(PHONG3D);
+        // material.gbufferShader = ShaderManager::get(GBUFFER3D);
+
+        material.shader = &ShaderManager::get3D(gfx::shader::PHONG);
+        material.gbufferShader = &ShaderManager::get3D(gfx::shader::GBUFFER);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -417,13 +433,15 @@ void Scene2::init() {
     // cubes
     {
         MaterialComponent material;
-        material.shader = Shaders::get(INSTANCEPBR3D);
+        // material.shader = ShaderManager::get(INSTANCEPBR3D);
+        material.shader = &ShaderManager::get3D(gfx::shader::PBR_INSTANCE);
         material.albedo = AssetManager::loadTexture("assets/textures/grunge-box-small.jpg");
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
 
-        material.gbufferShader = Shaders::get(INSTANCE_GBUFFER3D);
+        // material.gbufferShader = ShaderManager::get(INSTANCE_GBUFFER3D);
+        material.gbufferShader = &ShaderManager::get3D(gfx::shader::GBUFFER_INSTANCE);
 
         const InstanceComponent& instance = EntityShapes::instance().cubes;
         
@@ -444,7 +462,8 @@ void Scene2::init() {
         MeshComponent mesh = EntityShapes::instance().cube;
 
         MaterialComponent material;
-        material.shader = Shaders::get(LIGHT3D);
+        // material.shader = ShaderManager::get(LIGHT3D);
+        material.shader = &ShaderManager::getUtil(gfx::shader::LIGHT);
 
         PointLightComponent pointlight;
         pointlight.color     = colors::YELLOW;
@@ -476,7 +495,8 @@ void Scene2::init() {
         MeshComponent mesh = EntityShapes::instance().cube;
 
         MaterialComponent material;
-        material.shader = Shaders::get(LIGHT3D);
+        // material.shader = ShaderManager::get(LIGHT3D);
+        material.shader = &ShaderManager::getUtil(gfx::shader::LIGHT);
 
         PointLightComponent pointlight;
         pointlight.color     = 2.0f * colors::PINK;
@@ -511,8 +531,11 @@ void Scene2::init() {
         transform.computeModel();
 
         MaterialComponent material;
-        material.shader = Shaders::get(PBR3D);
-        material.gbufferShader = Shaders::get(GBUFFER3D);
+        // material.shader = ShaderManager::get(PBR3D);
+        // material.gbufferShader = ShaderManager::get(GBUFFER3D);
+
+        material.shader = &ShaderManager::get3D(gfx::shader::PBR);
+        material.gbufferShader = &ShaderManager::get3D(gfx::shader::GBUFFER);
 
         ModelComponent model = AssetManager::loadModel("assets/models/campfire/campfire.obj");
         
@@ -530,7 +553,7 @@ void Scene2::init() {
     // flameSprite
     {
         TransformComponent transform;
-        transform.position = glm::vec3(-1.0f, -1.0f, 1.0f);
+        transform.position = glm::vec3(-1.0f, -0.95f, 1.0f);
         transform.rotation = glm::vec3(0.0f);
         transform.scale    = glm::vec3(1.0f);
 
@@ -539,8 +562,11 @@ void Scene2::init() {
         MeshComponent mesh = EntityShapes::instance().square;
 
         MaterialComponent material;
-        material.shader = Shaders::get(ALBEDO2D);
-        material.gbufferShader = Shaders::get(GBUFFER2D);
+        // material.shader = ShaderManager::get(ALBEDO2D);
+        // material.gbufferShader = ShaderManager::get(GBUFFER2D);
+
+        material.shader = &ShaderManager::get2D(gfx::shader::ALBEDO);
+        material.gbufferShader = &ShaderManager::get2D(gfx::shader::GBUFFER);
         
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -588,8 +614,11 @@ void Scene2::init() {
         transform.computeModel();
 
         MaterialComponent material;
-        material.shader = Shaders::get(PHONG3D);
-        material.gbufferShader = Shaders::get(GBUFFER3D);
+        // material.shader = ShaderManager::get(PHONG3D);
+        // material.gbufferShader = ShaderManager::get(GBUFFER3D);
+
+        material.shader = &ShaderManager::get3D(gfx::shader::PHONG);
+        material.gbufferShader = &ShaderManager::get3D(gfx::shader::GBUFFER);
 
         material.metallic  = material.albedo;
         material.roughness = material.albedo;
@@ -616,12 +645,6 @@ void Scene2::init() {
     camChild.children = { gun };
     componentManager.addComponent(mainCamera, camChild);
 
-    DebugMenu::printAssetsInitTime();
-
-    // Multi-threaded Work
-    AssetManager::compileTextures();
-    DebugMenu::log("Texture Compilation: " + running::globalTimer::endInterval());
-
     // CampFire
     Particle fire = gfx::particles::Fire;
     const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
@@ -632,15 +655,35 @@ void Scene2::init() {
 
     ParticleInitProperties property = gfx::particles::FireProperties;
     property.center = fire.position;
-    property.total_count = 1000;
+    property.total_count = 10;
 
-    // fire_emitter.create(fire, property);
+    // Smoke
+    Particle smoke = gfx::particles::smoke;
+    ParticleInitProperties smoke_property = gfx::particles::smokeProperties;
+
+    smoke.isLooping = true;
+    smoke_property.center = fire.position + glm::vec3(0.0f, 1.0f, 0.0f);
+    smoke_property.total_count = 100;
+
+    smoke_emitter.particleType = gfx::particles::TEXTURED;
+    smoke_emitter.setTexture(AssetManager::loadTexture("assets/particles/smoke_01.png", true));
+
+    fire_emitter.create(fire, property);
+    smoke_emitter.create(smoke, smoke_property);
+
+    // LAST INITIALIZATION WORK //
+
+    DebugMenu::printAssetsInitTime();
+
+    // Multi-threaded Work
+    AssetManager::compileTextures();
+    DebugMenu::log("Texture Compilation: " + running::globalTimer::endInterval());
 }
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {
 
-    static Entity  entity = 0;
-    const  float   move_speed    = scene_var::speed * delta_time;
+    static Entity entity = 0;
+    const  float  move_speed = scene_var::speed * delta_time;
 
     // Model of the Object to move
 
@@ -713,21 +756,6 @@ void Scene2::input(GLFWwindow* window, const float& delta_time) {
     if (Input::isKeyDown(GLFW_KEY_V)) {
         Camera::activeCamera = &ecs.componentManager.get<CameraComponent>(mainCamera).camera;
     }
-    
-    // if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-
-    //     const float length = 10.0f;
-    //     // const glm::vec3 position = Camera::activeCamera->getPos() + glm::normalize(Camera::activeCamera->getTarget()) * length;
-    //     const glm::vec3& position = ecs.componentManager.get<TransformComponent>(gun).position;
-
-    //     // bullet_emitter.emit(position);
-    //     // bullet_emitter.emit(gun_muzzle);
-
-    //     Particle fire = gfx::particles::Fire;
-    //     fire.position = gun_muzzle + position;
-
-    //     fire_emitter.create(fire, 10);
-    // }
 }
 
 void Scene2::update(const float deltaTime) {
@@ -818,6 +846,7 @@ void Scene2::update(const float deltaTime) {
     fire_emitter.update(deltaTime);
     rain_emitter.update(deltaTime);
     bullet_emitter.update(deltaTime);
+    smoke_emitter.update(deltaTime);
 
     // const glm::vec3& position = ecs.componentManager.get<TransformComponent>(wood_box).position;
     // std::cout << "Position: " << position.x << "," << position.y << "," << position.z << '\n';
@@ -841,7 +870,7 @@ void Scene2::renderLight() const {
 
         glDepthFunc(GL_LEQUAL);
 
-        const Shader& shader = *Shaders::get(ENVIRONMENT);
+        const Shader& shader = ShaderManager::getUtil(gfx::shader::ENVIRONMENT);
         shader.use();
 
         shader.setMat4("projection", Camera::activeCamera->getProjection());
@@ -857,11 +886,12 @@ void Scene2::renderLight() const {
     const CameraComponent& cameraComponent = ecs.componentManager.get<CameraComponent>(mainCamera);
     if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
 
+    RenderSystem::instance().renderTransparent(ecs);
+
     fire_emitter.render();
     rain_emitter.render();
     bullet_emitter.render();
-
-    RenderSystem::instance().renderTransparent(ecs);
+    smoke_emitter.render();
 }
 
 void Scene2::renderPointShadow() const {

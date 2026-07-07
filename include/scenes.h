@@ -1,6 +1,6 @@
 #pragma once
 
-#include <shapes.h>
+// #include <shapes.h>
 #include <lights.h>
 #include <shader.h>
 #include <frame.h>
@@ -45,65 +45,65 @@ public:
     virtual void destroy() = 0;
 };
 
-class Scene1 : public Scene {
+// class Scene1 : public Scene {
 
-    // Entities
-    Shape myFloor;
-    Shape myGround;
-    Shape myCube;
-    Shape advCube;
-    Shape myWall;
+//     // Entities
+//     Shape myFloor;
+//     Shape myGround;
+//     Shape myCube;
+//     Shape advCube;
+//     Shape myWall;
 
-    Model3D* mySphere;
-    ShapeInstanced cubes;
+//     Model3D* mySphere;
+//     ShapeInstanced cubes;
 
-    std::vector <Matrix4> entityModels;
+//     std::vector <Matrix4> entityModels;
 
-    // Light
-    uint8_t light_count;
-    std::vector <LightSource*> lights;
-    std::vector <Matrix4*> lightModels;
+//     // Light
+//     uint8_t light_count;
+//     std::vector <LightSource*> lights;
+//     std::vector <Matrix4*> lightModels;
 
-    // Shadow
-    glm::mat4 shadowProj;
-    std::vector <PointShadowFrame*> shadowFrames;
+//     // Shadow
+//     glm::mat4 shadowProj;
+//     std::vector <PointShadowFrame*> shadowFrames;
 
-    // Light Space - Directional Light
-    glm::mat4 lightSpace;
-    DirectShadowFrame* directFrame;
+//     // Light Space - Directional Light
+//     glm::mat4 lightSpace;
+//     DirectShadowFrame* directFrame;
 
-    // Skybox
-    Skybox* _skybox;
+//     // Skybox
+//     // Skybox* _skybox;
 
-    // ECS
-    // ECS ecs;
-    Entity cube;
+//     // ECS
+//     // ECS ecs;
+//     Entity cube;
 
-    // Debug
-    DebugFrame* debugFrame;
+//     // Debug
+//     DebugFrame* debugFrame;
 
-    // FrameBuffers
-    // IBLFrame* ibl_frame;
+//     // FrameBuffers
+//     // IBLFrame* ibl_frame;
 
-public:
+// public:
 
-    Scene1() {
-        this->init();
-    }
+//     Scene1() {
+//         this->init();
+//     }
 
-    void init() override;
-    void input(GLFWwindow* window, const float& delta_time) override;
-    void update(const float delta_time) override;
-    void render() const override;
-    void renderGbuffer() const override;
-    void renderDeferred(const Shader& currentShader) const override;
-    void renderLight() const override;
-    void renderDirectShadow() const override;
-    void renderPointShadow() const override;
-    void renderSkybox() const override;
-    void renderDebug() const override;
-    void destroy() override;
-};
+//     void init() override;
+//     void input(GLFWwindow* window, const float& delta_time) override;
+//     void update(const float delta_time) override;
+//     void render() const override;
+//     void renderGbuffer() const override;
+//     void renderDeferred(const Shader& currentShader) const override;
+//     void renderLight() const override;
+//     void renderDirectShadow() const override;
+//     void renderPointShadow() const override;
+//     void renderSkybox() const override;
+//     void renderDebug() const override;
+//     void destroy() override;
+// };
 
 class Scene2 : public Scene {
 
@@ -130,6 +130,7 @@ class Scene2 : public Scene {
     ParticleEmitter fire_emitter;
     ParticleEmitter rain_emitter;
     ParticleEmitter bullet_emitter;
+    ParticleEmitter smoke_emitter;
 
     glm::vec3 gun_muzzle;
 
