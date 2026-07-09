@@ -5,7 +5,6 @@
 #include <thread>
 #include <unordered_map>
 
-#include <shader.h>
 #include <ecs/component.h>
 
 #include <assimp/Importer.hpp>

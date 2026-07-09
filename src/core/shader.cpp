@@ -2,15 +2,18 @@
 #include <renderer.h>
 #include <lights.h>
 #include <debug.h>
-#include <ibl.h>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <regex>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include <debug/assert.h>
 
 std::filesystem::path base = std::filesystem::current_path();
 
@@ -208,128 +211,6 @@ std::string Shader::preprocessFile(const char* path) {
     return output.str();
 }
 
-// Shader::Shader(const std::string vertexStr, const std::string fragmentStr) {
-
-//     // Vertex & Fragment Shader //
-
-//     const char* vertexShaderSource = vertexStr.c_str();
-//     const char* fragmentShaderSource = fragmentStr.c_str();
-
-//     const unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-//     const unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-//     int success;
-//     char infoLog[512];
-
-//     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-//     glCompileShader(vertexShader);
-
-//     glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-//     glCompileShader(fragmentShader);
-
-//     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-//     if (!success) {
-//         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-//         std::cout << "ERROR: VERTEX-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-//         // std::cout << "File: " << vertexStr << std::endl;
-//     }
-
-//     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-//     if (!success) {
-//         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-//         std::cout << "ERROR: FRAGMENT-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-//         // std::cout << "File: " << fragmentStr << std::endl;
-//     }
-
-//     // Shader Program //
-//     shaderProgram = glCreateProgram();
-
-//     glAttachShader(shaderProgram, vertexShader);
-//     glAttachShader(shaderProgram, fragmentShader);
-
-//     glLinkProgram(shaderProgram);
-//     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-//     if (!success) {
-//         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-//         std::cout << "ERROR: SHADER-PROGRAM LINKING FAILED!\n" << infoLog << std::endl;
-//     }
-
-//     glDeleteShader(vertexShader);
-//     glDeleteShader(fragmentShader);
-// }
-
-// Shader::Shader(const char* vertPath, const char* geomPath, const char* fragPath) {
-    
-//     // Vertex & Fragment Shader //
-
-//     std::string vertexStr = loadShaderFile(vertPath);
-//     std::string geometryStr = loadShaderFile(geomPath);
-//     std::string fragmentStr = loadShaderFile(fragPath);
-
-//     const char* vertexShaderSource = vertexStr.c_str();
-//     const char* geometryShaderSource = geometryStr.c_str();
-//     const char* fragmentShaderSource = fragmentStr.c_str();
-
-//     const unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-//     const unsigned int geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-//     const unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-//     int success;
-//     char infoLog[512];
-
-//     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-//     glCompileShader(vertexShader);
-
-//     glShaderSource(geometryShader, 1, &geometryShaderSource, nullptr);
-//     glCompileShader(geometryShader);
-
-//     glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-//     glCompileShader(fragmentShader);
-
-//     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-//     if (!success) {
-//         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-//         std::cout << "ERROR: VERTEX-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-//     }
-
-//     glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
-
-//     if (!success) {
-//         glGetShaderInfoLog(geometryShader, 512, nullptr, infoLog);
-//         std::cout << "ERROR: GEOMETRY-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-//     }
-
-//     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-//     if (!success) {
-//         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-//         std::cout << "ERROR: FRAGMENT-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
-//     }
-
-//     // Shader Program //
-//     shaderProgram = glCreateProgram();
-
-//     glAttachShader(shaderProgram, vertexShader);
-//     glAttachShader(shaderProgram, geometryShader);
-//     glAttachShader(shaderProgram, fragmentShader);
-
-//     glLinkProgram(shaderProgram);
-//     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-//     if (!success) {
-//         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-//         std::cout << "ERROR: SHADER-PROGRAM LINKING FAILED!\n" << infoLog << std::endl;
-//     }
-
-//     glDeleteShader(vertexShader);
-//     glDeleteShader(geometryShader);
-//     glDeleteShader(fragmentShader);
-// }
-
 void Shader::use() const {
     glUseProgram(shaderProgram);
 }
@@ -342,60 +223,22 @@ void Shader::destroy() {
 
 // ------------------------------ Shaders -------------------------------------------- //
 
-std::vector <bool>    ShaderManager::isLoaded (MAX_SHADERS, false);
-std::vector <Shader*> ShaderManager::loadedShaders (MAX_SHADERS);
+Shader ShaderManager::pointLightShadow  {};
+Shader ShaderManager::directLightShadow {};
 
-std::vector <Shader>  ShaderManager::lShaders3D   (MAX_SHADERS);
-std::vector <Shader>  ShaderManager::lShaders2D   (MAX_SHADERS);
-std::vector <Shader>  ShaderManager::lShadersUtil (MAX_SHADERS);
+Shader ShaderManager::pointLightShadow_instanced  {};
+Shader ShaderManager::directLightShadow_instanced {};
 
-std::vector <Shader*> ShaderManager::specialShaders(gfx::shader::TOTAL_SPECIAL_SHADERS);
+std::vector <Shader> ShaderManager::objShaders   (MAX_SHADERS);
+std::vector <Shader> ShaderManager::lShadersUtil (MAX_SHADERS);
 
-Shader* ShaderManager::pointLightShadow  = nullptr;
-Shader* ShaderManager::directLightShadow = nullptr;
+std::vector <Shader> ShaderManager::shaderFrames (gfx::shader::SHADERFRAME_TOTAL_COUNT);
 
-Shader* ShaderManager::pointLightShadow_instanced  = nullptr;
-Shader* ShaderManager::directLightShadow_instanced = nullptr;
+std::vector <ShaderPath> ShaderManager::paths = {
 
-// Shader* ShaderManager::lineShader     = nullptr;
-// Shader* ShaderManager::particleShader = nullptr;
+    // 3D
 
-std::vector <ShaderPath> ShaderManager::path = {
-
-    ShaderPath("ecs/generic3d.vert",        "ecs/test.frag"),
-    ShaderPath("ecs/generic2d.vert",        "ecs/test.frag"),
-    ShaderPath("lights/ecs.vert",           "lights/light.frag"),
-    ShaderPath("ecs/generic3d.vert",        "ecs/albedo.frag"),
-    ShaderPath("ecs/generic2d.vert",        "ecs/albedo.frag"),
-    ShaderPath("ecs/generic3d.vert",        "ecs/phong.frag", true),
-    ShaderPath("ecs/generic2d.vert",        "ecs/phong.frag", true),
-    ShaderPath("ecs/instance3d.vert",       "ecs/phong.frag", true),
-    ShaderPath("ecs/instance2d.vert",       "ecs/phong.frag", true),
-    ShaderPath("ecs/norm3d.vert",           "ecs/normPhong.frag", true),
-    ShaderPath("ecs/norm2d.vert",           "ecs/normPhong.frag", true),
-    ShaderPath("ecs/p2d.vert",              "ecs/p2d.frag", true),
-    ShaderPath("ecs/generic3d.vert",        "ecs/pbr.frag", true),
-    ShaderPath("ecs/generic2d.vert",        "ecs/pbr.frag", true),
-    ShaderPath("ecs/generic3d.vert",        "ecs/pbrColor.frag", true),
-    ShaderPath("ecs/generic2d.vert",        "ecs/pbrColor.frag", true),
-    ShaderPath("ecs/norm3d.vert",           "ecs/normPbr.frag", true),
-    ShaderPath("ecs/norm2d.vert",           "ecs/normPbr.frag", true),
-    ShaderPath("ecs/instance3d.vert",       "ecs/pbr.frag", true),
-    ShaderPath("ecs/instance2d.vert",       "ecs/pbr.frag", true),
-    ShaderPath("cubeMap/env.vert",          "cubeMap/env.frag"),
-    ShaderPath("deferred/gbuffer3d.vert",   "deferred/ecs_gbuffer.frag"),
-    ShaderPath("deferred/gbuffer2d.vert",   "deferred/ecs_gbuffer.frag"),
-    ShaderPath("deferred/gbufferInst.vert", "deferred/ecs_gbuffer.frag"),
-    
-    ShaderPath("deferred/gbuffer_normalTex3d.vert",   "deferred/gbuffer_normalTex.frag"),
-    ShaderPath("deferred/gbuffer_normalTex2d.vert",   "deferred/gbuffer_normalTex.frag"),
-
-    ShaderPath("wireframe/generic3d.vert", "wireframe/wireframe.frag"),
-    ShaderPath("ecs/norm2d.vert",           "ecs/normPbr2d_bf.frag", true)
-};
-
-std::vector <ShaderPath> ShaderManager::path3D = {
-
+    ShaderPath("lights/ecs.vert",          "lights/light.frag"),
     ShaderPath("ecs/generic3d.vert",        "ecs/albedo.frag"),
 
     ShaderPath("ecs/generic3d.vert",        "ecs/phong.frag", true),
@@ -410,11 +253,11 @@ std::vector <ShaderPath> ShaderManager::path3D = {
     ShaderPath("deferred/gbuffer_normalTex3d.vert",   "deferred/gbuffer_normalTex.frag"),
     ShaderPath("deferred/gbufferInst.vert", "deferred/ecs_gbuffer.frag"),
 
-    ShaderPath("ShaderPath Not Initialized", "ShaderPath Not Initialized")
-};
+    ShaderPath("ShaderPath Not Initialized", "ShaderPath Not Initialized"),
 
-std::vector <ShaderPath> ShaderManager::path2D = {
+    // 2D
 
+    ShaderPath("ShaderPath Not Initialized", "ShaderPath Not Initialized"),
     ShaderPath("ecs/generic2d.vert",        "ecs/albedo.frag"),
 
     ShaderPath("ecs/generic2d.vert",        "ecs/phong.frag", true),
@@ -429,11 +272,12 @@ std::vector <ShaderPath> ShaderManager::path2D = {
     ShaderPath("deferred/gbuffer_normalTex2d.vert",   "deferred/gbuffer_normalTex.frag"),
     ShaderPath("ShaderPath Not Initialized", "ShaderPath Not Initialized"),
 
-    ShaderPath("ecs/p2d.vert",              "ecs/p2d.frag", true),
+    ShaderPath("ecs/p2d.vert",              "ecs/p2d.frag", true)
 };
 
 std::vector <ShaderPath> ShaderManager::pathUtil = {
 
+    ShaderPath("text/text.vert",           "text/text.frag"),
     ShaderPath("line/line.vert",           "line/line.frag"),
     ShaderPath("lights/ecs.vert",          "lights/light.frag"),
     ShaderPath("wireframe/generic3d.vert", "wireframe/wireframe.frag"),
@@ -444,107 +288,109 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
 
 bool ShaderManager::initShaders() {
 
-    pointLightShadow = new Shader();
-    pointLightShadow_instanced = new Shader();
-    directLightShadow = new Shader();
-    directLightShadow_instanced = new Shader();
-
-    pointLightShadow->loadFromFile(
+    pointLightShadow.loadFromFile(
         "../shaders/pointShadow/shadow.vert",
         "../shaders/pointShadow/shadow.geom",
         "../shaders/pointShadow/shadow.frag"
     );
 
-    pointLightShadow_instanced->loadFromFile(
+    pointLightShadow_instanced.loadFromFile(
         "../shaders/pointShadow/instancedShadow.vert",
         "../shaders/pointShadow/shadow.geom",
         "../shaders/pointShadow/shadow.frag"
     );
 
-    directLightShadow->loadFromFile(
+    directLightShadow.loadFromFile(
         "../shaders/directShadow/directShadow.vert",
         "../shaders/directShadow/directShadow.frag"
     );
 
-    directLightShadow_instanced->loadFromFile(
+    directLightShadow_instanced.loadFromFile(
         "../shaders/directShadow/directShadowInstanced.vert",
         "../shaders/directShadow/directShadow.frag"
     );
 
-    // lineShader = new Shader(
-    //     "../shaders/line/line.vert",
-    //     "../shaders/line/line.frag"
-    // );
+    // ------------ Shaders for FrameBuffers ------------ //
 
-    // particleShader = new Shader(
-    //     "../shaders/obj2d/tex_particle.vert",
-    //     "../shaders/obj2d/tex_particle.frag"
-    // );
+    shaderFrames[gfx::shader::FRAME_DEFAULT].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/default_fb.frag"
+    );
 
-    // specialShaders = {
-    //     new Shader(
-    //         "../shaders/obj2d/particle.vert",
-    //         "../shaders/obj2d/particle.frag"
-    //     ),
-    //     particleShader
-    // };
+    shaderFrames[gfx::shader::FRAME_HDR].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/hdr_frame.frag"
+    );
+
+    shaderFrames[gfx::shader::FRAME_BLOOM].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/bloom.frag"
+    );
+
+    shaderFrames[gfx::shader::FRAME_BLUR].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/blur.frag"
+    );
+
+    shaderFrames[gfx::shader::EQUIRECT_TO_CUBEMAP].loadFromFile(
+        "../shaders/cubeMap/rect2cube.vert",
+        "../shaders/cubeMap/rect2cube.frag"
+    );
+
+    shaderFrames[gfx::shader::BLUR_CUBEMAP].loadFromFile(
+        "../shaders/cubeMap/env.vert",
+        "../shaders/cubeMap/convolution.frag"
+    );
+
+    shaderFrames[gfx::shader::PREFILTER_CUBEMAP].loadFromFile(
+        "../shaders/cubeMap/env.vert",
+        "../shaders/cubeMap/prefilter.frag"
+    );
+
+    shaderFrames[gfx::shader::BRDF].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/cubeMap/brdf.frag"
+    );
+
+    shaderFrames[gfx::shader::SSAO].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/ssao/ssao.frag"
+    );
+
+    shaderFrames[gfx::shader::SSAO_BLUR].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/ssao/ssaoBlur.frag"
+    );
+
+    shaderFrames[gfx::shader::DEFERRED_LIGHTNING].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/deferred.frag", true
+    );
 
     return true;
 }
 
-// Shader* ShaderManager::get(shaderNames shader) {
+const Shader& ShaderManager::getShader(const ShaderHandle handle) {
 
-//     if (!isLoaded[shader]) {
+    SNOW_ASSERT(
+        handle < gfx::shader::SHADER_TOTAL_COUNT,
+        "SHADER ACCESSED OUTSIDE RANGE!"
+    );
 
-//         const std::string base_path = "../shaders/";
-
-//         const std::string& vertPath = base_path + path[shader].vert;
-//         const std::string& fragPath = base_path + path[shader].frag;
-
-//         // loadedShaders[shader] = new Shader(vertPath.c_str(), fragPath.c_str(), path[shader].preprocess);
-//         isLoaded[shader] = true;
-//     }
-
-//     return loadedShaders[shader];
-// }
-
-Shader* ShaderManager::get(gfx::shader::special shader) {
-
-    if (shader >= gfx::shader::TOTAL_SPECIAL_SHADERS) return nullptr;
-    return specialShaders[shader];
-}
-
-Shader& ShaderManager::get3D(const gfx::shader::shaders index) {
-
-    if (!lShaders3D[index].getShader()) {
+    if (!objShaders[handle].getShader()) {
 
         const std::string base_path = "../shaders/";
 
-        const std::string& vertPath = base_path + path3D[index].vert;
-        const std::string& fragPath = base_path + path3D[index].frag;
+        const std::string& vertPath = base_path + paths[handle].vert;
+        const std::string& fragPath = base_path + paths[handle].frag;
 
-        lShaders3D[index].loadFromFile(vertPath.c_str(), fragPath.c_str(), path3D[index].preprocess);
+        objShaders[handle].loadFromFile(vertPath.c_str(), fragPath.c_str(), paths[handle].preprocess);
     }
 
-    return lShaders3D[index];
+    return objShaders[handle];
 }
 
-Shader& ShaderManager::get2D(const gfx::shader::shaders index) {
-
-    if (!lShaders2D[index].getShader()) {
-
-        const std::string base_path = "../shaders/";
-
-        const std::string& vertPath = base_path + path2D[index].vert;
-        const std::string& fragPath = base_path + path2D[index].frag;
-
-        lShaders2D[index].loadFromFile(vertPath.c_str(), fragPath.c_str(), path2D[index].preprocess);
-    }
-
-    return lShaders2D[index];
-}
-
-Shader& ShaderManager::getUtil(const gfx::shader::shadersUtil index) {
+const Shader& ShaderManager::getUtil(const gfx::shader::shadersUtil index) {
 
     if (!lShadersUtil[index].getShader()) {
 

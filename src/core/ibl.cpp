@@ -6,6 +6,8 @@
 #include <cubemap.h>
 
 #include <stb_image.h>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <debug/assert.h>
 
 #include <iostream>
@@ -34,31 +36,6 @@ IBLFrame::IBLFrame(const char* path, const uint16_t resolution): isInit(false) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    shader = new Shader();
-    shaderBlur = new Shader();
-    shaderPrefilter = new Shader();
-    shaderBRDF = new Shader();
-
-    shader->loadFromFile(
-        "../shaders/cubeMap/rect2cube.vert",
-        "../shaders/cubeMap/rect2cube.frag"
-    );
-
-    shaderBlur->loadFromFile(
-        "../shaders/cubeMap/env.vert",
-        "../shaders/cubeMap/convolution.frag"
-    );
-
-    shaderPrefilter->loadFromFile(
-        "../shaders/cubeMap/env.vert",
-        "../shaders/cubeMap/prefilter.frag"
-    );
-
-    shaderBRDF->loadFromFile(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/cubeMap/brdf.frag"
-    );
-
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     loadEnvironment(path);
@@ -86,12 +63,6 @@ void IBLFrame::loadEnvironment(const char* path) {
 
     isHDR = true;
 
-    // std::string path_str(path);
-    // std::string base_str = base.string();
-
-    // base_str.erase(base_str.size() - 5);
-    // const std::string finalPath = base_str + path_str;
-
     const std::string finalPath = "../" + std::string(path);
 
     pixelData = stbi_loadf(finalPath.c_str(), &width, &height, nullptr, 4);
@@ -100,22 +71,6 @@ void IBLFrame::loadEnvironment(const char* path) {
         std::cerr << "Failed to Load Image!\n" << finalPath << std::endl;
         return;
     }
-
-    // glGenTextures(1, &env_texture);
-    // glBindTexture(GL_TEXTURE_2D, env_texture);
-
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, pixelData);
-    
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // glGenerateMipmap(GL_TEXTURE_2D);
-
-    // stbi_image_free(pixelData);
-    // glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void IBLFrame::compileEnvironment() {
@@ -156,10 +111,11 @@ void IBLFrame::convertCubeMap(const uint16_t resolution) {
     glViewport(0, 0, resolution, resolution);
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     
-    shader->use();
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::EQUIRECT_TO_CUBEMAP);
+    shader.use();
 
-    shader->setMat4("projection", captureProjection);
-    shader->setInt("equirectangularMap", 0);
+    shader.setMat4("projection", captureProjection);
+    shader.setInt("equirectangularMap", 0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, env_texture);
@@ -169,7 +125,7 @@ void IBLFrame::convertCubeMap(const uint16_t resolution) {
 
     for (unsigned int i = 0; i < 6; i++) {
 
-        shader->setMat4("view", captureViews[i]);
+        shader.setMat4("view", captureViews[i]);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, env_cubeMap, 0);
         // glClearColor( (i%2)? 0.0 : 0.5, 0.5, (i%2)? 0.5 : 0.0, 1.0);
@@ -209,9 +165,11 @@ void IBLFrame::createIrradiance(const glm::mat4 captureProjection, const glm::ma
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    shaderBlur->use();
-    shaderBlur->setMat4("projection", captureProjection);
-    shaderBlur->setInt("environmentMap", 0);
+    const Shader& shaderBlur = ShaderManager::getFrame(gfx::shader::BLUR_CUBEMAP);
+
+    shaderBlur.use();
+    shaderBlur.setMat4("projection", captureProjection);
+    shaderBlur.setInt("environmentMap", 0);
 
     this->bindEnv(0);
 
@@ -220,7 +178,7 @@ void IBLFrame::createIrradiance(const glm::mat4 captureProjection, const glm::ma
 
     for (unsigned int i = 0; i < 6; i++) {
 
-        shaderBlur->setMat4("view", captureViews[i]);
+        shaderBlur.setMat4("view", captureViews[i]);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -248,8 +206,10 @@ void IBLFrame::preFilter(const glm::mat4 captureProjection, const glm::mat4 capt
 
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-    shaderPrefilter->use();
-    shaderPrefilter->setMat4("projection", captureProjection);
+    const Shader& shaderPrefilter = ShaderManager::getFrame(gfx::shader::PREFILTER_CUBEMAP);
+
+    shaderPrefilter.use();
+    shaderPrefilter.setMat4("projection", captureProjection);
 
     this->bindEnv(0);
 
@@ -268,11 +228,11 @@ void IBLFrame::preFilter(const glm::mat4 captureProjection, const glm::mat4 capt
         glViewport(0, 0, mipWidth, mipHeight);
 
         float roughness = (float)mip / (float)(maxMipLevels - 1);
-        shaderPrefilter->setFloat("roughness", roughness);
+        shaderPrefilter.setFloat("roughness", roughness);
 
         for (unsigned int i = 0; i < 6; i++) {
 
-            shaderPrefilter->setMat4("view", captureViews[i]);
+            shaderPrefilter.setMat4("view", captureViews[i]);
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -308,7 +268,7 @@ void IBLFrame::brdfLUT() {
 
     glViewport(0, 0, 512, 512);
 
-    shaderBRDF->use();
+    ShaderManager::getFrame(gfx::shader::BRDF).use();
     glClearColor(1.0, 1.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     this->renderSquare();

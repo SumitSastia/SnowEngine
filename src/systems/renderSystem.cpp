@@ -14,11 +14,11 @@
 
 #include <iostream>
 
-void RenderSystem::bindCameraGlobals(const Shader* shader) {
+void RenderSystem::bindCameraGlobals(const Shader& shader) {
 
-    shader->setMat4("projection", Camera::activeCamera->getProjection());
-    shader->setMat4("view",       Camera::activeCamera->getView());
-    shader->setVec3("camPos",     Camera::activeCamera->getPos());
+    shader.setMat4("projection", Camera::activeCamera->getProjection());
+    shader.setMat4("view",       Camera::activeCamera->getView());
+    shader.setVec3("camPos",     Camera::activeCamera->getPos());
 }
 
 void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
@@ -30,16 +30,18 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
     // Global Textures Binding
     
-    for (const Shader* shader : componentManager.uniqueShaders) {
+    for (const ShaderHandle shaderHandle : componentManager.uniqueShaders) {
+
+        const Shader& shader = ShaderManager::getShader(shaderHandle);
         
-        shader->use();
+        shader.use();
 
         lastTextureUnit = 0;
 
         // ----------------------- SpotLight ----------------------- //
 
-        shader->setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
-        shader->setSpotLight("sl", DefaultLights::instance().flashlight);
+        shader.setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
+        shader.setSpotLight("sl", DefaultLights::instance().flashlight);
 
         // ------------------------ Camera ------------------------- //
         
@@ -47,8 +49,8 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
         // ----------------------- PointLight ---------------------- //
 
-        shader->setInt("light_count", light_count);
-        shader->setFloat("far_plane", 25.0f);
+        shader.setInt("light_count", light_count);
+        shader.setFloat("far_plane", 25.0f);
 
         for (uint32_t index = 0; index < light_count; index++) {
 
@@ -63,12 +65,12 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
                 const std::string e  = "pl[" + std::to_string(index) + "]";
 
-                shader->setVec3((e + ".position").c_str(), transform.position);
-                shader->setVec3((e + ".color").c_str(),    pointlight.color);
+                shader.setVec3((e + ".position").c_str(), transform.position);
+                shader.setVec3((e + ".color").c_str(),    pointlight.color);
 
-                shader->setFloat((e + ".constant").c_str(),  pointlight.constant);
-                shader->setFloat((e + ".linear").c_str(),    pointlight.linear);
-                shader->setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
+                shader.setFloat((e + ".constant").c_str(),  pointlight.constant);
+                shader.setFloat((e + ".linear").c_str(),    pointlight.linear);
+                shader.setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
             }
         }
 
@@ -77,33 +79,33 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
         for (uint8_t i = 0; i < MAX_LIGHTS; i++) {
 
             if (i < light_count) componentManager.pointShadowFrames[i].frame->bindTexture(lastTextureUnit);
-            shader->setInt(("depthMap[" + std::to_string(i) + "]").c_str(), lastTextureUnit++);
+            shader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), lastTextureUnit++);
         }
 
         // --------------------- Directional Light ----------------- //
 
-        shader->setDirectionalLight("dl", DefaultLights::instance().sunlight);
-        shader->setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
-        // shader->setBool("useDirectionalLight", true);
+        shader.setDirectionalLight("dl", DefaultLights::instance().sunlight);
+        shader.setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
+        // shader.setBool("useDirectionalLight", true);
 
-        shader->setInt("dl_depthMap", lastTextureUnit);
+        shader.setInt("dl_depthMap", lastTextureUnit);
         componentManager.directShadowFrames[0].frame->bindTexture(lastTextureUnit++);
 
-        shader->setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
+        shader.setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
         
         // ---------------------- Environment ---------------------- //
 
-        shader->setInt("irradianceMap", lastTextureUnit);
+        shader.setInt("irradianceMap", lastTextureUnit);
         entityManager.env->bindIrradiance(lastTextureUnit++);
 
-        shader->setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
-        // shader->setBool("useIrradiance", true);
+        shader.setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
+        // shader.setBool("useIrradiance", true);
 
-        shader->setInt("preFilterMap", lastTextureUnit);
+        shader.setInt("preFilterMap", lastTextureUnit);
         // entityManager.env->bindPrefilter(lastTextureUnit++);
         entityManager.env->bindTexture(lastTextureUnit++);
 
-        shader->setInt("brdfLUT", lastTextureUnit);
+        shader.setInt("brdfLUT", lastTextureUnit);
         entityManager.env->bindBRDF(lastTextureUnit++);
     }
 }
@@ -352,7 +354,7 @@ void RenderSystem::drawWireframe(
         const Shader& shader = ShaderManager::getUtil(gfx::shader::WIREFRAME);
     
         shader.use();
-        bindCameraGlobals(&shader);
+        bindCameraGlobals(shader);
     
         Matrix4 model;
         model.translate(sphere.center);
@@ -377,7 +379,7 @@ void RenderSystem::drawWireframe(
         const Shader& shader = ShaderManager::getUtil(gfx::shader::WIREFRAME);
     
         shader.use();
-        bindCameraGlobals(&shader);
+        bindCameraGlobals(shader);
     
         Matrix4 model;
         model.translate(AABB.center);
@@ -394,45 +396,45 @@ void RenderSystem::draw(
     const TransformComponent& transform,
     const MaterialComponent&  material
 ) {
-    const Shader* shader = material.shader;
+    const Shader& shader = ShaderManager::getShader(material.shader);
 
-    shader->use();
-    shader->setMat4("model",        transform.model);
-    shader->setMat3("normalMatrix", transform.model.getNormal());
+    shader.use();
+    shader.setMat4("model",        transform.model);
+    shader.setMat3("normalMatrix", transform.model.getNormal());
 
     bindCameraGlobals(shader);
 
     const uint32_t initialUnit = lastTextureUnit;
 
     if (material.albedo) {
-        shader->setInt("albedo", initialUnit);
+        shader.setInt("albedo", initialUnit);
         AssetManager::getTexture(material.albedo).bind(initialUnit);
         // AssetManager::getTexture(0).bind(initialUnit);
     }
 
     if (material.normal) {
-        shader->setInt("normalMap", initialUnit+1);
+        shader.setInt("normalMap", initialUnit+1);
         AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
     if (material.height) {
-        shader->setFloat("height_scale", 0.1);
-        shader->setInt("heightMap", initialUnit+2);
+        shader.setFloat("height_scale", 0.1);
+        shader.setInt("heightMap", initialUnit+2);
         AssetManager::getTexture(material.height).bind(initialUnit + 2);
     }
 
     if (material.metallic) {
-        shader->setInt("metallicMap", initialUnit+3);
+        shader.setInt("metallicMap", initialUnit+3);
         AssetManager::getTexture(material.metallic).bind(initialUnit + 3);
     }
 
     if (material.roughness) {
-        shader->setInt("roughnessMap", initialUnit+4);
+        shader.setInt("roughnessMap", initialUnit+4);
         AssetManager::getTexture(material.roughness).bind(initialUnit + 4);
     }
 
     if (material.specular) {
-        shader->setInt("specularMap", initialUnit+5);
+        shader.setInt("specularMap", initialUnit+5);
         AssetManager::getTexture(material.specular).bind(initialUnit + 5);
     }
 
@@ -445,13 +447,13 @@ void RenderSystem::draw(
     const MaterialComponent&   material,
     const PointLightComponent& pointlight
 ) {
-    const Shader* shader = material.shader;
+    const Shader& shader = ShaderManager::getShader(material.shader);
 
     bindCameraGlobals(shader);
 
-    shader->use();
-    shader->setMat4("model",      transform.model);
-    shader->setVec3("lightColor", pointlight.color);
+    shader.use();
+    shader.setMat4("model",      transform.model);
+    shader.setVec3("lightColor", pointlight.color);
 
     // mesh.shape.draw();
     mesh.draw();
@@ -461,18 +463,19 @@ void RenderSystem::draw(
     const InstanceComponent& instance,
     const MaterialComponent& material
 ) {
+    const Shader& shader = ShaderManager::getShader(material.shader);
 
-    material.shader->use();
+    shader.use();
 
     const uint32_t initialUnit = lastTextureUnit;
 
     if (material.albedo) {
-        material.shader->setInt("albedo", initialUnit);
+        shader.setInt("albedo", initialUnit);
         AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
-        material.shader->setInt("normalMap", initialUnit+1);
+        shader.setInt("normalMap", initialUnit+1);
         AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
@@ -484,44 +487,44 @@ void RenderSystem::drawGbuffer(
     const TransformComponent& transform,
     const MaterialComponent&  material
 ) {
-    const Shader* shader = material.gbufferShader;
+    const Shader& shader = ShaderManager::getShader(material.gbufferShader);
 
-    shader->use();
-    shader->setMat4("model",        transform.model);
-    shader->setMat3("normalMatrix", transform.model.getNormal());
+    shader.use();
+    shader.setMat4("model",        transform.model);
+    shader.setMat3("normalMatrix", transform.model.getNormal());
 
     bindCameraGlobals(shader);
 
     const uint32_t initialUnit = lastTextureUnit;
 
     if (material.albedo) {
-        shader->setInt("albedo", initialUnit);
+        shader.setInt("albedo", initialUnit);
         AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
-        shader->setInt("normalMap", initialUnit+1);
+        shader.setInt("normalMap", initialUnit+1);
         AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
     if (material.height) {
-        shader->setFloat("height_scale", 0.1);
-        shader->setInt("heightMap", initialUnit+2);
+        shader.setFloat("height_scale", 0.1);
+        shader.setInt("heightMap", initialUnit+2);
         AssetManager::getTexture(material.height).bind(initialUnit + 2);
     }
 
     if (material.metallic) {
-        shader->setInt("metallicMap", initialUnit+3);
+        shader.setInt("metallicMap", initialUnit+3);
         AssetManager::getTexture(material.metallic).bind(initialUnit + 3);
     }
 
     if (material.roughness) {
-        shader->setInt("roughnessMap", initialUnit+4);
+        shader.setInt("roughnessMap", initialUnit+4);
         AssetManager::getTexture(material.roughness).bind(initialUnit + 4);
     }
 
     if (material.specular) {
-        shader->setInt("specularMap", initialUnit+5);
+        shader.setInt("specularMap", initialUnit+5);
         AssetManager::getTexture(material.specular).bind(initialUnit + 5);
     }
 
@@ -534,13 +537,13 @@ void RenderSystem::drawGbuffer(
     const MaterialComponent&   material,
     const PointLightComponent& pointlight
 ) {
-    const Shader* shader = material.gbufferShader;
+    const Shader& shader = ShaderManager::getShader(material.gbufferShader);
 
-    shader->use();
+    shader.use();
     bindCameraGlobals(shader);
 
-    shader->setMat4("model",      transform.model);
-    shader->setVec3("lightColor", pointlight.color);
+    shader.setMat4("model",      transform.model);
+    shader.setVec3("lightColor", pointlight.color);
 
     mesh.draw();
 }
@@ -549,20 +552,20 @@ void RenderSystem::drawGbuffer(
     const InstanceComponent& instance,
     const MaterialComponent& material
 ) {
-    const Shader* shader = material.gbufferShader;
+    const Shader& shader = ShaderManager::getShader(material.gbufferShader);
 
-    shader->use();
+    shader.use();
     bindCameraGlobals(shader);
 
     const uint32_t initialUnit = 0;
 
     if (material.albedo) {
-        material.shader->setInt("albedo", initialUnit);
+        shader.setInt("albedo", initialUnit);
         AssetManager::getTexture(material.albedo).bind(initialUnit);
     }
 
     if (material.normal) {
-        material.shader->setInt("normalMap", initialUnit+1);
+        shader.setInt("normalMap", initialUnit+1);
         AssetManager::getTexture(material.normal).bind(initialUnit + 1);
     }
 
@@ -690,7 +693,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     }
 }
 
-void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
+void RenderSystem::lightningPass(const ECS& ecs) {
 
     const EntityManager&    entityManager    = ecs.entityManager;
     const ComponentManager& componentManager = ecs.componentManager;
@@ -698,21 +701,22 @@ void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
     lastTextureUnit = 5;
     const uint32_t light_count = entityManager.emissiveEntities.size();
 
-    shader->use();
+    const Shader& final_shader = ShaderManager::getFrame(gfx::shader::DEFERRED_LIGHTNING);
+    final_shader.use();
 
     // ----------------------- SpotLight ----------------------- //
 
-    shader->setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
-    shader->setSpotLight("sl", DefaultLights::instance().flashlight);
+    final_shader.setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
+    final_shader.setSpotLight("sl", DefaultLights::instance().flashlight);
 
     // ------------------------ Camera ------------------------- //
     
-    bindCameraGlobals(shader);
+    bindCameraGlobals(final_shader);
 
     // ----------------------- PointLight ---------------------- //
 
-    shader->setInt("light_count", light_count);
-    shader->setFloat("far_plane", 25.0f);
+    final_shader.setInt("light_count", light_count);
+    final_shader.setFloat("far_plane", 25.0f);
 
     for (uint32_t index = 0; index < light_count; index++) {
 
@@ -727,12 +731,12 @@ void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
 
             const std::string e  = "pl[" + std::to_string(index) + "]";
 
-            shader->setVec3((e + ".position").c_str(), transform.position);
-            shader->setVec3((e + ".color").c_str(),    pointlight.color);
+            final_shader.setVec3((e + ".position").c_str(), transform.position);
+            final_shader.setVec3((e + ".color").c_str(),    pointlight.color);
 
-            shader->setFloat((e + ".constant").c_str(),  pointlight.constant);
-            shader->setFloat((e + ".linear").c_str(),    pointlight.linear);
-            shader->setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
+            final_shader.setFloat((e + ".constant").c_str(),  pointlight.constant);
+            final_shader.setFloat((e + ".linear").c_str(),    pointlight.linear);
+            final_shader.setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
         }
     }
 
@@ -741,33 +745,33 @@ void RenderSystem::lightningPass(const ECS& ecs, const Shader* shader) {
     for (uint8_t i = 0; i < MAX_LIGHTS; i++) {
 
         if (i < light_count) componentManager.pointShadowFrames[i].frame->bindTexture(lastTextureUnit);
-        shader->setInt(("depthMap[" + std::to_string(i) + "]").c_str(), lastTextureUnit++);
+        final_shader.setInt(("depthMap[" + std::to_string(i) + "]").c_str(), lastTextureUnit++);
     }
 
     // --------------------- Directional Light ----------------- //
 
-    shader->setDirectionalLight("dl", DefaultLights::instance().sunlight);
-    shader->setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
-    // shader->setBool("useDirectionalLight", true);
+    final_shader.setDirectionalLight("dl", DefaultLights::instance().sunlight);
+    final_shader.setBool("useDirectionalLight", Input::isKeyPressed(GLFW_KEY_L));
+    // shader.setBool("useDirectionalLight", true);
 
-    shader->setInt("dl_depthMap", lastTextureUnit);
+    final_shader.setInt("dl_depthMap", lastTextureUnit);
     componentManager.directShadowFrames[0].frame->bindTexture(lastTextureUnit++);
 
-    shader->setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
+    final_shader.setMat4("lightSpaceMatrix", componentManager.directShadowFrames[0].lightSpaceMatrix);
     
     // ---------------------- Environment ---------------------- //
 
-    shader->setInt("irradianceMap", lastTextureUnit);
+    final_shader.setInt("irradianceMap", lastTextureUnit);
     entityManager.env->bindIrradiance(lastTextureUnit++);
 
-    shader->setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
-    // shader->setBool("useIrradiance", true);
+    final_shader.setBool("useIrradiance", Input::isKeyPressed(GLFW_KEY_B));
+    // shader.setBool("useIrradiance", true);
 
-    shader->setInt("preFilterMap", lastTextureUnit);
+    final_shader.setInt("preFilterMap", lastTextureUnit);
     // entityManager.env->bindPrefilter(lastTextureUnit++);
     entityManager.env->bindTexture(lastTextureUnit++);
 
-    shader->setInt("brdfLUT", lastTextureUnit);
+    final_shader.setInt("brdfLUT", lastTextureUnit);
     entityManager.env->bindBRDF(lastTextureUnit++);
 }
 
@@ -789,8 +793,8 @@ void ShadowSystem::render(const ECS& ecs) {
     const ComponentManager& componentManager = ecs.componentManager;
 
     Shader shader[2] = {
-        *ShaderManager::getPointLightShadow(),
-        *ShaderManager::getPointLightShadow_Instanced()
+        ShaderManager::getPointLightShadow(),
+        ShaderManager::getPointLightShadow_Instanced()
     };
 
     for (const PointShadowData& pointShadow : componentManager.pointShadowFrames) {
@@ -899,8 +903,8 @@ void ShadowSystem::renderDirectional(const ECS& ecs) {
     for (const DirectShadowData& directShadow : componentManager.directShadowFrames) {
 
         const Shader shader[2] = {
-            *ShaderManager::getDirectLightShadow(),
-            *ShaderManager::getDirectLightShadow_Instanced()
+            ShaderManager::getDirectLightShadow(),
+            ShaderManager::getDirectLightShadow_Instanced()
         };
 
         for (uint8_t i = 0; i < 2; i++) {

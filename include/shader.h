@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <core/config.h>
+
 const uint8_t MAX_SHADERS = 8;
 
 // ------------------------------ Foward Declarations -------------------------------- //
@@ -43,15 +45,6 @@ public:
 
     void loadFromString(const std::string& vertStr, const std::string& fragStr);
     void loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr);
-
-    // Shader(const char* vertPath, const char* fragPath): 
-    //     Shader(loadShaderFile(vertPath), loadShaderFile(fragPath)) {
-    // }
-
-    // // Preprocess header files, (if #include <> is present)
-    // Shader(const char* vertPath, const char* fragPath, const bool preprocess):
-    //     Shader(loadShaderFile(vertPath), preprocessFile(fragPath)) {
-    // }
 
     /*
     Vertex -> Geometry -> Fragment
@@ -103,61 +96,42 @@ namespace colors {
 
 #define MAX_SHADERS 30
 
-enum shaderNames {
-
-    TEST3D,
-    TEST2D,
-    LIGHT3D,
-    ALBEDO3D,
-    ALBEDO2D,
-    PHONG3D,
-    PHONG2D,
-    INSTANCE3D,
-    INSTANCE2D,
-    NORM_PHONG3D,
-    NORM_PHONG2D,
-    PARALLAX2D,
-    PBR3D,
-    PBR2D,
-    PBR3D_COLORED,
-    PBR2D_COLORED,
-    NORMPBR3D,
-    NORMPBR2D,
-    INSTANCEPBR3D,
-    INSTANCEPBR2D,
-    ENVIRONMENT,
-    GBUFFER3D,
-    GBUFFER2D,
-    INSTANCE_GBUFFER3D,
-    GBUFFERNORM_3D,
-    GBUFFERNORM_2D,
-    WIREFRAME,
-    NORMPBR2D_BACKFACE,
-
-    SHADER_COUNT
-};
-
 namespace gfx::shader {
 
-    enum shaders : uint8_t {
+    enum shaders : ShaderHandle {
 
-        ALBEDO,
-        PHONG,
-        PHONG_NORM,
-        PHONG_INSTANCE,
-        PBR,
-        PBR_NORM,
-        PBR_INSTANCE,
-        GBUFFER,
-        GBUFFER_NORM,
-        GBUFFER_INSTANCE,
-        PARALLAX,
+        S3D_LIGHT,
+        S3D_ALBEDO,
+        S3D_PHONG,
+        S3D_PHONG_NORM,
+        S3D_PHONG_INSTANCE,
+        S3D_PBR,
+        S3D_PBR_NORM,
+        S3D_PBR_INSTANCE,
+        S3D_GBUFFER,
+        S3D_GBUFFER_NORM,
+        S3D_GBUFFER_INSTANCE,
+        S3D_PARALLAX,
+
+        S2D_LIGHT,
+        S2D_ALBEDO,
+        S2D_PHONG,
+        S2D_PHONG_NORM,
+        S2D_PHONG_INSTANCE,
+        S2D_PBR,
+        S2D_PBR_NORM,
+        S2D_PBR_INSTANCE,
+        S2D_GBUFFER,
+        S2D_GBUFFER_NORM,
+        S2D_GBUFFER_INSTANCE,
+        S2D_PARALLAX,
 
         SHADER_TOTAL_COUNT
     };
 
     enum shadersUtil : uint8_t {
         
+        TEXT,
         LINE,
         LIGHT,
         WIREFRAME,
@@ -168,11 +142,22 @@ namespace gfx::shader {
         SHADERUTIL_TOTAL_COUNT
     };
 
-    enum special {
-        COLORED_PARTICLE,
-        TETXURED_PARTICLE,
+    enum shadersFrame : uint8_t {
 
-        TOTAL_SPECIAL_SHADERS
+        FRAME_DEFAULT,
+        FRAME_HDR,
+        FRAME_BLOOM,
+        FRAME_BLUR,
+        
+        EQUIRECT_TO_CUBEMAP,
+        BLUR_CUBEMAP,
+        PREFILTER_CUBEMAP,
+        BRDF,
+        SSAO,
+        SSAO_BLUR,
+        DEFERRED_LIGHTNING,
+
+        SHADERFRAME_TOTAL_COUNT
     };
 };
 
@@ -194,50 +179,36 @@ struct ShaderPath {
 
 class ShaderManager {
 
-    static std::vector <bool>    isLoaded;
-    static std::vector <Shader*> loadedShaders;
+    static Shader pointLightShadow;
+    static Shader directLightShadow;
 
-    static std::vector <bool>       preprocess;
-    static std::vector <ShaderPath> path;
+    static Shader pointLightShadow_instanced;
+    static Shader directLightShadow_instanced;
 
-    static std::vector <Shader*> specialShaders;
-
-    static Shader* pointLightShadow;
-    static Shader* directLightShadow;
-
-    static Shader* pointLightShadow_instanced;
-    static Shader* directLightShadow_instanced;
-
-    // static Shader* lineShader;
-    // static Shader* particleShader;
-
-    static std::vector <ShaderPath> path3D;
-    static std::vector <ShaderPath> path2D;
+    static std::vector <ShaderPath> paths;
     static std::vector <ShaderPath> pathUtil;
 
-    static std::vector <Shader> lShaders3D;
-    static std::vector <Shader> lShaders2D;
+    static std::vector <Shader> objShaders;
     static std::vector <Shader> lShadersUtil;
+    
+    //-------------------------------------------------------------//
+
+    static std::vector <Shader> shaderFrames;
 
 public:
 
     static bool initShaders();
 
-    static Shader* getPointLightShadow() { return pointLightShadow; }
-    static Shader* getDirectLightShadow() { return directLightShadow; }
+    static const Shader& getPointLightShadow() { return pointLightShadow; }
+    static const Shader& getDirectLightShadow() { return directLightShadow; }
 
-    static Shader* getPointLightShadow_Instanced() { return pointLightShadow_instanced; }
-    static Shader* getDirectLightShadow_Instanced() { return directLightShadow_instanced; }
-
-    // static Shader* getLineShader() { return lineShader; }
-    // static Shader* getParticleShader() { return particleShader; }
-
-    // static Shader* get(shaderNames shader);
-    static Shader* get(gfx::shader::special shader);
-
-    static Shader& get3D(const gfx::shader::shaders index);
-    static Shader& get2D(const gfx::shader::shaders index);
-    static Shader& getUtil(const gfx::shader::shadersUtil index);
+    static const Shader& getPointLightShadow_Instanced() { return pointLightShadow_instanced; }
+    static const Shader& getDirectLightShadow_Instanced() { return directLightShadow_instanced; }
     
-    static uint32_t totat() { return SHADER_COUNT; }
+    static const Shader& getShader(const ShaderHandle handle);
+
+    static const Shader& getUtil(const gfx::shader::shadersUtil index);
+    static const Shader& getFrame(const gfx::shader::shadersFrame index) { return shaderFrames[index]; }
+    
+    static uint32_t totat() { return gfx::shader::SHADER_TOTAL_COUNT; }
 };

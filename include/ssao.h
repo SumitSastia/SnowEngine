@@ -5,8 +5,6 @@
 #include <vector>
 #include <random>
 
-class Shader;
-
 class SSAO {
 
     static std::vector <glm::vec3> ssaoKernel;
@@ -19,8 +17,6 @@ class SSAO {
     static unsigned int fbo_blur;
     static unsigned int colorBuffer_blur;
 
-    static Shader* shaderBlur;
-
     static float lerp(float a, float b, float f) {
         return a + f * (b - a);
     }
@@ -29,13 +25,10 @@ public:
 
     static bool enable;
 
-    static Shader* shader;
-
     static void init();
     static void bindFBO();
     static void bindNoiseTex(const unsigned int textureUnit);
     static void bindOcclusion(const unsigned int textureUnit);
 
-    static void setInt(const unsigned int textureUnit);
     static void blurSSAO();
 };

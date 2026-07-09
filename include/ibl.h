@@ -1,12 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <cstdint>
-
-class Shader;
 
 class IBLFrame {
 
@@ -21,10 +17,10 @@ class IBLFrame {
     uint prefilterMap;
     uint brdfLUTTexture; 
 
-    Shader* shader;          // Converts 2D -> CubeMap 
-    Shader* shaderBlur;      // CubeMap -> Blurred CubeMap
-    Shader* shaderPrefilter; // Prefilters CubeMap
-    Shader* shaderBRDF;
+    // Shader shader;          // Converts 2D -> CubeMap 
+    // Shader shaderBlur;      // CubeMap -> Blurred CubeMap
+    // Shader shaderPrefilter; // Prefilters CubeMap
+    // Shader shaderBRDF;
 
     bool isHDR;
     bool isInit;

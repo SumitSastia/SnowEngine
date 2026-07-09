@@ -13,30 +13,15 @@ unsigned int SSAO::noiseTexture = 0;
 unsigned int SSAO::fbo_blur         = 0;
 unsigned int SSAO::colorBuffer_blur = 0;
 
-Shader* SSAO::shader     = nullptr;
-Shader* SSAO::shaderBlur = nullptr;
-
 bool SSAO::enable = false;
 
 // ----------------------------------------------------------------------------------- //
 
 void SSAO::init() {
 
-    shader = new Shader();
-    shaderBlur = new Shader();
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::SSAO);
 
-    // Shader
-    shader->loadFromFile(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/ssao/ssao.frag"
-    );
-
-    shaderBlur->loadFromFile(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/ssao/ssaoBlur.frag"
-    );
-
-    shader->use();
+    shader.use();
 
     std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
     std::default_random_engine generator;
@@ -57,7 +42,7 @@ void SSAO::init() {
         scale   = lerp(0.1f, 1.0f, scale * scale);
         sample *= scale;
 
-        shader->setVec3(("samples[" + std::to_string(i) + "]").c_str(), sample);
+        shader.setVec3(("samples[" + std::to_string(i) + "]").c_str(), sample);
 
         ssaoKernel.push_back(sample); 
     }
@@ -122,8 +107,8 @@ void SSAO::bindFBO() {
 }
 
 void SSAO::bindNoiseTex(const unsigned int textureUnit) {
-
-    shader->setInt("texNoise", textureUnit);
+    
+    ShaderManager::getFrame(gfx::shader::SSAO).setInt("texNoise", textureUnit);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, noiseTexture);
 }
@@ -134,16 +119,14 @@ void SSAO::bindOcclusion(const unsigned int textureUnit) {
     glBindTexture(GL_TEXTURE_2D, colorBuffer_blur);
 }
 
-void SSAO::setInt(const unsigned int textureUnit) {
-    // shader->use();
-}
-
 void SSAO::blurSSAO() {
+
+    const Shader& shaderBlur = ShaderManager::getFrame(gfx::shader::SSAO_BLUR);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_blur);
 
-    shaderBlur->use();
-    shader->setInt("ssaoInput", 0);
+    shaderBlur.use();
+    shaderBlur.setInt("ssaoInput", 0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, colorBuffer);

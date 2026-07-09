@@ -92,8 +92,6 @@ class DepthFrame : public FrameBuffer {
 
 class DebugFrame : public FrameBuffer {
 
-	Shader* shader;
-
 	unsigned int rbo;
     unsigned int texture_id;
 
@@ -101,7 +99,7 @@ public:
 
 	DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
 
-	void init() override;
+	void init() override {}
 	void render() const override;
 	void render(const unsigned int& textureID) const;
 };
@@ -140,8 +138,6 @@ public:
 
 class HDRFrame : public FrameBuffer {
 
-	Shader* shader;
-
 	unsigned int rbo;
     unsigned int texture_id;
 	
@@ -160,8 +156,6 @@ public:
 	unsigned int pingpongFBO[2];
 	unsigned int pingpongTex[2];
 	
-	Shader* shader;
-	
 	BlurFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
 };
 
@@ -170,7 +164,6 @@ class BloomFrame : public FrameBuffer {
 	unsigned int rbo;
 	unsigned int colorBuffers[2];
 	
-	Shader* shader;
 	BlurFrame* _blur;
 
 public:
@@ -186,14 +179,9 @@ class Gbuffer : public FrameBuffer {
 	unsigned int rbo;
 	unsigned int gPosition, gNormal, gTexture;
 
-	Shader* shader;
-
 public:
 
 	Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight);
-
-	const Shader* getShader() const { return shader; }
-	// void bindFBO() const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
 
 	void init() override {}
 	void render() const override;

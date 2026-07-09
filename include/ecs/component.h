@@ -26,9 +26,6 @@
 #define TEXTURE_DEFAULT_ALBEDO 1
 #define TEXTURE_DEFAULT_NORMAL 2
 
-class Shader;
-class Texture2D;
-class Model3D;
 class PointShadowFrame;
 class DirectShadowFrame;
 
@@ -209,8 +206,11 @@ struct SpotLightComponent {
 
 struct MaterialComponent {
 
-    Shader* shader;
-    Shader* gbufferShader;
+    // Shader* shader;
+    // Shader* gbufferShader;
+
+    ShaderHandle shader        = 0;
+    ShaderHandle gbufferShader = 0;
     
     TextureHandle albedo    = 0;
     TextureHandle normal    = 0;
@@ -220,10 +220,12 @@ struct MaterialComponent {
     TextureHandle roughness = 0;
     TextureHandle ao        = 0;
 
-    MaterialComponent(): 
-        shader(nullptr),
-        gbufferShader(nullptr) {
-    }
+    // MaterialComponent(): 
+    //     shader(nullptr),
+    //     gbufferShader(nullptr) {
+    // }
+
+    MaterialComponent() = default;
 
     // SHOULD BE IMPLEMENTED WITH ASSET MANAGER
     void destroy() {}
@@ -453,10 +455,10 @@ public:
     ComponentPool <AnimatedSprite>          animSprites;
     
     // @note Currently only use for Model3D to Entity Conversion.
-    void addShader(Shader* shader);
+    void addShader(const ShaderHandle shader);
 
     // For Global uniform Bindings
-    std::vector <Shader*> uniqueShaders;
+    std::vector <ShaderHandle> uniqueShaders;
 
     // For ShadowPass
     std::vector <PointShadowData>  pointShadowFrames;

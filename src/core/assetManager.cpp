@@ -7,7 +7,7 @@
 
 uint32_t AssetManager::loadedTextures = 0;
 
-AssetManager::Queue AssetManager::loadingQueue {};
+AssetManager::Queue   AssetManager::loadingQueue {};
 std::vector <Texture> AssetManager::textures (MAX_TEXTURES);
 
 std::unordered_map <std::string, TextureHandle> AssetManager::textureLookup {};

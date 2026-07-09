@@ -3,7 +3,6 @@
 #include <renderer.h>
 #include <shader.h>
 #include <camera.h>
-// #include <shapes.h>
 #include <debug.h>
 #include <input.h>
 #include <scenes.h>
@@ -12,8 +11,6 @@
 #include <ssao.h>
 #include <assetManager.h>
 #include <utils/crosshair.h>
-
-#include <thread>
 
 // ------------------------------ Global Variables ----------------------------------- //
 
@@ -43,12 +40,12 @@ int main() {
     // Text::init("../assets/fonts/BlockBlueprint.ttf");
     Text::init("../assets/fonts/Lato-Bold.ttf");
 
-    SSAO::init();
-    
     ShaderManager::initShaders();
     AssetManager::init();
+    
     Line::init();
     Crosshair::init();
+    SSAO::init();
 
     gfx::particles::init();
 
@@ -70,20 +67,12 @@ int main() {
 
     running::core::timer t;
 
-    // Scene1* scene1 = new Scene1();
-    // Scene* mainScene = scene1;
-    // DebugMenu::log("Time taken to initialize - scene1: " + t.end());
+    Scene2* scene2 = new Scene2();
 
-    // running::time::startInterval();
-    Scene2* scene2   = new Scene2();
-    // Scene* mainScene = scene2;
-    // std::cout << "Time taken to initialize - scene2: " << running::time::endInterval() << std::endl;
-
-    // DebugFrame* debugFrame = new DebugFrame(WIN_W, WIN_H);
-    HDRFrame*   hdrFrame   = new HDRFrame(WIN_W, WIN_H);
     // BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
-
-    Gbuffer* deferredFrame = new Gbuffer(WIN_W, WIN_H);
+    
+    HDRFrame* hdrFrame      = new HDRFrame(WIN_W, WIN_H);
+    Gbuffer*  deferredFrame = new Gbuffer(WIN_W, WIN_H);
 
     bool deferredRender = false;
 
@@ -126,10 +115,6 @@ int main() {
         }
 
         scene2->input(window, deltaTime);
-        // Input::update();
-        
-        // mainCamera.mouse_handler(window);
-        // mainCamera.scroll_handler(scrollOffset);
 
         Camera::activeCamera->handle_mouse(window);
         
@@ -153,7 +138,6 @@ int main() {
         Camera::activeCamera->update(deltaTime);
         
         if (!isPaused) {
-            // mainScene->update(deltaTime);
             scene2->update(deltaTime);
         }
 
@@ -181,20 +165,11 @@ int main() {
 
         // Scene
         if (!deferredRender) {
-
-            // mainScene->renderDirectShadow();
-            // mainScene->renderPointShadow();
             
             glViewport(0, 0, WIN_W, WIN_H);
             glBindFramebuffer(GL_FRAMEBUFFER, hdrFrame->getFBO());
 
             Renderer::clear();
-
-            // if (Input::isKeyPressed(GLFW_KEY_O))
-            //     mainScene->render();
-            
-            // Renderer::enableDepth();
-            // Renderer::disableCulling();
             scene2->render();
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -204,12 +179,8 @@ int main() {
 
             Renderer::copyDepth(hdrFrame);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-            // if (Input::isKeyPressed(GLFW_KEY_O))
-            //     mainScene->renderLight();
             
             scene2->renderLight();
-            Crosshair::render();
         }
         else {
 
@@ -234,18 +205,20 @@ int main() {
                 // Occlusion Pass
                 SSAO::bindFBO();
                 glClear(GL_COLOR_BUFFER_BIT);
-                
-                SSAO::shader->use();
 
-                SSAO::shader->setInt("gPosition", 0);
+                const Shader& shader = ShaderManager::getFrame(gfx::shader::SSAO);
+
+                shader.use();
+
+                shader.setInt("gPosition", 0);
                 deferredFrame->bind_gPosition(0);
 
-                SSAO::shader->setInt("gNormal", 1);
+                shader.setInt("gNormal", 1);
                 deferredFrame->bind_gNormal(1);
 
                 SSAO::bindNoiseTex(2);
-                SSAO::shader->setMat4("projection", Camera::activeCamera->getProjection());
-                SSAO::shader->setMat4("view", Camera::activeCamera->getView());
+                shader.setMat4("projection", Camera::activeCamera->getProjection());
+                shader.setMat4("view",       Camera::activeCamera->getView());
 
                 frameBuffers::renderScreen();
                 SSAO::blurSSAO();
@@ -257,8 +230,8 @@ int main() {
             // ************************************************************* //
 
             // Lighting Pass
-            // mainScene->renderDeferred(*deferredFrame->getShader());
-            scene2->renderDeferred(*deferredFrame->getShader());
+            // scene2->renderDeferred(*deferredFrame->getShader());
+            scene2->renderDeferred();
             deferredFrame->render();
 
             Renderer::copyDepth(deferredFrame);
@@ -267,6 +240,8 @@ int main() {
             // mainScene->renderLight();
             scene2->renderLight();
         }
+
+        Crosshair::render();
 
         // Debug - UI
         DebugMenu::endUI();

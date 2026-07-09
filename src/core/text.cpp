@@ -13,7 +13,6 @@ FT_Face    Text::font {};
 uint Text::VAO = 0;
 uint Text::VBO = 0;
 
-Shader* Text::shader = nullptr;
 std::map <char, TextCharacter> Text::Characters {};
 
 bool Text::init(const char* path) {
@@ -79,17 +78,12 @@ bool Text::init(const char* path) {
     FT_Done_Face(font);
     FT_Done_FreeType(ft);
 
-    shader = new Shader();
-
-    shader->loadFromFile(
-        "../shaders/text/text.vert",
-        "../shaders/text/text.frag"
-    );
+    const Shader& shader = ShaderManager::getUtil(gfx::shader::TEXT);
 
     glm::mat4 projection = glm::ortho(0.0f, (float)WIN_W, 0.0f, (float)WIN_H);
 
-    shader->use();
-    shader->setMat4("projection", projection);
+    shader.use();
+    shader.setMat4("projection", projection);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -110,12 +104,12 @@ bool Text::init(const char* path) {
 
 void Text::render(const std::string text, glm::vec2 pos, const float scale, const glm::vec3 color) {
 
-    // static glm::mat4 projection = glm::ortho(0.0f, (float)WIN_W, 0.0f, (float)WIN_H);
-
     glEnable(GL_BLEND);
 
-    shader->use();
-    shader->setVec3("textColor", color);
+    const Shader& shader = ShaderManager::getUtil(gfx::shader::TEXT);
+
+    shader.use();
+    shader.setVec3("textColor", color);
 
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);

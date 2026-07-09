@@ -101,20 +101,14 @@ DebugFrame::DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) 
     this->init();
 }
 
-void DebugFrame::init() {
-
-    // shader = new Shader(
-    //     "../shaders/frameBuffs/default_fb.vert",
-    //     "../shaders/frameBuffs/default_fb.frag"
-    // );
-}
-
 void DebugFrame::render() const {
 
     Renderer::disableDepth();
 
-    shader->use();
-    shader->setInt("screen", 0);
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::FRAME_DEFAULT);
+
+    shader.use();
+    shader.setInt("screen", 0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -129,8 +123,10 @@ void DebugFrame::render(const unsigned int& textureID) const {
 
     Renderer::disableDepth();
 
-    shader->use();
-    shader->setInt("screen", 0);
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::FRAME_DEFAULT);
+
+    shader.use();
+    shader.setInt("screen", 0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -262,18 +258,20 @@ void HDRFrame::init() {
     //     "../shaders/frameBuffs/hdr_frame.frag"
     // );
 
-    shader = new Shader();
+    // shader = new Shader();
 
-    shader->loadFromFile(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/frameBuffs/hdr_frame.frag"
-    );
+    // shader->loadFromFile(
+    //     "../shaders/frameBuffs/default_fb.vert",
+    //     "../shaders/frameBuffs/hdr_frame.frag"
+    // );
 }
 
 void HDRFrame::render() const {
 
-    shader->use();
-    shader->setInt("screen", 0);
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::FRAME_HDR);
+
+    shader.use();
+    shader.setInt("screen", 0);
     
     static bool  toggle   = false;
     static float gamma = 2.3f;
@@ -301,8 +299,8 @@ void HDRFrame::render() const {
         }
     }
     
-    shader->setBool("toggle", toggle);
-    shader->setFloat("gamma", gamma);
+    shader.setBool("toggle", toggle);
+    shader.setFloat("gamma", gamma);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -365,12 +363,15 @@ void BloomFrame::render() const {
 
     int amount = 5;
 
-    _blur->shader->use();
+    // _blur->shader->use();
+
+    const Shader& shaderBlur = ShaderManager::getFrame(gfx::shader::FRAME_BLUR);
+    shaderBlur.use();
 
     for (unsigned int i = 0; i < amount; i++) {
 
         glBindFramebuffer(GL_FRAMEBUFFER, _blur->pingpongFBO[horizontal]);
-        shader->setBool("horizontal", horizontal);
+        shaderBlur.setBool("horizontal", horizontal);
 
         glBindTexture(GL_TEXTURE_2D, first_itr ? colorBuffers[1] : _blur->pingpongTex[!horizontal]);
 
@@ -384,9 +385,11 @@ void BloomFrame::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    shader->use();
-    shader->setInt("screen", 0);
-    shader->setInt("bloom", 1);
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::FRAME_BLOOM);
+
+    shader.use();
+    shader.setInt("screen", 0);
+    shader.setInt("bloom", 1);
 
     glBindVertexArray(frameBuffers::get_defaultVAO());
 
@@ -479,23 +482,25 @@ Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    shader = new Shader();
+    // shader = new Shader();
 
-    shader->loadFromFile(
-        "../shaders/frameBuffs/default_fb.vert",
-        "../shaders/frameBuffs/deferred.frag", true
-    );
+    // shader->loadFromFile(
+    //     "../shaders/frameBuffs/default_fb.vert",
+    //     "../shaders/frameBuffs/deferred.frag", true
+    // );
 }
 
 void Gbuffer::render() const {
 
     const int textureUnit = 0;
 
-    shader->use();
-    shader->setInt("gPosition",  textureUnit);
-    shader->setInt("gNormal",    textureUnit + 1);
-    shader->setInt("gTexture",   textureUnit + 2);
-    shader->setInt("gOcclusion", textureUnit + 3);
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::DEFERRED_LIGHTNING);
+
+    shader.use();
+    shader.setInt("gPosition",  textureUnit);
+    shader.setInt("gNormal",    textureUnit + 1);
+    shader.setInt("gTexture",   textureUnit + 2);
+    shader.setInt("gOcclusion", textureUnit + 3);
 
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -510,7 +515,7 @@ void Gbuffer::render() const {
         SSAO::bindOcclusion(textureUnit + 3);
     }
 
-    shader->setBool("toggleAO", SSAO::enable);
+    shader.setBool("toggleAO", SSAO::enable);
     
     frameBuffers::renderScreen();
 }

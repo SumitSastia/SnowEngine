@@ -5,9 +5,11 @@
 #include <camera.h>
 #include <utils/wireframe.h>
 
+class Shader;
+
 class RenderSystem {
 
-    void bindCameraGlobals(const Shader* shader);
+    void bindCameraGlobals(const Shader& shader);
     void bindPointLightGlobals(const ECS& ecs);
 
     void draw(
@@ -76,7 +78,7 @@ public:
     void renderTransparent(const ECS& ecs);
 
     void renderGbuffer(const ECS& ecs);
-    void lightningPass(const ECS& ecs, const Shader* shader);
+    void lightningPass(const ECS& ecs);
 };
 
 class ShadowSystem {

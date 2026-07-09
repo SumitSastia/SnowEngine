@@ -23,8 +23,6 @@ class Text {
     static FT_Face font;
 
     static std::map <char, TextCharacter> Characters;
-    
-    static Shader*   shader;
     static glm::mat4 projection;
 
     static uint VAO, VBO;
