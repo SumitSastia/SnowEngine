@@ -62,6 +62,7 @@ public:
     void setBool (const char* target, const bool   value) const;
     void setInt  (const char* target, const int&   value) const;
     void setFloat(const char* target, const float& value) const;
+    void setVec2 (const char* target, const glm::vec2& vector) const;
     void setVec3 (const char* target, const glm::vec3& vector) const;
     void setVec4 (const char* target, const glm::vec4& vector) const;
     void setMat3 (const char* target, const glm::mat3& matrix) const;
@@ -97,6 +98,8 @@ namespace colors {
 #define MAX_SHADERS 30
 
 namespace gfx::shader {
+
+    const uint8_t PARTICLE_SHADER_OFFSET = 5;
 
     enum shaders : ShaderHandle {
 
@@ -136,8 +139,10 @@ namespace gfx::shader {
         LIGHT,
         WIREFRAME,
         ENVIRONMENT,
-        PARTICLE_COLORED,
-        PARTICLE_TEXTURED,
+        PARTICLE_HARD_COLORED,
+        PARTICLE_HARD_TEXTURED,
+        PARTICLE_SOFT_COLORED,
+        PARTICLE_SOFT_TEXTURED,
 
         SHADERUTIL_TOTAL_COUNT
     };
@@ -148,6 +153,7 @@ namespace gfx::shader {
         FRAME_HDR,
         FRAME_BLOOM,
         FRAME_BLUR,
+        FRAME_DEPTH,
         
         EQUIRECT_TO_CUBEMAP,
         BLUR_CUBEMAP,
@@ -207,7 +213,7 @@ public:
     
     static const Shader& getShader(const ShaderHandle handle);
 
-    static const Shader& getUtil(const gfx::shader::shadersUtil index);
+    static const Shader& getUtil(const uint8_t index);
     static const Shader& getFrame(const gfx::shader::shadersFrame index) { return shaderFrames[index]; }
     
     static uint32_t totat() { return gfx::shader::SHADER_TOTAL_COUNT; }

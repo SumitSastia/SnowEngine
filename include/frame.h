@@ -5,8 +5,6 @@
 
 #include <core/config.h>
 
-class Shader;
-
 namespace gfx::internal {
 
 	class Screen {
@@ -79,7 +77,7 @@ public:
 	const unsigned int getFBO() const { return fbo; }
 
     virtual void init() = 0;
-    virtual void render() const = 0;
+    virtual void render() const {};
     virtual void destroy();
 };
 
@@ -87,7 +85,12 @@ class DepthFrame : public FrameBuffer {
 
 	unsigned int depth_texture;
 
+public:
+
 	void create(const UintRes frameWidth, const UintRes frameHeight);
+
+	void init() override {}
+	void render() const override;
 };
 
 class DebugFrame : public FrameBuffer {
@@ -138,15 +141,20 @@ public:
 
 class HDRFrame : public FrameBuffer {
 
-	unsigned int rbo;
-    unsigned int texture_id;
-	
 public:
 
-	HDRFrame(const uint16_t& frameWidth, const uint16_t& frameHeight);
+	HDRFrame(const UintRes& frameWidth, const UintRes& frameHeight);
 
-	void init() override;
+	void init() override {}
 	void render() const override;
+
+	const unsigned int& getDepthTexture() const { return depth_texture; }
+
+private:
+
+	unsigned int rbo;
+    unsigned int color_texture;
+	unsigned int depth_texture;
 };
 
 class BlurFrame {

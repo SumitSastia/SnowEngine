@@ -31,7 +31,10 @@ Camera::Camera() {
 
     aspectRatio = static_cast<float>(WIN_W) / static_cast<float>(WIN_H);
 
-    projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    nearPlane = 0.1f;
+    farPlane  = 100.0f;
+
+    projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
     viewMatrix = glm::lookAt(position, position + target, up_axis);
 
     yaw   = -90.0f;

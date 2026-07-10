@@ -8,6 +8,7 @@
 #include <input.h>
 
 #include <core/config.h>
+#include <debug/assert.h>
 
 namespace gfx::particles {
     
@@ -136,7 +137,8 @@ namespace gfx::particles {
         smoke.acceleration = glm::vec3(
             Random::Float(0.1f),
             0.2f,
-            Random::Float(0.1f)
+            // Random::Float(0.1f)
+            -10.0f
         );
 
         smoke.velocity = glm::vec3(
@@ -151,10 +153,10 @@ namespace gfx::particles {
         // smoke.startSize = glm::vec2(0.0f);
         // smoke.endSize = glm::vec2(0.1f);
 
-        smoke.startSize = glm::vec2(0.01f);
-        smoke.endSize = glm::vec2(0.5f);
+        smoke.startSize = glm::vec2(0.1f);
+        smoke.endSize = glm::vec2(1.0f);
 
-        smoke.lifetime = 2.0f;
+        smoke.lifetime = 3.0f;
         smoke.remainingLife = smoke.lifetime;
         
         smoke.rotation_angle   = 0.0f;
@@ -167,8 +169,11 @@ namespace gfx::particles {
         smokeProperties.box_size = { 0.1f, 0.1f, 0.1f };
         // FireProperties.radius   = 1.0f;
 
-        smokeProperties.velocity_min = {-0.1f, 0.5f,-0.1f };
-        smokeProperties.velocity_max = { 0.1f, 0.8f, 0.1f };
+        smokeProperties.acc_min = smoke.acceleration;
+        smokeProperties.acc_max = smoke.acceleration;
+
+        smokeProperties.velocity_min = {-0.1f, 0.5f,-2.1f };
+        smokeProperties.velocity_max = { 0.1f, 0.8f,-2.1f };
 
         smokeProperties.size_min = 1.0;
         smokeProperties.size_max = 2.0;
@@ -384,7 +389,7 @@ void ParticleEmitter::update(const float dt) {
     }
 }
 
-void ParticleEmitter::render() const {
+void ParticleEmitter::render(const TextureHandle depthTexture) const {
 
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
@@ -419,30 +424,41 @@ void ParticleEmitter::render() const {
         modelMatrix[1] = glm::vec4(newUp    * particle.size.y, 0.0f);
         modelMatrix[2] = glm::vec4(front,                      0.0f);
         modelMatrix[3] = glm::vec4(particle.position,          1.0f);
+
+        const bool isSoft = (softness > 0.0f);
+
+        const Shader& shader = ShaderManager::getUtil(
+            (isSoft << 1 | particleType) + gfx::shader::PARTICLE_SHADER_OFFSET
+        );
+
+        shader.use();
         
-        if (particleType == gfx::particles::TEXTURED) {
-
-            // const Shader& shader = *ShaderManager::get(gfx::shader::TETXURED_PARTICLE);
-            const Shader& shader = ShaderManager::getUtil(gfx::shader::PARTICLE_TEXTURED);
-            shader.use();
-
-            shader.setMat4("finalMatrix", projection * view * modelMatrix);
-            shader.setFloat("alpha", particle.alpha);
+        if (particleType) {
 
             shader.setInt("particle", 0);
             AssetManager::getTexture(particleTexture).bind(0);
         }
         else {
-
-            // const Shader& shader = *ShaderManager::get(gfx::shader::COLORED_PARTICLE);
-            const Shader& shader = ShaderManager::getUtil(gfx::shader::PARTICLE_COLORED);
-            shader.use();
-
-            shader.setMat4("finalMatrix", projection * view * modelMatrix);
-            shader.setFloat("alpha", particle.alpha);
             shader.setVec3("color", particle.color);
         }
 
+        // Soft Particles
+        if (isSoft) {
+            
+            SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!");
+
+            shader.setInt("depthTexture", 1);
+            glActiveTexture(GL_TEXTURE0 + 1);
+            glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+            shader.setVec2("screenSize", glm::vec2(WIN_W, WIN_H));
+            shader.setFloat("nearPlane", Camera::activeCamera->getNearPlane());
+            shader.setFloat("farPlane",  Camera::activeCamera->getFarPlane());
+        }
+
+        shader.setMat4("finalMatrix", projection * view * modelMatrix);
+        shader.setFloat("alpha", particle.alpha);
+        
         mesh.draw();
     }
 

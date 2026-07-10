@@ -61,6 +61,22 @@ void DepthFrame::create(const UintRes frameWidth, const UintRes frameHeight) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void DepthFrame::render() const {
+
+    Renderer::disableDepth();
+
+    const Shader& shader = ShaderManager::getFrame(gfx::shader::FRAME_DEPTH);
+
+    shader.use();
+    shader.setInt("depthTexture", 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depth_texture);
+
+    frameBuffers::renderScreen();
+    Renderer::enableDepth();
+}
+
 DebugFrame::DebugFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
     glGenFramebuffers(1, &fbo);
@@ -213,57 +229,56 @@ void PointShadowFrame::bindTexture(const unsigned int textureUnit) const {
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
 }
 
-HDRFrame::HDRFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
+HDRFrame::HDRFrame(const UintRes& frameWidth, const UintRes& frameHeight) {
+
+    width  = frameWidth;
+    height = frameHeight;
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // Texture Attachment
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glGenTextures(1, &color_texture);
+    glBindTexture(GL_TEXTURE_2D, color_texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, frameWidth, frameHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_texture, 0);
 
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, drawBuffers);
 
-    // Render Object
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    // Depth Attachment
+    glGenTextures(1, &depth_texture);
+    glBindTexture(GL_TEXTURE_2D, depth_texture);
 
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameWidth, frameHeight);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
+
+    // Render Object
+    // glGenRenderbuffers(1, &rbo);
+    // glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+
+    // glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameWidth, frameHeight);
     
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
     
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         std::cerr << "ERROR :: UNABLE TO COMPLETE DEBUG-FRAME-BUFFER!" << std::endl;
     }
     
     glBindTexture(GL_TEXTURE_2D, 0);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    // glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    this->init();
-}
-
-void HDRFrame::init() {
-
-    // shader = new Shader(
-    //     "../shaders/frameBuffs/default_fb.vert",
-    //     "../shaders/frameBuffs/hdr_frame.frag"
-    // );
-
-    // shader = new Shader();
-
-    // shader->loadFromFile(
-    //     "../shaders/frameBuffs/default_fb.vert",
-    //     "../shaders/frameBuffs/hdr_frame.frag"
-    // );
 }
 
 void HDRFrame::render() const {
@@ -273,8 +288,8 @@ void HDRFrame::render() const {
     shader.use();
     shader.setInt("screen", 0);
     
-    static bool  toggle   = false;
-    static float gamma = 2.3f;
+    static bool  toggle = false;
+    static float gamma  = 2.3f;
     
     if (Input::isKeyDown(GLFW_KEY_M)) {
         
@@ -303,7 +318,7 @@ void HDRFrame::render() const {
     shader.setFloat("gamma", gamma);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glBindTexture(GL_TEXTURE_2D, color_texture);
 
     frameBuffers::renderScreen();
 }
@@ -349,11 +364,6 @@ BloomFrame::BloomFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     _blur = new BlurFrame(frameWidth, frameHeight);
-
-    // shader = new Shader(
-    //     "../shaders/frameBuffs/default_fb.vert",
-    //     "../shaders/frameBuffs/bloom.frag"
-    // );
 }
 
 void BloomFrame::render() const {
@@ -362,8 +372,6 @@ void BloomFrame::render() const {
     bool first_itr  = true;
 
     int amount = 5;
-
-    // _blur->shader->use();
 
     const Shader& shaderBlur = ShaderManager::getFrame(gfx::shader::FRAME_BLUR);
     shaderBlur.use();
@@ -420,11 +428,6 @@ BlurFrame::BlurFrame(const uint16_t& frameWidth, const uint16_t& frameHeight) {
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongTex[i], 0);
     }
-
-    // shader = new Shader(
-    //     "../shaders/frameBuffs/default_fb.vert",
-    //     "../shaders/frameBuffs/blur.frag"
-    // );
 }
 
 Gbuffer::Gbuffer(const uint16_t& frameWidth, const uint16_t& frameHeight) {

@@ -156,7 +156,7 @@ std::string Shader::loadShaderFile(const char* path) {
     std::ifstream file(path);
 
     if (!file) {
-        std::cerr << "Failed to open the File!" << std::endl;
+        std::cerr << "Failed to open the File!\n path: " << path << std::endl;
         return "";
     }
 
@@ -283,7 +283,9 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
     ShaderPath("wireframe/generic3d.vert", "wireframe/wireframe.frag"),
     ShaderPath("cubeMap/env.vert",         "cubeMap/env.frag"),
     ShaderPath("obj2d/particle.vert",      "obj2d/particle.frag"),
-    ShaderPath("obj2d/tex_particle.vert",  "obj2d/tex_particle.frag")
+    ShaderPath("obj2d/tex_particle.vert",  "obj2d/tex_particle.frag"),
+    ShaderPath("obj2d/particle.vert",      "obj2d/soft_particle.frag"),
+    ShaderPath("obj2d/tex_particle.vert",  "obj2d/soft_tex_particle.frag")
 };
 
 bool ShaderManager::initShaders() {
@@ -330,6 +332,11 @@ bool ShaderManager::initShaders() {
     shaderFrames[gfx::shader::FRAME_BLUR].loadFromFile(
         "../shaders/frameBuffs/default_fb.vert",
         "../shaders/frameBuffs/blur.frag"
+    );
+
+    shaderFrames[gfx::shader::FRAME_DEPTH].loadFromFile(
+        "../shaders/frameBuffs/default_fb.vert",
+        "../shaders/frameBuffs/depth.frag"
     );
 
     shaderFrames[gfx::shader::EQUIRECT_TO_CUBEMAP].loadFromFile(
@@ -390,7 +397,12 @@ const Shader& ShaderManager::getShader(const ShaderHandle handle) {
     return objShaders[handle];
 }
 
-const Shader& ShaderManager::getUtil(const gfx::shader::shadersUtil index) {
+const Shader& ShaderManager::getUtil(const uint8_t index) {
+
+    SNOW_ASSERT(
+        index < gfx::shader::SHADERUTIL_TOTAL_COUNT,
+        "SHADER-UTIL ACCESSED OUTSIDE RANGE!"
+    );
 
     if (!lShadersUtil[index].getShader()) {
 
@@ -428,6 +440,15 @@ void Shader::setFloat(const char* target, const float &value) const {
     glUniform1f(
         glGetUniformLocation(shaderProgram, target),
         value
+    );
+}
+
+void Shader::setVec2(const char* target, const glm::vec2 &vector) const {
+
+    glUniform2fv(
+        glGetUniformLocation(shaderProgram, target),
+        1,
+        glm::value_ptr(vector)
     );
 }
 

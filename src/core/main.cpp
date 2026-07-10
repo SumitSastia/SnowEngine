@@ -70,6 +70,9 @@ int main() {
     Scene2* scene2 = new Scene2();
 
     // BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
+
+    DepthFrame depthFrame {};
+    depthFrame.create(WIN_W, WIN_H);
     
     HDRFrame* hdrFrame      = new HDRFrame(WIN_W, WIN_H);
     Gbuffer*  deferredFrame = new Gbuffer(WIN_W, WIN_H);
@@ -178,9 +181,13 @@ int main() {
             hdrFrame->render();
 
             Renderer::copyDepth(hdrFrame);
+            Renderer::copyDepth(hdrFrame, &depthFrame);
+
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            // depthFrame.render();
             
             scene2->renderLight();
+            scene2->renderParticles(hdrFrame->getDepthTexture());
         }
         else {
 
@@ -230,15 +237,14 @@ int main() {
             // ************************************************************* //
 
             // Lighting Pass
-            // scene2->renderDeferred(*deferredFrame->getShader());
             scene2->renderDeferred();
             deferredFrame->render();
 
             Renderer::copyDepth(deferredFrame);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            // mainScene->renderLight();
             scene2->renderLight();
+            scene2->renderParticles();
         }
 
         Crosshair::render();

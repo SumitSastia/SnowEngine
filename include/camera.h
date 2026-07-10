@@ -21,6 +21,9 @@ class Camera {
     glm::vec3 right_axis;
     glm::vec3 up_axis;
 
+    float nearPlane;
+    float farPlane;
+
     float camSlow;
     float camSpeed;
     
@@ -53,9 +56,7 @@ public:
     void update(const float deltaTime);
     void handle_mouse(GLFWwindow* window);
 
-    // void update(const float& delta_time);
     void look_at();
-    // void input_handler(GLFWwindow* window, float deltaTime);
     void mouse_handler(GLFWwindow* window);
     void scroll_handler(float &scrollOffset);
 
@@ -64,14 +65,14 @@ public:
     void set_target(const glm::vec3 target);
     void set_fov(const float fov);
     void set_aspect(const int frameWidth, const int frameHeight);
-    
-    // void set_yaw(const float& yaw);
-    // float get_yaw() const { return yaw; }
 
     glm::vec3 getPos()        const { return position;   }
     glm::mat4 getView()       const { return viewMatrix; }
     glm::mat4 getProjection() const { return projection; }
     glm::vec3 getTarget()     const { return target;     }
+
+    float getNearPlane() const { return nearPlane; }
+    float getFarPlane()  const { return farPlane;  }
 
     const float getPitch() const { return pitch; }
     const float getYaw()   const { return yaw;   }

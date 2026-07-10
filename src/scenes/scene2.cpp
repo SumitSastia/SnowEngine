@@ -12,9 +12,6 @@
 
 void Scene2::init() {
 
-    // Particles
-    fire_emitter.particleType = gfx::particles::COLORED;
-
     EntityManager&    entityManager    = ecs.entityManager;
     ComponentManager& componentManager = ecs.componentManager;
 
@@ -630,6 +627,9 @@ void Scene2::init() {
     camChild.children = { gun };
     componentManager.addComponent(mainCamera, camChild);
 
+    // Particles
+    fire_emitter.particleType = gfx::particles::COLORED;
+
     // CampFire
     Particle fire = gfx::particles::Fire;
     const glm::vec3 fire_variation = glm::vec3(0.2f, 0.0f, 0.2f);
@@ -650,6 +650,7 @@ void Scene2::init() {
     smoke_property.center = fire.position + glm::vec3(0.0f, 1.0f, 0.0f);
     smoke_property.total_count = 100;
 
+    smoke_emitter.softness = 0.5f;
     smoke_emitter.particleType = gfx::particles::TEXTURED;
     smoke_emitter.setTexture(AssetManager::loadTexture("assets/particles/smoke_01.png", true));
 
@@ -872,11 +873,14 @@ void Scene2::renderLight() const {
     if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
 
     RenderSystem::instance().renderTransparent(ecs);
+}
+
+void Scene2::renderParticles(const TextureHandle depthTexture) const {
 
     fire_emitter.render();
     rain_emitter.render();
     bullet_emitter.render();
-    smoke_emitter.render();
+    smoke_emitter.render(depthTexture);
 }
 
 void Scene2::renderPointShadow() const {

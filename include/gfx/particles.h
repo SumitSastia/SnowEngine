@@ -86,7 +86,7 @@ enum random_flags : uint8_t {
 
 namespace gfx::particles {
 
-    enum Type : uint8_t {
+    enum PType : uint8_t {
         COLORED,
         TEXTURED
     };
@@ -150,7 +150,8 @@ class ParticleEmitter {
 
 public:
     
-    bool particleType;
+    float softness = 0.0f;
+    bool  particleType;
 
     ParticleEmitter();
 
@@ -166,5 +167,5 @@ public:
     void update(const float dt);
     // void update(const ParticleEffect& effect, const float dt);
 
-    void render() const;
+    void render(const TextureHandle depthTexture = 0) const;
 };

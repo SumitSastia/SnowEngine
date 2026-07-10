@@ -1,6 +1,5 @@
 #pragma once
 
-// #include <shapes.h>
 #include <lights.h>
 #include <shader.h>
 #include <frame.h>
@@ -43,6 +42,8 @@ public:
     virtual void renderSkybox() const                               = 0;
     virtual void renderDebug() const                                = 0;
     virtual void destroy()                                          = 0;
+
+    virtual void renderParticles(const TextureHandle depthTexture = 0) const {}
 };
 
 // class Scene1 : public Scene {
@@ -152,4 +153,6 @@ public:
     void renderSkybox() const override {}
     void renderDebug() const override {}
     void destroy() override {}
+
+    void renderParticles(const TextureHandle depthTexture = 0) const;
 };
