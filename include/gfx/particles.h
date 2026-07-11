@@ -169,3 +169,12 @@ public:
 
     void render(const TextureHandle depthTexture = 0) const;
 };
+
+class InstancedParticles {
+
+public:
+    void init();
+
+private:
+    uint VAO, VBO1, VBO2, VBO3;
+};

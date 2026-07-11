@@ -100,7 +100,8 @@ void Scene2::init() {
         TransformComponent transform;
         transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
         transform.rotation = glm::vec3(0.0f);
-        transform.scale    = glm::vec3(0.1f);
+        transform.scale    = glm::vec3(1.0f);
+        // transform.scale    = glm::vec3(0.1f);
         transform.computeModel();
 
         // transform.isVisible = false;
@@ -132,7 +133,8 @@ void Scene2::init() {
         BoundingAABBComponent AABB = createAABB(transform, mesh);
         
         componentManager.addComponent(wood_box, mesh);
-        componentManager.addComponent(wood_box, transform);
+        componentManager.addComponent<TransformComponent>(wood_box);
+        // componentManager.addComponent(wood_box, transform);
         componentManager.addComponent(wood_box, material);
         componentManager.addComponent(wood_box, boundingSphere);
         componentManager.addComponent(wood_box, AABB);

@@ -257,7 +257,7 @@ void InstanceComponent::bind(
     mesh.indicesCount = indices.size();
     visibleCount = count;
 
-    if (!count) DebugMenu::log("ERROR::TRANSFORMCOMPONENTS NOT INITIALIZED!");
+    if (!count) DebugMenu::log("ERROR::TRANSFORM-COMPONENTS NOT INITIALIZED!");
 
     glGenBuffers(1, &mesh.VBO);
     glGenBuffers(1, &mesh.EBO);
@@ -617,13 +617,6 @@ const ComponentPool<AnimatedSprite>& ComponentManager::getPool() const {
 void ComponentManager::addShader(const ShaderHandle shader) {
 
     bool skip = false;
-    // for (const Shader* s : uniqueShaders) {
-    //     if (shader == s) { skip = true; break; }
-    // }
-
-    // if (!skip) {
-    //     uniqueShaders.push_back(shader);
-    // }
 
     for (const ShaderHandle handle : uniqueShaders) {
         if (shader == handle) { skip = true; break; }

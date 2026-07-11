@@ -410,6 +410,10 @@ public:
         hasData(MAX_ENTITIES, false) {
     }
 
+    void addComponent(const Entity entity) {
+        hasData[entity] = true;
+    }
+
     void addComponent(const Entity entity, const Component& component) {
         data[entity] = component;
         hasData[entity] = true;
@@ -471,6 +475,11 @@ public:
     const ComponentPool<Component>& getPool() const;
 
     ComponentManager() = default;
+
+    template <typename Component>
+    void addComponent(const Entity& entity) {
+        getPool<Component>().addComponent(entity);
+    }
 
     template <typename Component>
     void addComponent(const Entity& entity, const Component& component) {
