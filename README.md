@@ -86,3 +86,5 @@ This project is being developed from scratch as a learning-focused engine to exp
 <!-- ## License -->
 
 <!-- MIT License -->
+
+Download assets folder: https://drive.google.com/drive/folders/1TM2m4U4ik7_SKgbpLG4OVVpNUeKe89Bn?usp=sharing
