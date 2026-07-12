@@ -2,12 +2,13 @@
 
 out vec4 FragColor;
 
+in vec4 color;
+in vec2 vTexCords;
+
+uniform sampler2D particle;
 uniform sampler2D depthTexture;
 
-uniform vec3  color;
 uniform vec2  screenSize;
-uniform float alpha;
-
 uniform float nearPlane;
 uniform float farPlane;
 
@@ -19,6 +20,13 @@ float linearizeDepth(float depth) {
 }
 
 void main() {
+    
+    const vec4 tex = texture(particle, vTexCords);
+
+    const float gamma = 2.3;
+    vec3 finalColor = pow(tex.rgb, vec3(1.0 / gamma));   // Gamma Correction
+
+    // Soft
 
     const vec2 uv = gl_FragCoord.xy / screenSize;
 
@@ -33,5 +41,5 @@ void main() {
     const float softness = 0.8;
     const float fade = clamp(diff / softness, 0.0, 1.0);
 
-    FragColor = vec4(color, alpha * fade);
+    FragColor = vec4(finalColor.rgb, color.a * fade * tex.a);
 }

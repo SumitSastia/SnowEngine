@@ -282,10 +282,11 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
     ShaderPath("lights/ecs.vert",          "lights/light.frag"),
     ShaderPath("wireframe/generic3d.vert", "wireframe/wireframe.frag"),
     ShaderPath("cubeMap/env.vert",         "cubeMap/env.frag"),
-    ShaderPath("obj2d/particle.vert",      "obj2d/particle.frag"),
-    ShaderPath("obj2d/tex_particle.vert",  "obj2d/tex_particle.frag"),
-    ShaderPath("obj2d/particle.vert",      "obj2d/soft_particle.frag"),
-    ShaderPath("obj2d/tex_particle.vert",  "obj2d/soft_tex_particle.frag")
+    ShaderPath("obj2d/particle.vert",      "obj2d/particle_colored.frag"),
+    ShaderPath("obj2d/particle.vert",      "obj2d/particle_textured.frag"),
+    ShaderPath("obj2d/particle.vert",      "obj2d/particle_colored_soft.frag"),
+    ShaderPath("obj2d/particle.vert",      "obj2d/particle_textured_soft.frag"),
+    ShaderPath("obj2d/instance.vert",      "obj2d/particle_colored.frag")
 };
 
 bool ShaderManager::initShaders() {

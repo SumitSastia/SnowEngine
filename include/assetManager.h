@@ -5,15 +5,14 @@
 #include <thread>
 #include <unordered_map>
 
-#include <ecs/component.h>
-
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <texture.h>
+#include <ecs/component.h>
 
-using TextureHandle = uint32_t;
+#include <texture.h>
+#include <core/config.h>
 
 class AssetManager {
 
@@ -51,6 +50,9 @@ class AssetManager {
 
     static uint32_t loadedTextures;
     static std::vector <Texture> textures;
+
+    static uint32_t loadedModels;
+    // static std::vector <Model> models;
 
     static std::unordered_map <std::string, TextureHandle> textureLookup;
     static std::unordered_map <uint32_t, TextureHandle>    textureLookup_flat;

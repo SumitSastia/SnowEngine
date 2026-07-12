@@ -104,7 +104,7 @@ void Scene2::init() {
         // transform.scale    = glm::vec3(0.1f);
         transform.computeModel();
 
-        // transform.isVisible = false;
+        transform.isVisible = false;
         
         MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
@@ -535,6 +535,8 @@ void Scene2::init() {
         transform.rotation = glm::vec3(0.0f);
         transform.scale    = glm::vec3(1.0f);
 
+        transform.isVisible = false;
+
         transform.computeModel();
 
         MeshComponent mesh = EntityShapes::instance().square;
@@ -642,7 +644,7 @@ void Scene2::init() {
 
     ParticleInitProperties property = gfx::particles::FireProperties;
     property.center = fire.position;
-    property.total_count = 10;
+    property.total_count = 100;
 
     // Smoke
     Particle smoke = gfx::particles::smoke;
@@ -879,7 +881,8 @@ void Scene2::renderLight() const {
 
 void Scene2::renderParticles(const TextureHandle depthTexture) const {
 
-    fire_emitter.render();
+    // fire_emitter.render();
+    fire_emitter.instanceEmitter.render();
     rain_emitter.render();
     bullet_emitter.render();
     smoke_emitter.render(depthTexture);

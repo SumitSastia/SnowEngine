@@ -333,6 +333,8 @@ void RenderSystem::renderTransparent(const ECS& ecs) {
             const TransformComponent& transform  = componentManager.get<TransformComponent>(entity);
             const AnimatedSprite&     animSprite = componentManager.get<AnimatedSprite>(entity);
 
+            if (!transform.isVisible) continue;
+
             MaterialComponent material   = componentManager.get<MaterialComponent>(entity);
             material.albedo = animSprite.activeSprite;
             

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -40,6 +38,8 @@ public:
         static EntityShapes instance {};
         return instance;
     }
+
+    const uint getQuadVAO() const { return square.VAO; }
 };
 
 class EntityManager {

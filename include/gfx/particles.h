@@ -98,6 +98,13 @@ namespace gfx::particles {
         CONE
     };
 
+    struct InstancedParticle {
+
+        glm::vec4 color;    // rgb -> color, a-> alpha
+        glm::vec4 position; // xyz -> position, w -> rotation
+        glm::vec2 size;
+    };
+
     struct SpawnProperties {
         
         // POINT
@@ -138,6 +145,20 @@ namespace gfx::particles {
     void init();
 };
 
+class InstancedParticles {
+
+public:
+    
+    void init(const size_t count);
+    void update(const std::vector <gfx::particles::InstancedParticle>& particles);
+    void render() const;
+
+private:
+
+    uint VAO, VBO, QuadVBO;
+    uint total_count;
+};
+
 class ParticleEmitter {
 
     std::vector <Particle> particles;
@@ -152,6 +173,8 @@ public:
     
     float softness = 0.0f;
     bool  particleType;
+
+    InstancedParticles instanceEmitter;
 
     ParticleEmitter();
 
@@ -168,13 +191,4 @@ public:
     // void update(const ParticleEffect& effect, const float dt);
 
     void render(const TextureHandle depthTexture = 0) const;
-};
-
-class InstancedParticles {
-
-public:
-    void init();
-
-private:
-    uint VAO, VBO1, VBO2, VBO3;
 };

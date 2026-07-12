@@ -193,6 +193,8 @@ ParticleEmitter::ParticleEmitter():
     particleType(gfx::particles::COLORED)
 {
     particleTexture = AssetManager::loadTexture("assets/particles/scorch_01.png", true);
+
+    instanceEmitter.init(MAX_PARTICLES);
 }
 
 const glm::vec3 ParticleEmitter::generate(const ParticleInitProperties& spawner) {
@@ -350,6 +352,8 @@ void ParticleEmitter::emit(const glm::vec3& position) {
 
 void ParticleEmitter::update(const float dt) {
 
+    std::vector <gfx::particles::InstancedParticle> instances;
+
     if (Input::isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) particleType = !particleType;
 
     // if (Input::isKeyPressed(GLFW_KEY_N)) emit(Random::vec3(0.0f, 0.5f));
@@ -386,7 +390,16 @@ void ParticleEmitter::update(const float dt) {
 
         particle.velocity += particle.acceleration * dt;
         particle.position += particle.velocity * dt;
+
+        gfx::particles::InstancedParticle inst_particle;
+        inst_particle.color    = glm::vec4(particle.color,    particle.alpha);
+        inst_particle.position = glm::vec4(particle.position, particle.rotation_angle);
+        inst_particle.size     = particle.size;
+
+        instances.push_back(inst_particle);
     }
+
+    instanceEmitter.update(instances);
 }
 
 void ParticleEmitter::render(const TextureHandle depthTexture) const {
@@ -439,7 +452,7 @@ void ParticleEmitter::render(const TextureHandle depthTexture) const {
             AssetManager::getTexture(particleTexture).bind(0);
         }
         else {
-            shader.setVec3("color", particle.color);
+            shader.setVec4("uColor", glm::vec4(particle.color, particle.alpha));
         }
 
         // Soft Particles
@@ -454,13 +467,93 @@ void ParticleEmitter::render(const TextureHandle depthTexture) const {
             shader.setVec2("screenSize", glm::vec2(WIN_W, WIN_H));
             shader.setFloat("nearPlane", Camera::activeCamera->getNearPlane());
             shader.setFloat("farPlane",  Camera::activeCamera->getFarPlane());
+            
+            shader.setFloat("alpha", particle.alpha);
         }
 
         shader.setMat4("finalMatrix", projection * view * modelMatrix);
-        shader.setFloat("alpha", particle.alpha);
         
         mesh.draw();
     }
 
     glDepthMask(GL_TRUE);
+}
+
+void InstancedParticles::init(const size_t count) {
+
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    static const size_t maxSize = sizeof(gfx::particles::InstancedParticle);
+
+    static const std::vector <float> verticesSqr = {
+
+        -0.5f, 0.5f,  0.0f,0.0f,
+         0.5f, 0.5f,  1.0f,0.0f,
+        -0.5f,-0.5f,  0.0f,1.0f,
+
+         0.5f, 0.5f,  1.0f,0.0f,
+         0.5f,-0.5f,  1.0f,1.0f,
+        -0.5f,-0.5f,  0.0f,1.0f
+    };
+    
+    glGenBuffers(1, &QuadVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, verticesSqr.size() * sizeof(float), verticesSqr.data(), GL_STATIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // TextureCords
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, count * maxSize, nullptr, GL_DYNAMIC_DRAW);
+
+    // Color
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, maxSize, (void*)0);
+    glEnableVertexAttribArray(2);
+    glVertexAttribDivisor(2, 1);
+
+    // Position
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, maxSize, (void*)(offsetof(gfx::particles::InstancedParticle, position)));
+    glEnableVertexAttribArray(3);
+    glVertexAttribDivisor(3, 1);
+
+    // Size
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, maxSize, (void*)(offsetof(gfx::particles::InstancedParticle, size)));
+    glEnableVertexAttribArray(4);
+    glVertexAttribDivisor(4, 1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void InstancedParticles::update(const std::vector<gfx::particles::InstancedParticle>& particles) {
+
+    total_count = particles.size();
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, total_count * sizeof(gfx::particles::InstancedParticle), particles.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void InstancedParticles::render() const {
+
+    const Shader&    shader = ShaderManager::getUtil(gfx::shader::PARTICLE_INSTANCED_HARD_COLORED);
+    const glm::mat4& view   = Camera::activeCamera->getView();
+
+    shader.use();
+    shader.setMat4("projection", Camera::activeCamera->getProjection());
+    shader.setMat4("view", view);
+
+    shader.setVec3("cameraRight", glm::vec3(view[0][0], view[1][0], view[2][0]));
+    shader.setVec3("cameraUp",    glm::vec3(view[0][1], view[1][1], view[2][1]));
+
+    glBindVertexArray(VAO);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, total_count);
+    glBindVertexArray(0);
 }
