@@ -535,7 +535,7 @@ void Scene2::init() {
         transform.rotation = glm::vec3(0.0f);
         transform.scale    = glm::vec3(1.0f);
 
-        transform.isVisible = false;
+        // transform.isVisible = false;
 
         transform.computeModel();
 
@@ -631,8 +631,7 @@ void Scene2::init() {
     camChild.children = { gun };
     componentManager.addComponent(mainCamera, camChild);
 
-    // Particles
-    fire_emitter.particleType = gfx::particles::COLORED;
+    // ----- Particles ----- //
 
     // CampFire
     Particle fire = gfx::particles::Fire;
@@ -640,26 +639,36 @@ void Scene2::init() {
     
     fire.position = ecs.componentManager.get<TransformComponent>(campfire).position;
     fire.position.y += 0.2f;
-    fire.isLooping = true;
+    
+    // fire_emitter.softness  = 0.5f;
+    fire_emitter.isLooping = true;
+    fire_emitter.renderInstance = true;
 
     ParticleInitProperties property = gfx::particles::FireProperties;
     property.center = fire.position;
-    property.total_count = 100;
+    property.total_count = 10;
 
     // Smoke
     Particle smoke = gfx::particles::smoke;
     ParticleInitProperties smoke_property = gfx::particles::smokeProperties;
-
-    smoke.isLooping = true;
     smoke_property.center = fire.position + glm::vec3(0.0f, 1.0f, 0.0f);
     smoke_property.total_count = 100;
+    
+    smoke_emitter.softness  = 0.8f;
+    smoke_emitter.isLooping = true;
 
-    smoke_emitter.softness = 0.5f;
-    smoke_emitter.particleType = gfx::particles::TEXTURED;
+    smoke_emitter.particleType = static_cast<bool>(gfx::particles::Type::TEXTURED);
     smoke_emitter.setTexture(AssetManager::loadTexture("assets/particles/smoke_01.png", true));
 
     fire_emitter.create(fire, property);
     smoke_emitter.create(smoke, smoke_property);
+
+    smoke_emitter.effects.forces = {
+
+        gfx::particles::wind,
+        gfx::particles::buoyancy,
+        gfx::particles::turbulence
+    };
 
     // LAST INITIALIZATION WORK //
 
@@ -881,10 +890,9 @@ void Scene2::renderLight() const {
 
 void Scene2::renderParticles(const TextureHandle depthTexture) const {
 
-    // fire_emitter.render();
-    fire_emitter.instanceEmitter.render();
-    rain_emitter.render();
-    bullet_emitter.render();
+    fire_emitter.render(depthTexture);
+    rain_emitter.render(depthTexture);
+    bullet_emitter.render(depthTexture);
     smoke_emitter.render(depthTexture);
 }
 

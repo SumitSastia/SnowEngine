@@ -32,8 +32,22 @@ struct Particle {
     float rotation_angle   = 0.0f;
     float angular_velocity = 0.0f;
 
-    bool isActive  = false;
-    bool isLooping = false;
+    bool isActive = false;
+};
+
+enum random_flags : uint8_t {
+
+    RANDOM_POSITION = 1 << 0,
+    RANDOM_VELOCITY = 1 << 1,
+    RANDOM_LIFETIME = 1 << 2,
+    RANDOM_SIZE     = 1 << 3
+};
+
+enum class ParticleSpawnShape : uint8_t {
+    POINT,
+    SPHERE,
+    BOX,
+    CONE
 };
 
 struct ParticleInitProperties {
@@ -60,42 +74,35 @@ struct ParticleInitProperties {
     float radius;
 
     // CONE
-    uint32_t height;
+    float height;
     
     uint32_t total_count;
-    uint8_t  spawnerType;
-};
-
-struct ParticleEffect {
-
-    glm::vec3 acceleration;
-    glm::vec3 velocity;
-    glm::vec3 color;
-
-    float size;
-    float random_lifetime;
-};
-
-enum random_flags : uint8_t {
-
-    RANDOM_POSITION = 1 << 0,
-    RANDOM_VELOCITY = 1 << 1,
-    RANDOM_LIFETIME = 1 << 2,
-    RANDOM_SIZE     = 1 << 3
+    ParticleSpawnShape spawnerType;
 };
 
 namespace gfx::particles {
 
-    enum PType : uint8_t {
+    enum class Type : uint8_t {
         COLORED,
         TEXTURED
     };
 
-    enum SpawnShape : uint8_t {
-        POINT,
-        SPHERE,
-        BOX,
-        CONE
+    enum class ParticleForceType : uint8_t {
+
+        NO_FORCE,
+        WIND       = 1 << 1,
+        DRAG       = 1 << 2,
+        GRAVITY    = 1 << 3,
+        BUOYANCY   = 1 << 4,
+        TURBULENCE = 1 << 5
+    };
+
+    struct ParticleForce {
+
+        // Use Mangitude of 'direction' for Scalar Operations
+
+        glm::vec3 direciton;
+        ParticleForceType forceType;
     };
 
     struct InstancedParticle {
@@ -108,28 +115,19 @@ namespace gfx::particles {
     struct SpawnProperties {
         
         // POINT
-        glm::vec3 center;
+        glm::vec3 center { 0.0f };
         
         // BOX
-        glm::vec3 box_size;
+        glm::vec3 box_size { 1.0f };
         
         // SPHERE
-        float radius;
+        float radius = 1.0f;
 
         // CONE
-        uint32_t height;
+        uint32_t height = 1.0f;
         
-        uint32_t total_count;
-        uint8_t  spawnerType;
-
-        SpawnProperties():
-            center({0.0f}),
-            box_size({1.0f}),
-            radius(1.0f),
-            total_count(1u),
-            spawnerType(0u) {
-        }
-
+        uint32_t total_count = 1;
+        ParticleSpawnShape spawnerType = ParticleSpawnShape::POINT;
     };
 
     inline Particle Fire;
@@ -141,9 +139,21 @@ namespace gfx::particles {
     inline ParticleInitProperties RainProperties;
     inline ParticleInitProperties smokeProperties;
     inline ParticleInitProperties flashProperties;
+
+    inline ParticleForce wind;
+    inline ParticleForce drag;
+    inline ParticleForce gravity;
+    inline ParticleForce buoyancy;
+    inline ParticleForce turbulence;
     
     void init();
 };
+
+struct ParticleEffect {
+    
+    std::vector <gfx::particles::ParticleForce> forces;
+};
+
 
 class InstancedParticles {
 
@@ -151,7 +161,7 @@ public:
     
     void init(const size_t count);
     void update(const std::vector <gfx::particles::InstancedParticle>& particles);
-    void render() const;
+    void draw() const;
 
 private:
 
@@ -162,19 +172,24 @@ private:
 class ParticleEmitter {
 
     std::vector <Particle> particles;
+    
+    InstancedParticles instanceEmitter;
     ParticleInitProperties properties;
-
+    
     TextureHandle particleTexture;
-    uint32_t      activeParticles; // not implemented
-
+    uint32_t activeParticles;
+    
     const glm::vec3 generate(const ParticleInitProperties& spawner);
-
+    
 public:
+
+    ParticleEffect effects;
     
     float softness = 0.0f;
-    bool  particleType;
+    bool particleType;
 
-    InstancedParticles instanceEmitter;
+    bool renderInstance = false;
+    bool isLooping      = false;
 
     ParticleEmitter();
 

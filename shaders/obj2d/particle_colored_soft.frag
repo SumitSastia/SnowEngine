@@ -10,6 +10,7 @@ uniform sampler2D depthTexture;
 uniform vec2  screenSize;
 uniform float nearPlane;
 uniform float farPlane;
+uniform float softness;
 
 float linearizeDepth(float depth) {
 
@@ -28,9 +29,7 @@ void main() {
     sceneDepth    = linearizeDepth(sceneDepth);
     particleDepth = linearizeDepth(particleDepth);
 
-    float diff = sceneDepth - particleDepth;
-
-    const float softness = 0.8;
+    const float diff = sceneDepth - particleDepth;
     const float fade = clamp(diff / softness, 0.0, 1.0);
 
     FragColor = vec4(color.rgb, color.a * fade);

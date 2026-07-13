@@ -286,7 +286,10 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
     ShaderPath("obj2d/particle.vert",      "obj2d/particle_textured.frag"),
     ShaderPath("obj2d/particle.vert",      "obj2d/particle_colored_soft.frag"),
     ShaderPath("obj2d/particle.vert",      "obj2d/particle_textured_soft.frag"),
-    ShaderPath("obj2d/instance.vert",      "obj2d/particle_colored.frag")
+    ShaderPath("obj2d/instance.vert",      "obj2d/particle_colored.frag"),
+    ShaderPath("obj2d/instance.vert",      "obj2d/particle_textured.frag"),
+    ShaderPath("obj2d/instance.vert",      "obj2d/particle_colored_soft.frag"),
+    ShaderPath("obj2d/instance.vert",      "obj2d/particle_textured_soft.frag"),
 };
 
 bool ShaderManager::initShaders() {

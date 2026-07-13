@@ -39,12 +39,13 @@ namespace gfx::particles {
         Fire.rotation_angle   = 0.0f;
         Fire.angular_velocity = 20.0f;
 
-        FireProperties.spawnerType = gfx::particles::BOX;
-        // FireProperties.spawnerType = gfx::particles::SPHERE;
+        FireProperties.spawnerType = ParticleSpawnShape::CONE;
+        // FireProperties.spawnerType = ParticleSpawnShape::SPHERE;
 
         FireProperties.center   = { 0.0f, 0.0f, 0.0f };
-        FireProperties.box_size = { 0.2f, 0.2f, 0.2f };
-        // FireProperties.radius   = 1.0f;
+        // FireProperties.box_size = { 0.2f, 0.2f, 0.2f };
+        FireProperties.radius = 0.5f;
+        FireProperties.height = -1.0f;
 
         FireProperties.velocity_min = {-0.1f, 0.5f,-0.1f };
         FireProperties.velocity_max = { 0.1f, 0.8f, 0.1f };
@@ -84,7 +85,7 @@ namespace gfx::particles {
         // RainProperties.position_min = {-10.0f,-4.0f,-10.0f };
         // RainProperties.position_max = { 10.0f, 4.0f, 10.0f };
 
-        RainProperties.spawnerType = gfx::particles::BOX;
+        RainProperties.spawnerType = ParticleSpawnShape::BOX;
 
         RainProperties.center   = { 0.0f, 0.0f, 0.0f };
         RainProperties.box_size = { 20.0f, 8.0f, 20.0f };
@@ -115,7 +116,7 @@ namespace gfx::particles {
         flash.lifetime = 0.1f;
         flash.remainingLife = flash.lifetime;
 
-        flashProperties.spawnerType = gfx::particles::BOX;
+        flashProperties.spawnerType = ParticleSpawnShape::BOX;
         
         flashProperties.center = { 0.0f, 0.0f, 0.0f };
         flashProperties.box_size = { 0.1f, 0.1f, 0.1f};
@@ -162,7 +163,7 @@ namespace gfx::particles {
         smoke.rotation_angle   = 0.0f;
         smoke.angular_velocity = 0.0f;
 
-        smokeProperties.spawnerType = gfx::particles::BOX;
+        smokeProperties.spawnerType = ParticleSpawnShape::BOX;
         // FireProperties.spawnerType = gfx::particles::SPHERE;
 
         smokeProperties.center   = { 0.0f, 0.0f, 0.0f };
@@ -172,8 +173,11 @@ namespace gfx::particles {
         smokeProperties.acc_min = smoke.acceleration;
         smokeProperties.acc_max = smoke.acceleration;
 
-        smokeProperties.velocity_min = {-0.1f, 0.5f,-2.1f };
-        smokeProperties.velocity_max = { 0.1f, 0.8f,-2.1f };
+        smokeProperties.velocity_min = {-0.1f, 0.5f,-0.1f };
+        smokeProperties.velocity_max = { 0.1f, 0.8f, 0.1f };
+
+        // smokeProperties.velocity_min = {-0.1f, 0.5f,-2.1f };
+        // smokeProperties.velocity_max = { 0.1f, 0.8f,-2.1f };
 
         smokeProperties.size_min = 1.0;
         smokeProperties.size_max = 2.0;
@@ -183,6 +187,23 @@ namespace gfx::particles {
 
         smokeProperties.acc_min = glm::vec3(-0.1f, 0.1f,-0.1f);
         smokeProperties.acc_max = glm::vec3( 0.1f, 0.4f, 0.1f);
+
+        //------------------------------- FORCES ------------------------------------//
+
+        wind.direciton = {-0.5f, 0.0f, 0.0f };
+        wind.forceType = ParticleForceType::WIND; 
+
+        drag.direciton = glm::vec3(0.5f);
+        drag.forceType = ParticleForceType::DRAG;
+
+        gravity.direciton = { 0.0f,-1.0f, 0.0 };
+        gravity.forceType = ParticleForceType::GRAVITY;
+
+        buoyancy.direciton = glm::vec3(Random::Float(0.8f, 1.0f));
+        buoyancy.forceType = ParticleForceType::BUOYANCY;
+
+        turbulence.direciton = glm::vec3(1.0f);
+        turbulence.forceType = ParticleForceType::TURBULENCE;
     }
 };
 
@@ -190,7 +211,7 @@ ParticleEmitter::ParticleEmitter():
     particles(MAX_PARTICLES),
     particleTexture(0),
     activeParticles(0),
-    particleType(gfx::particles::COLORED)
+    particleType(static_cast<bool>(gfx::particles::Type::COLORED))
 {
     particleTexture = AssetManager::loadTexture("assets/particles/scorch_01.png", true);
 
@@ -201,16 +222,16 @@ const glm::vec3 ParticleEmitter::generate(const ParticleInitProperties& spawner)
 
     switch (spawner.spawnerType) {
 
-        case gfx::particles::POINT:
+        case ParticleSpawnShape::POINT:
             return spawner.center;
         
-        case gfx::particles::SPHERE: {
+        case ParticleSpawnShape::SPHERE: {
 
             const glm::vec3 direction = Random::vec3(glm::vec3(-1.0f), glm::vec3(1.0f));
             return (spawner.center + glm::normalize(direction) * Random::Float(0, spawner.radius));
         }
 
-        case gfx::particles::BOX: {
+        case ParticleSpawnShape::BOX: {
 
             const glm::vec3 pos_min = -spawner.box_size / 2.0f;
             const glm::vec3 pos_max =  spawner.box_size / 2.0f;
@@ -218,17 +239,21 @@ const glm::vec3 ParticleEmitter::generate(const ParticleInitProperties& spawner)
             return (spawner.center + Random::vec3(pos_min, pos_max));
         }
 
-        case gfx::particles::CONE: {
+        case ParticleSpawnShape::CONE: {
 
-            const float height    = Random::Float(0.0f, spawner.height);
-            const float maxRadius = (height / spawner.height) * spawner.radius;
+            bool isInverted = false;
+            if (spawner.height < 0.0f) isInverted = true;
 
-            // for inverted cone: maxRadius = (1.0f - height/spawner.height) * spawner.radius;
+            const float height = (isInverted)? 
+                Random::Float(-spawner.height, 0.0f) : Random::Float(0.0f, spawner.height);
+
+            const float maxRadius = (isInverted)?
+                ((1.0f - height/(-spawner.height)) * spawner.radius) : ((height / spawner.height) * spawner.radius);
 
             const float angle  = Random::Float(0.0f, glm::two_pi<float>());
             const float radius = maxRadius * glm::sqrt(Random::Float(0.0f, 1.0f));
 
-            return glm::vec3(glm::cos(angle) * radius, height, glm::sin(angle) * radius);
+            return spawner.center + glm::vec3(glm::cos(angle) * radius, height, glm::sin(angle) * radius);
         }
 
         default:
@@ -352,6 +377,8 @@ void ParticleEmitter::emit(const glm::vec3& position) {
 
 void ParticleEmitter::update(const float dt) {
 
+    activeParticles = 0;
+
     std::vector <gfx::particles::InstancedParticle> instances;
 
     if (Input::isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) particleType = !particleType;
@@ -376,7 +403,7 @@ void ParticleEmitter::update(const float dt) {
 
         if (particle.remainingLife <= 0.0f) {
 
-            if (particle.isLooping) {
+            if (isLooping) {
                 recreate(particle);
             }
             else {
@@ -388,6 +415,41 @@ void ParticleEmitter::update(const float dt) {
         particle.rotation_angle += particle.angular_velocity * dt;
         if (particle.rotation_angle > 360.0f) particle.rotation_angle -= 360.0f;
 
+        for (const auto& force : effects.forces) {
+
+            switch (force.forceType) {
+
+                case gfx::particles::ParticleForceType::WIND: {
+
+                    const glm::vec3 delta = force.direciton - particle.velocity;
+                    particle.velocity += delta * glm::length(force.direciton) * dt;
+                    break;
+                }
+
+                case gfx::particles::ParticleForceType::DRAG: {
+                    particle.velocity *= std::exp(-force.direciton.x * dt);
+                    break;
+                }
+
+                case gfx::particles::ParticleForceType::GRAVITY: {
+                    particle.velocity += force.direciton * dt;
+                    break;
+                }
+
+                case gfx::particles::ParticleForceType::BUOYANCY: {
+                    particle.velocity.y += force.direciton.x * dt;
+                    break;
+                }
+
+                case gfx::particles::ParticleForceType::TURBULENCE: {
+
+                    particle.velocity.x += Random::Float(-force.direciton.x, force.direciton.x) * dt;
+                    particle.velocity.z += Random::Float(-force.direciton.x, force.direciton.x) * dt;
+                    break;
+                }
+            }
+        }
+
         particle.velocity += particle.acceleration * dt;
         particle.position += particle.velocity * dt;
 
@@ -397,6 +459,7 @@ void ParticleEmitter::update(const float dt) {
         inst_particle.size     = particle.size;
 
         instances.push_back(inst_particle);
+        activeParticles++;
     }
 
     instanceEmitter.update(instances);
@@ -407,80 +470,121 @@ void ParticleEmitter::render(const TextureHandle depthTexture) const {
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
 
-    const MeshComponent& mesh = EntityShapes::instance().square;
+    const bool isSoft = (softness > 0.0f);
 
-    const glm::mat4& projection = Camera::activeCamera->getProjection();
-    const glm::mat4& view       = Camera::activeCamera->getView();
-
-    const glm::vec3 cameraRight(view[0][0], view[1][0], view[2][0]);
-    const glm::vec3 cameraUp   (view[0][1], view[1][1], view[2][1]);
-    const glm::vec3 cameraFront(view[0][2], view[1][2], view[2][2]);
-
-    for (const Particle& particle : particles) {
-
-        if (!particle.isActive) continue;
-
-        const glm::vec3 up    = glm::normalize(particle.velocity);
-        const glm::vec3 right = glm::normalize(glm::cross(up, cameraFront));
-        const glm::vec3 front = glm::normalize(glm::cross(right, up));
-
-        const float cos = glm::cos(glm::radians(particle.rotation_angle));
-        const float sin = glm::sin(glm::radians(particle.rotation_angle));
-
-        const auto& newRight =  right * cos + up * sin;
-        const auto& newUp    = -right * sin + up * cos;
-
-        // Billboarding
-        glm::mat4 modelMatrix;
-
-        modelMatrix[0] = glm::vec4(newRight * particle.size.x, 0.0f);
-        modelMatrix[1] = glm::vec4(newUp    * particle.size.y, 0.0f);
-        modelMatrix[2] = glm::vec4(front,                      0.0f);
-        modelMatrix[3] = glm::vec4(particle.position,          1.0f);
-
-        const bool isSoft = (softness > 0.0f);
+    if (renderInstance) {
 
         const Shader& shader = ShaderManager::getUtil(
-            (isSoft << 1 | particleType) + gfx::shader::PARTICLE_SHADER_OFFSET
+            (isSoft << 1 | particleType) + gfx::shader::PARTICLE_INSTANCED_SHADER_OFFSET
         );
 
-        shader.use();
-        
-        if (particleType) {
+        const glm::mat4& view = Camera::activeCamera->getView();
 
+        shader.use();
+        shader.setMat4("projection", Camera::activeCamera->getProjection());
+        shader.setMat4("view", view);
+
+        shader.setVec3("cameraRight", glm::vec3(view[0][0], view[1][0], view[2][0]));
+        shader.setVec3("cameraUp",    glm::vec3(view[0][1], view[1][1], view[2][1]));
+
+        if (particleType) {
+                
             shader.setInt("particle", 0);
             AssetManager::getTexture(particleTexture).bind(0);
-        }
-        else {
-            shader.setVec4("uColor", glm::vec4(particle.color, particle.alpha));
         }
 
         // Soft Particles
         if (isSoft) {
             
             SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!");
-
+            
             shader.setInt("depthTexture", 1);
             glActiveTexture(GL_TEXTURE0 + 1);
             glBindTexture(GL_TEXTURE_2D, depthTexture);
-
+            
             shader.setVec2("screenSize", glm::vec2(WIN_W, WIN_H));
             shader.setFloat("nearPlane", Camera::activeCamera->getNearPlane());
             shader.setFloat("farPlane",  Camera::activeCamera->getFarPlane());
             
-            shader.setFloat("alpha", particle.alpha);
+            shader.setFloat("softness", softness);
         }
 
-        shader.setMat4("finalMatrix", projection * view * modelMatrix);
-        
-        mesh.draw();
+        instanceEmitter.draw();
     }
+    else {
+        const MeshComponent& mesh = EntityShapes::instance().square;
+        
+        const glm::mat4& projection = Camera::activeCamera->getProjection();
+        const glm::mat4& view       = Camera::activeCamera->getView();
+        
+        const glm::vec3 cameraRight(view[0][0], view[1][0], view[2][0]);
+        const glm::vec3 cameraUp   (view[0][1], view[1][1], view[2][1]);
+        const glm::vec3 cameraFront(view[0][2], view[1][2], view[2][2]);
+        
+        for (const Particle& particle : particles) {
+            
+            if (!particle.isActive) continue;
+            
+            const glm::vec3 up    = glm::normalize(particle.velocity);
+            const glm::vec3 right = glm::normalize(glm::cross(up, cameraFront));
+            const glm::vec3 front = glm::normalize(glm::cross(right, up));
+            
+            const float cos = glm::cos(glm::radians(particle.rotation_angle));
+            const float sin = glm::sin(glm::radians(particle.rotation_angle));
+            
+            const auto& newRight =  right * cos + up * sin;
+            const auto& newUp    = -right * sin + up * cos;
+            
+            // Billboarding
+            glm::mat4 modelMatrix;
+            
+            modelMatrix[0] = glm::vec4(newRight * particle.size.x, 0.0f);
+            modelMatrix[1] = glm::vec4(newUp    * particle.size.y, 0.0f);
+            modelMatrix[2] = glm::vec4(front,                      0.0f);
+            modelMatrix[3] = glm::vec4(particle.position,          1.0f);
+            
+            const Shader& shader = ShaderManager::getUtil(
+                (isSoft << 1 | particleType) + gfx::shader::PARTICLE_SHADER_OFFSET
+            );
 
+            shader.use();
+            
+            if (particleType) {
+                
+                shader.setInt("particle", 0);
+                AssetManager::getTexture(particleTexture).bind(0);
+            }
+
+            // Binded for both COLORED & TEXTURED
+            shader.setVec4("uColor", glm::vec4(particle.color, particle.alpha));
+            
+            // Soft Particles
+            if (isSoft) {
+                
+                SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!");
+                
+                shader.setInt("depthTexture", 1);
+                glActiveTexture(GL_TEXTURE0 + 1);
+                glBindTexture(GL_TEXTURE_2D, depthTexture);
+                
+                shader.setVec2("screenSize", glm::vec2(WIN_W, WIN_H));
+                shader.setFloat("nearPlane", Camera::activeCamera->getNearPlane());
+                shader.setFloat("farPlane",  Camera::activeCamera->getFarPlane());
+                
+                shader.setFloat("softness", softness);
+            }
+            
+            shader.setMat4("finalMatrix", projection * view * modelMatrix);
+            
+            mesh.draw();
+        }
+    }
+    
     glDepthMask(GL_TRUE);
 }
 
 void InstancedParticles::init(const size_t count) {
-
+    
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -541,17 +645,7 @@ void InstancedParticles::update(const std::vector<gfx::particles::InstancedParti
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void InstancedParticles::render() const {
-
-    const Shader&    shader = ShaderManager::getUtil(gfx::shader::PARTICLE_INSTANCED_HARD_COLORED);
-    const glm::mat4& view   = Camera::activeCamera->getView();
-
-    shader.use();
-    shader.setMat4("projection", Camera::activeCamera->getProjection());
-    shader.setMat4("view", view);
-
-    shader.setVec3("cameraRight", glm::vec3(view[0][0], view[1][0], view[2][0]));
-    shader.setVec3("cameraUp",    glm::vec3(view[0][1], view[1][1], view[2][1]));
+void InstancedParticles::draw() const {
 
     glBindVertexArray(VAO);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, total_count);

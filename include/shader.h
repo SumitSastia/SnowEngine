@@ -100,6 +100,7 @@ namespace colors {
 namespace gfx::shader {
 
     const uint8_t PARTICLE_SHADER_OFFSET = 5;
+    const uint8_t PARTICLE_INSTANCED_SHADER_OFFSET = 9;
 
     enum shaders : ShaderHandle {
 
