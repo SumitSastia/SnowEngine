@@ -9,30 +9,51 @@ project(${TARGET_NAME})
 set(
     MATH_SRC
 
-    src/math/matrix.cpp
-    src/math/random.cpp
+    math/matrix.cpp
+    math/random.cpp
+    # src/shader/uniforms.cpp
 )
 
 set(
     CORE_SRC
 
-    src/core/glad.c
-    src/core/main.cpp
-    src/core/shader.cpp
-    src/core/camera.cpp
-    # src/core/shapes.cpp
-    src/core/renderer.cpp
-    src/core/input.cpp
-    src/core/lights.cpp
-    src/core/frame.cpp
-    src/core/model.cpp
-    src/core/ibl.cpp
-    src/core/text.cpp
-    src/core/ssao.cpp
-    src/core/frustum.cpp
-    src/core/assetManager.cpp
-    src/core/texture.cpp
-    src/core/cubemap.cpp
+    # src/core/glad.c
+    # src/core/main.cpp
+    # src/core/shader.cpp
+    # src/core/camera.cpp
+    # # src/core/shapes.cpp
+    # src/core/renderer.cpp
+    # src/core/input.cpp
+    # src/core/lights.cpp
+    # src/core/frame.cpp
+    # src/core/model.cpp
+    # src/core/ibl.cpp
+    # src/core/text.cpp
+    # src/core/ssao.cpp
+    # src/core/frustum.cpp
+    # src/core/assetManager.cpp
+    # src/core/texture.cpp
+    # src/core/cubemap.cpp
+
+    main/glad.c
+    main/main.cpp
+
+    core/camera.cpp
+    core/renderer.cpp
+    core/input.cpp
+    core/lights.cpp
+    core/frustum.cpp
+    core/text.cpp
+
+    core/frame/frame.cpp
+    core/shader/shader.cpp
+    core/model/model.cpp
+    core/deferred/ssao.cpp
+
+    core/img/assetManager.cpp
+    core/img/cubemap.cpp
+    core/img/ibl.cpp
+    core/img/texture.cpp
 )
 
 set(
@@ -49,23 +70,23 @@ set(
 set(
     ECS_SRC
 
-    src/ecs/entity.cpp
-    src/ecs/component.cpp
+    ecs/entity.cpp
+    ecs/component.cpp
 )
 
 set(
     SCENES_SRC
 
-    src/scenes/scene1.cpp
-    src/scenes/scene2.cpp
+    scenes/scene1.cpp
+    scenes/scene2.cpp
 )
 
 set(
     ECS_SYSTEMS
 
-    src/systems/initSystem.cpp
-    src/systems/updateSystem.cpp
-    src/systems/renderSystem.cpp
+    ecs/systems/initSystem.cpp
+    ecs/systems/updateSystem.cpp
+    ecs/systems/renderSystem.cpp
 )
 
 add_executable(
@@ -73,10 +94,10 @@ add_executable(
 
     ${MATH_SRC}
     ${CORE_SRC}
-    src/debug/debug.cpp
-    src/utils/wireframe.cpp
-    src/utils/crosshair.cpp
-    src/gfx/particles.cpp
+    utils/debug.cpp
+    utils/wireframe.cpp
+    utils/crosshair.cpp
+    core/gfx/particles.cpp
     
     ${SCENES_SRC}
     ${ECS_SRC}
@@ -84,6 +105,7 @@ add_executable(
     ${ECS_SYSTEMS}
 )
 
+target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR})
 target_include_directories(${TARGET_NAME} PRIVATE include)
 target_include_directories(${TARGET_NAME} PRIVATE include/freetype2)
 

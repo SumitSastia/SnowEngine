@@ -5,6 +5,13 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec3 aTangent;
 layout (location = 3) in vec2 aTexCords;
 
+layout (std140, binding = 0) uniform CameraData {
+
+    mat4 projection1;
+    mat4 view1;
+    vec3 cameraPos;
+};
+
 out vec3 vPos;
 out vec2 vTexCords;
 out vec4 lightSpace_vPos;
