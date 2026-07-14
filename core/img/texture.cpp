@@ -7,7 +7,7 @@
 #include "utils/debug.h"
 #include "utils/assert.h"
 
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/camera.h"
 
 void Texture::load(const uint32_t color, const bool isRGBA) {

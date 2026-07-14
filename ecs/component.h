@@ -17,14 +17,11 @@
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
-// WARNING: SHOULD BE SAME AS THAT DEFINED IN GLSL SHADER
-#define MAX_LIGHTS 4
-
 #define MAX_ENTITIES 5000
 #define MAX_INSTANCES 100
 
-#define TEXTURE_DEFAULT_ALBEDO 1
-#define TEXTURE_DEFAULT_NORMAL 2
+#define TEXTURE_DEFAULT_ALBEDO 1U
+#define TEXTURE_DEFAULT_NORMAL 2U
 
 class PointShadowFrame;
 class DirectShadowFrame;

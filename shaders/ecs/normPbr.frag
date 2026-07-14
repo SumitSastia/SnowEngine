@@ -3,7 +3,7 @@
 // out vec4 FragColor;
 
 layout (location = 0) out vec4 FragColor; 
-layout (location = 1) out vec4 BrightColor; 
+layout (location = 1) out vec4 BrightColor;
 
 in vec3 vPos;
 in vec2 vTexCords;
@@ -12,7 +12,7 @@ in vec4 lightSpace_vPos;
 in mat3 TBN;
 
 uniform sampler2D albedo; 
-uniform sampler2D normalMap;  
+uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 
@@ -23,6 +23,12 @@ uniform sampler2D   brdfLUT;
 
 #include <ecs_lighting.glsl>
 #include <ecs_pbr.glsl>
+
+layout (std140, binding = 1) uniform PointLightData {
+
+    pointLight lights[MAX_LIGHTS];
+    uint lightCount;
+};
 
 void main() {
 

@@ -2,16 +2,19 @@
 
 #include "core/camera.h"
 #include "core/renderer.h"
-#include "core/shader/shader.h"
 #include "core/input.h"
-#include "core/model/model.h"
 #include "core/text.h"
+
+#include "core/model/model.h"
 #include "core/deferred/ssao.h"
 #include "core/img/assetManager.h"
 
-#include "scenes/scenes.h"
-#include "utils/crosshair.h"
+#include "core/shader.h"
+#include "core/shader/uniforms.h"
 
+#include "scenes/scenes.h"
+
+#include "utils/crosshair.h"
 #include "utils/debug.h"
 
 // ------------------------------ Global Variables ----------------------------------- //
@@ -28,7 +31,7 @@ int main() {
 
     // ---------- Initialization --------------- //
 
-    running::globalTimer::start();
+    running::core::GlobalTimer.restart();
     std::cout << "//----------------------------------------//\n\n"; 
     
     GLFWwindow* window = Renderer::instance().getWindow();
@@ -67,8 +70,6 @@ int main() {
 
     // ---------- Testing --------------------- //
 
-    running::core::timer t;
-
     Scene2* scene2 = new Scene2();
 
     // BloomFrame* bloomFrame = new BloomFrame(WIN_W, WIN_H);
@@ -81,7 +82,10 @@ int main() {
 
     bool deferredRender = false;
 
-    DebugMenu::log("Time taken to Initialize: " + running::globalTimer::getTime());
+    UBOhandler uboHandler {};
+    uboHandler.init();
+
+    DebugMenu::log("Time taken to Initialize: " + running::core::GlobalTimer.end());
 
     // ---------- Loop ------------------------ //
 
@@ -141,6 +145,7 @@ int main() {
         ImGui::End();
 
         Camera::activeCamera->update(deltaTime);
+        uboHandler.update();
         
         if (!isPaused) {
             scene2->update(deltaTime);
@@ -257,14 +262,14 @@ int main() {
             "FPS: " + Text::floatToString(fps),
             glm::vec2(10.0f, 700.0f),
             0.3f,
-            glm::vec3(1.0f)
+            colors::WHITE
         );
 
         Text::render(
             "frametime: " + Text::floatToString(frameTime) + "ms",
             glm::vec2(10.0f, 680.0f), 
             0.3f,
-            glm::vec3(1.0f)
+            colors::WHITE
         );
 
         glfwSwapBuffers(window);

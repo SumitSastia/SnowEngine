@@ -3,7 +3,7 @@
 
 #include "core/camera.h"
 #include "core/model/model.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/frame/frame.h"
 #include "core/img/texture.h"
 

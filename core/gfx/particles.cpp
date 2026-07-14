@@ -3,7 +3,7 @@
 #include "math/random.h"
 #include "core/img/assetManager.h"
 
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/camera.h"
 #include "core/input.h"
 

@@ -1,5 +1,5 @@
 #include "wireframe.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 
 void gfx::internal::Wireframe::init(
     const std::vector<float>& vertices,

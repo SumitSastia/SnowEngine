@@ -38,8 +38,13 @@ void main() {
 
     vec3 view_dir = normalize(camPos - vPos);
     
-    if (dot(vNormal, view_dir) < 0.0) {
-        tex = texture(specularMap, vTexCords).rgb;
+    // if (dot(vNormal, view_dir) < 0.0) {
+    //     tex = texture(specularMap, vTexCords).rgb;
+    // }
+
+    // use this
+    if (glFrontfacing) {
+
     }
 
     // metallic = 0.8;

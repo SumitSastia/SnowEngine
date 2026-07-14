@@ -1,6 +1,6 @@
 #include "ssao.h"
 #include "core/renderer.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/frame/frame.h"
 
 std::vector <glm::vec3> SSAO::ssaoKernel {};

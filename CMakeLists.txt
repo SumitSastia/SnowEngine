@@ -11,29 +11,11 @@ set(
 
     math/matrix.cpp
     math/random.cpp
-    # src/shader/uniforms.cpp
+    core/shader/uniforms.cpp
 )
 
 set(
     CORE_SRC
-
-    # src/core/glad.c
-    # src/core/main.cpp
-    # src/core/shader.cpp
-    # src/core/camera.cpp
-    # # src/core/shapes.cpp
-    # src/core/renderer.cpp
-    # src/core/input.cpp
-    # src/core/lights.cpp
-    # src/core/frame.cpp
-    # src/core/model.cpp
-    # src/core/ibl.cpp
-    # src/core/text.cpp
-    # src/core/ssao.cpp
-    # src/core/frustum.cpp
-    # src/core/assetManager.cpp
-    # src/core/texture.cpp
-    # src/core/cubemap.cpp
 
     main/glad.c
     main/main.cpp
@@ -42,11 +24,11 @@ set(
     core/renderer.cpp
     core/input.cpp
     core/lights.cpp
+    core/shader.cpp
     core/frustum.cpp
     core/text.cpp
 
     core/frame/frame.cpp
-    core/shader/shader.cpp
     core/model/model.cpp
     core/deferred/ssao.cpp
 
@@ -94,6 +76,7 @@ add_executable(
 
     ${MATH_SRC}
     ${CORE_SRC}
+
     utils/debug.cpp
     utils/wireframe.cpp
     utils/crosshair.cpp

@@ -5,7 +5,7 @@
 
 #include "ibl.h"
 #include "cubemap.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/renderer.h"
 #include "core/frame/frame.h"
 #include "utils/assert.h"

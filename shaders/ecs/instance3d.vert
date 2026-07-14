@@ -6,13 +6,18 @@ layout (location = 2) in vec2 aTexCords;
 layout (location = 3) in mat4 instanceModel;
 layout (location = 7) in mat3 instanceNormal;
 
+layout (std140, binding = 0) uniform CameraData {
+
+    mat4 projection;
+    mat4 view;
+    vec3 cameraPos;
+};
+
 out vec3 vPos;
 out vec3 vNormal;
 out vec2 vTexCords;
 out vec4 lightSpace_vPos;
 
-uniform mat4 projection;
-uniform mat4 view;
 uniform mat4 lightSpaceMatrix;
 
 void main(){

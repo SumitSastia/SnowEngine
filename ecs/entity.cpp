@@ -1,5 +1,5 @@
 #include "core/lights.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "ecs/systems/rendersystem.h"
 
 EntityShapes::EntityShapes() {

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "frame.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/renderer.h"
 #include "core/input.h"
 #include "core/deferred/ssao.h"

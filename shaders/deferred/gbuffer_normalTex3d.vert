@@ -5,13 +5,18 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec3 aTangent;
 layout (location = 3) in vec2 aTexCords;
 
+layout (std140, binding = 0) uniform CameraData {
+
+    mat4 projection;
+    mat4 view;
+    vec3 cameraPos;
+};
+
 out vec3 vPos;
 out vec2 vTexCords;
 
 out mat3 TBN;
 
-uniform mat4 projection;
-uniform mat4 view;
 uniform mat4 model;
 uniform mat3 normalMatrix;
 

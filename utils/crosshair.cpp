@@ -4,7 +4,7 @@
 
 #include "core/renderer.h"
 #include "core/img/texture.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 
 glm::mat4 Crosshair::model1 { 1.0f };
 glm::mat4 Crosshair::model2 { 1.0f };

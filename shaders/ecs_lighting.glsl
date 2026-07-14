@@ -6,7 +6,7 @@ struct directionalLight {
     vec3 color;
 };
 
-struct pointLight{
+struct pointLight {
 
     vec3 position;
     vec3 color;

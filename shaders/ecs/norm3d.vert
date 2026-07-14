@@ -7,8 +7,8 @@ layout (location = 3) in vec2 aTexCords;
 
 layout (std140, binding = 0) uniform CameraData {
 
-    mat4 projection1;
-    mat4 view1;
+    mat4 projection;
+    mat4 view;
     vec3 cameraPos;
 };
 
@@ -18,8 +18,6 @@ out vec4 lightSpace_vPos;
 
 out mat3 TBN;
 
-uniform mat4 projection;
-uniform mat4 view;
 uniform mat4 model;
 uniform mat3 normalMatrix;
 uniform mat4 lightSpaceMatrix;

@@ -2,7 +2,7 @@
 
 #include "core/lights.h"
 #include "core/frame/frame.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/model/model.h"
 #include "core/img/ibl.h"
 #include "core/gfx/particles.h"

@@ -18,7 +18,7 @@ void Scene2::init() {
     EntityManager&    entityManager    = ecs.entityManager;
     ComponentManager& componentManager = ecs.componentManager;
 
-    running::globalTimer::startInterval();
+    running::core::GlobalTimer.interval_start();
 
     wood_box  = entityManager.createEntity();
     floor     = entityManager.createEntity();
@@ -80,7 +80,7 @@ void Scene2::init() {
     env = new Environment("assets/env/hdri-sky.hdr", 1024);
     entityManager.env = env;
 
-    DebugMenu::log("HDR Environment: " + running::globalTimer::endInterval());
+    DebugMenu::log("HDR Environment: " + running::core::GlobalTimer.endInterval());
 
     // mainCamera
     {
@@ -111,7 +111,7 @@ void Scene2::init() {
         
         MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
-        DebugMenu::log("EntityShapes (init): " + running::globalTimer::endInterval());
+        DebugMenu::log("EntityShapes (init): " + running::core::GlobalTimer.endInterval());
         
         MaterialComponent material;
         material.shader = gfx::shader::S3D_PBR_NORM;
@@ -139,7 +139,7 @@ void Scene2::init() {
         componentManager.addComponent(wood_box, AABB);
     }
 
-    DebugMenu::log("WoodBox: " + running::globalTimer::endInterval());
+    DebugMenu::log("WoodBox: " + running::core::GlobalTimer.endInterval());
 
     // floor
     {
@@ -180,7 +180,7 @@ void Scene2::init() {
         componentManager.addComponent(floor, AABB);
     }
 
-    DebugMenu::log("Floor: " + running::globalTimer::endInterval());
+    DebugMenu::log("Floor: " + running::core::GlobalTimer.endInterval());
 
     // wall
     {
@@ -221,7 +221,7 @@ void Scene2::init() {
         componentManager.addComponent(wall, AABB);
     }
 
-    DebugMenu::log("Wall: " + running::globalTimer::endInterval());
+    DebugMenu::log("Wall: " + running::core::GlobalTimer.endInterval());
 
     // Parallax wall
     {
@@ -263,7 +263,7 @@ void Scene2::init() {
         componentManager.addComponent(brickWall, AABB);
     }
 
-    DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::globalTimer::endInterval());
+    DebugMenu::log("Parallax Wall (albedo, normal, height): " + running::core::GlobalTimer.endInterval());
 
     // sphere
     {
@@ -324,7 +324,7 @@ void Scene2::init() {
     //     componentManager.addComponent(sphere, AABB);
     // }
 
-    DebugMenu::log("Sphere: " + running::globalTimer::endInterval());
+    DebugMenu::log("Sphere: " + running::core::GlobalTimer.endInterval());
 
     // for (uint32_t i = 0; i < 100; i++) {
 
@@ -421,7 +421,7 @@ void Scene2::init() {
         componentManager.addComponent(cubes, material);
     }
 
-    DebugMenu::log("Cubes (albedo): " + running::globalTimer::endInterval());
+    DebugMenu::log("Cubes (albedo): " + running::core::GlobalTimer.endInterval());
 
     // light1
     {
@@ -449,13 +449,13 @@ void Scene2::init() {
         componentManager.addComponent(light1, mesh);
         componentManager.addComponent(light1, transform);
         componentManager.addComponent(light1, material);
-        // DebugMenu::log("Light1 before pl: " + running::globalTimer::endInterval());
+        // DebugMenu::log("Light1 before pl: " + running::core::GlobalTimer.endInterval());
         componentManager.addComponent(light1, pointlight);
-        // DebugMenu::log("Light1 after pl: " + running::globalTimer::endInterval());
+        // DebugMenu::log("Light1 after pl: " + running::core::GlobalTimer.endInterval());
         componentManager.addComponent(light1, AABB);
     }
 
-    DebugMenu::log("Light1: " + running::globalTimer::endInterval());
+    DebugMenu::log("Light1: " + running::core::GlobalTimer.endInterval());
 
     // light2
     {
@@ -483,13 +483,13 @@ void Scene2::init() {
         componentManager.addComponent(light2, mesh);
         componentManager.addComponent(light2, transform);
         componentManager.addComponent(light2, material);
-        // DebugMenu::log("Light2 before pl: " + running::globalTimer::endInterval());
+        // DebugMenu::log("Light2 before pl: " + running::core::GlobalTimer.endInterval());
         componentManager.addComponent(light2, pointlight);
-        // DebugMenu::log("Light2 after pl: " + running::globalTimer::endInterval());
+        // DebugMenu::log("Light2 after pl: " + running::core::GlobalTimer.endInterval());
         componentManager.addComponent(light2, AABB);
     }
 
-    DebugMenu::log("Light2: " + running::globalTimer::endInterval());
+    DebugMenu::log("Light2: " + running::core::GlobalTimer.endInterval());
 
     // Campfire
     {
@@ -580,7 +580,7 @@ void Scene2::init() {
         componentManager.addComponent(flames, AABB);
     }
 
-    DebugMenu::log("Flame Sprite: " + running::globalTimer::endInterval());
+    DebugMenu::log("Flame Sprite: " + running::core::GlobalTimer.endInterval());
 
     // gun
     {
@@ -618,7 +618,7 @@ void Scene2::init() {
         componentManager.addComponent(gun, AABB);
     }
 
-    DebugMenu::log("Gun: " + running::globalTimer::endInterval());
+    DebugMenu::log("Gun: " + running::core::GlobalTimer.endInterval());
 
     // Position: 0.189843,0.173202,-0.00755653 - gunscale = 0.1
     // Position: 0.317998,0.342213,0 - gunscale = 0.2
@@ -675,7 +675,7 @@ void Scene2::init() {
 
     // Multi-threaded Work
     AssetManager::compileTextures();
-    DebugMenu::log("Texture Compilation: " + running::globalTimer::endInterval());
+    DebugMenu::log("Texture Compilation: " + running::core::GlobalTimer.endInterval());
 }
 
 void Scene2::input(GLFWwindow* window, const float& delta_time) {

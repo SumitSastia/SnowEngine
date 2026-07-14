@@ -5,7 +5,7 @@
 
 #include "text.h"
 #include "renderer.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 
 FT_Library Text::ft   {};
 FT_Face    Text::font {};

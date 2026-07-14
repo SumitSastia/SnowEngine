@@ -6,11 +6,15 @@ layout (location = 2) in vec4 instanceColor;
 layout (location = 3) in vec4 instancePos;
 layout (location = 4) in vec2 instanceSize;
 
+layout (std140, binding = 0) uniform CameraData {
+
+    mat4 projection;
+    mat4 view;
+    vec3 cameraPos;
+};
+
 out vec4 color;
 out vec2 vTexCords;
-
-uniform mat4 projection;
-uniform mat4 view;
 
 uniform vec3 cameraRight;
 uniform vec3 cameraUp;

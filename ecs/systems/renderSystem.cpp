@@ -2,7 +2,7 @@
 
 #include "rendersystem.h"
 #include "core/renderer.h"
-#include "core/shader/shader.h"
+#include "core/shader.h"
 #include "core/frame/frame.h"
 
 #include "core/img/assetManager.h"
@@ -17,8 +17,8 @@
 
 void RenderSystem::bindCameraGlobals(const Shader& shader) {
 
-    shader.setMat4("projection", Camera::activeCamera->getProjection());
-    shader.setMat4("view",       Camera::activeCamera->getView());
+    // shader.setMat4("projection", Camera::activeCamera->getProjection());
+    // shader.setMat4("view",       Camera::activeCamera->getView());
     shader.setVec3("camPos",     Camera::activeCamera->getPos());
 }
 
@@ -596,6 +596,7 @@ void RenderSystem::renderGbuffer(const ECS& ecs) {
     for (const Entity& entity : objects) {
 
         if (componentManager.has<PointLightComponent>(entity)) continue;
+        if (componentManager.has<AnimatedSprite>(entity)) continue;
 
         // Frustum Culling
         if (componentManager.has<BoundingAABBComponent>(entity)) {
