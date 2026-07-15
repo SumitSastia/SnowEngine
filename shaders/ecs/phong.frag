@@ -30,12 +30,10 @@ void main() {
     // }
 
     // Point Shadow
-    for (int i = 0; i < light_count; i++) {
+    for (int i = 0; i < lightCount; i++) {
 
-        vec3 lightColor = vec3(0.0);
-
-        lightColor += calcPointLight_OnlyDiffuse(pl[i], tex, vNormal);
-        lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
+        vec3 lightColor = calcPointLightDiffuse(lights[i], tex, vNormal);
+        lightColor *= (1.0 - calcShadowUBO(lights[i].position, depthMap[i]));
 
         color += lightColor;
     }

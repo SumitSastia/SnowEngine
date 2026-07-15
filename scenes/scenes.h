@@ -13,6 +13,8 @@
 #include "ecs/systems/init.h"
 #include "ecs/systems/rendersystem.h"
 
+#include "core/shader/uniforms.h"
+
 namespace scene_var {
     const float speed = 3.0f;
 };
@@ -47,66 +49,6 @@ public:
     virtual void renderParticles(const TextureHandle depthTexture = 0) const {}
 };
 
-// class Scene1 : public Scene {
-
-//     // Entities
-//     Shape myFloor;
-//     Shape myGround;
-//     Shape myCube;
-//     Shape advCube;
-//     Shape myWall;
-
-//     Model3D* mySphere;
-//     ShapeInstanced cubes;
-
-//     std::vector <Matrix4> entityModels;
-
-//     // Light
-//     uint8_t light_count;
-//     std::vector <LightSource*> lights;
-//     std::vector <Matrix4*> lightModels;
-
-//     // Shadow
-//     glm::mat4 shadowProj;
-//     std::vector <PointShadowFrame*> shadowFrames;
-
-//     // Light Space - Directional Light
-//     glm::mat4 lightSpace;
-//     DirectShadowFrame* directFrame;
-
-//     // Skybox
-//     // Skybox* _skybox;
-
-//     // ECS
-//     // ECS ecs;
-//     Entity cube;
-
-//     // Debug
-//     DebugFrame* debugFrame;
-
-//     // FrameBuffers
-//     // IBLFrame* ibl_frame;
-
-// public:
-
-//     Scene1() {
-//         this->init();
-//     }
-
-//     void init() override;
-//     void input(GLFWwindow* window, const float& delta_time) override;
-//     void update(const float delta_time) override;
-//     void render() const override;
-//     void renderGbuffer() const override;
-//     void renderDeferred(const Shader& currentShader) const override;
-//     void renderLight() const override;
-//     void renderDirectShadow() const override;
-//     void renderPointShadow() const override;
-//     void renderSkybox() const override;
-//     void renderDebug() const override;
-//     void destroy() override;
-// };
-
 class Scene2 : public Scene {
 
     Entity wood_box;
@@ -135,6 +77,8 @@ class Scene2 : public Scene {
     ParticleEmitter smoke_emitter;
 
     glm::vec3 gun_muzzle;
+
+    PointLightUBO plight_UniformBuffer;
 
 public:
 

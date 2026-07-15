@@ -496,7 +496,7 @@ void ParticleEmitter::render(const TextureHandle depthTexture) const {
         // Soft Particles
         if (isSoft) {
             
-            SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!");
+            SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!")
             
             shader.setInt("depthTexture", 1);
             glActiveTexture(GL_TEXTURE0 + 1);
@@ -561,7 +561,7 @@ void ParticleEmitter::render(const TextureHandle depthTexture) const {
             // Soft Particles
             if (isSoft) {
                 
-                SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!");
+                SNOW_ASSERT(depthTexture != 0, "DEPTH-TEXTURE IS NOT PARSED FOR SOFT-PARTICLES!")
                 
                 shader.setInt("depthTexture", 1);
                 glActiveTexture(GL_TEXTURE0 + 1);

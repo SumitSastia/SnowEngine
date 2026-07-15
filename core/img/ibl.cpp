@@ -73,7 +73,7 @@ void IBLFrame::loadEnvironment(const char* path) {
 
 void IBLFrame::compileEnvironment() {
 
-    SNOW_ASSERT(pixelData, "PIXELDATA IS NOT LOADED FROM HDR FILE!");
+    SNOW_ASSERT(pixelData, "PIXELDATA IS NOT LOADED FROM HDR FILE!")
 
     glGenTextures(1, &env_texture);
     glBindTexture(GL_TEXTURE_2D, env_texture);

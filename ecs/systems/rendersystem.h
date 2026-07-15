@@ -9,7 +9,6 @@ class Shader;
 
 class RenderSystem {
 
-    void bindCameraGlobals(const Shader& shader);
     void bindPointLightGlobals(const ECS& ecs);
 
     void draw(

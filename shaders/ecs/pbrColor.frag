@@ -81,11 +81,11 @@ void main() {
         // color = envDiffuse;
     }
 
-    for (int i = 0; i < light_count; i++) { 
+    for (int i = 0; i < lightCount; i++) { 
 
-        vec3 Lo = calcPBR(pl[i], tex, vNormal, F0, metallic, roughness);
-        // Lo *= (1.0 - calcShadow(pl[i], depthMap[i]));
-        
+        vec3 Lo = calcPointLightPBR(lights[i], tex, vNormal, F0, metallic, roughness);
+        // Lo *= (1.0 - calcShadowUBO(lights[i].position, depthMap[i]));
+
         color += Lo;
 	}
 

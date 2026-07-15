@@ -7,7 +7,8 @@ layout (std140, binding = 0) uniform CameraData {
 
     mat4 projection;
     mat4 view;
-    vec3 cameraPos;
+    vec3 camPos;
+    float padding1;
 };
 
 out vec3 vPos;
@@ -22,8 +23,6 @@ out mat3 TBN;
 uniform mat4 model;
 uniform mat3 normalMatrix;
 uniform mat4 lightSpaceMatrix;
-
-uniform vec3 camPos;
 
 void main(){
 

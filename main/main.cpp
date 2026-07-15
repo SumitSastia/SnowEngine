@@ -3,14 +3,12 @@
 #include "core/camera.h"
 #include "core/renderer.h"
 #include "core/input.h"
+#include "core/shader.h"
 #include "core/text.h"
 
 #include "core/model/model.h"
 #include "core/deferred/ssao.h"
 #include "core/img/assetManager.h"
-
-#include "core/shader.h"
-#include "core/shader/uniforms.h"
 
 #include "scenes/scenes.h"
 

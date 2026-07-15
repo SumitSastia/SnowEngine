@@ -39,9 +39,16 @@ vec3 fresnalSchlick(float cosTheta, vec3 F0) {
 	return F0 +	(1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+// ---------------------- UBO POINTLIGHT CALCULATION ---------------------- //
+
 // Global Variables
 // 1. vPos, 2. camPos
-vec3 calcPBR(pointLight light, vec3 tex, vec3 normal, vec3 F0, float metallic, float roughness) {
+vec3 calcPointLightPBR(PointLightUBO light, vec3 tex, vec3 normal, vec3 F0, float metallic, float roughness) {
 
     vec3 Lo = vec3(0.0);
 
@@ -74,9 +81,4 @@ vec3 calcPBR(pointLight light, vec3 tex, vec3 normal, vec3 F0, float metallic, f
     Lo += (kD * tex / pi + specular) * radiance * NdotL;
 
     return Lo;
-}
-
-vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
-
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }

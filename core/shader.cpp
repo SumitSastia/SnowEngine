@@ -19,16 +19,28 @@ std::filesystem::path base = std::filesystem::current_path();
 // ------------------------------ Foward Declarations -------------------------------- //
 
 void Shader::loadFromFile(const char* vertPath, const char* fragPath, const bool preprocess) {
-    
-    if (!preprocess) loadFromString(loadShaderFile(vertPath), loadShaderFile(fragPath));
-    else             loadFromString(loadShaderFile(vertPath), preprocessFile(fragPath));
+
+    const bool success = (preprocess)?
+        loadFromString(loadShaderFile(vertPath), preprocessFile(fragPath)):
+        loadFromString(loadShaderFile(vertPath), loadShaderFile(fragPath));
+
+    SNOW_ASSERT(
+        success, 
+        std::string("INVALID CODE INSIDE THIS SHADER!\n") + vertPath + "\n" + fragPath
+    )
 }
 
 void Shader::loadFromFile(const char* vertPath, const char* geomPath, const char* fragPath) {
-    loadFromString(loadShaderFile(vertPath), loadShaderFile(geomPath), loadShaderFile(fragPath));
+    
+    const bool success = loadFromString(loadShaderFile(vertPath), loadShaderFile(geomPath), loadShaderFile(fragPath));
+
+    SNOW_ASSERT(
+        success, 
+        std::string("INVALID CODE INSIDE THIS SHADER!\n") + vertPath + "\n" + geomPath + "\n" + fragPath
+    )
 }
 
-void Shader::loadFromString(const std::string& vertexStr, const std::string& fragmentStr) {
+bool Shader::loadFromString(const std::string& vertexStr, const std::string& fragmentStr) {
 
     // Vertex & Fragment Shader //
 
@@ -53,6 +65,7 @@ void Shader::loadFromString(const std::string& vertexStr, const std::string& fra
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cout << "ERROR: VERTEX-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
         // std::cout << "File: " << vertexStr << std::endl;
+        return false;
     }
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -61,6 +74,7 @@ void Shader::loadFromString(const std::string& vertexStr, const std::string& fra
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cout << "ERROR: FRAGMENT-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
         // std::cout << "File: " << fragmentStr << std::endl;
+        return false;
     }
 
     // Shader Program //
@@ -75,13 +89,16 @@ void Shader::loadFromString(const std::string& vertexStr, const std::string& fra
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cout << "ERROR: SHADER-PROGRAM LINKING FAILED!\n" << infoLog << std::endl;
+        return false;
     }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    return true;
 }
 
-void Shader::loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr) {
+bool Shader::loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr) {
 
     const char* vertexShaderSource   = vertStr.c_str();
     const char* geometryShaderSource = geomStr.c_str();
@@ -108,6 +125,7 @@ void Shader::loadFromString(const std::string& vertStr, const std::string& geomS
     if (!success) {
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cout << "ERROR: VERTEX-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
+        return false;
     }
 
     glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
@@ -115,6 +133,7 @@ void Shader::loadFromString(const std::string& vertStr, const std::string& geomS
     if (!success) {
         glGetShaderInfoLog(geometryShader, 512, nullptr, infoLog);
         std::cout << "ERROR: GEOMETRY-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
+        return false;
     }
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -122,6 +141,7 @@ void Shader::loadFromString(const std::string& vertStr, const std::string& geomS
     if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cout << "ERROR: FRAGMENT-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
+        return false;
     }
 
     // Shader Program //
@@ -137,11 +157,14 @@ void Shader::loadFromString(const std::string& vertStr, const std::string& geomS
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
         std::cout << "ERROR: SHADER-PROGRAM LINKING FAILED!\n" << infoLog << std::endl;
+        return false;
     }
 
     glDeleteShader(vertexShader);
     glDeleteShader(geometryShader);
     glDeleteShader(fragmentShader);
+
+    return true;
 }
 
 // ------------------------------ Class Functions ------------------------------------ //
@@ -154,10 +177,10 @@ std::string Shader::loadShaderFile(const char* path) {
 
     std::ifstream file(path);
 
-    if (!file) {
-        std::cerr << "Failed to open the File!\n path: " << path << std::endl;
-        return "";
-    }
+    SNOW_ASSERT (
+        file,
+        std::string("FAILED TO OPEN SHADER FILE!\n") + path
+    )
 
     std::stringstream ss;
     ss << file.rdbuf();
@@ -385,7 +408,7 @@ const Shader& ShaderManager::getShader(const ShaderHandle handle) {
     SNOW_ASSERT(
         handle < gfx::shader::SHADER_TOTAL_COUNT,
         "SHADER ACCESSED OUTSIDE RANGE!"
-    );
+    )
 
     if (!objShaders[handle].getShader()) {
 
@@ -405,7 +428,7 @@ const Shader& ShaderManager::getUtil(const uint8_t index) {
     SNOW_ASSERT(
         index < gfx::shader::SHADERUTIL_TOTAL_COUNT,
         "SHADER-UTIL ACCESSED OUTSIDE RANGE!"
-    );
+    )
 
     if (!lShadersUtil[index].getShader()) {
 

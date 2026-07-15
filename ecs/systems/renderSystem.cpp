@@ -14,14 +14,6 @@
 #include "core/input.h"
 #include "utils/debug.h"
 
-
-void RenderSystem::bindCameraGlobals(const Shader& shader) {
-
-    // shader.setMat4("projection", Camera::activeCamera->getProjection());
-    // shader.setMat4("view",       Camera::activeCamera->getView());
-    shader.setVec3("camPos",     Camera::activeCamera->getPos());
-}
-
 void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
     const EntityManager&    entityManager    = ecs.entityManager;
@@ -43,37 +35,10 @@ void RenderSystem::bindPointLightGlobals(const ECS& ecs) {
 
         shader.setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
         shader.setSpotLight("sl", DefaultLights::instance().flashlight);
-
-        // ------------------------ Camera ------------------------- //
         
-        bindCameraGlobals(shader);
-
         // ----------------------- PointLight ---------------------- //
-
-        shader.setInt("light_count", light_count);
+        
         shader.setFloat("far_plane", 25.0f);
-
-        for (uint32_t index = 0; index < light_count; index++) {
-
-            const Entity& entity = entityManager.emissiveEntities[index];
-
-            if (
-                componentManager.has<PointLightComponent>(entity) &&
-                componentManager.has<TransformComponent>(entity)
-            ) {
-                const PointLightComponent& pointlight  = componentManager.get<PointLightComponent>(entity);
-                const TransformComponent&  transform   = componentManager.get<TransformComponent>(entity);
-
-                const std::string e  = "pl[" + std::to_string(index) + "]";
-
-                shader.setVec3((e + ".position").c_str(), transform.position);
-                shader.setVec3((e + ".color").c_str(),    pointlight.color);
-
-                shader.setFloat((e + ".constant").c_str(),  pointlight.constant);
-                shader.setFloat((e + ".linear").c_str(),    pointlight.linear);
-                shader.setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
-            }
-        }
 
         // ------------------------ DepthMap ----------------------- //
 
@@ -357,7 +322,6 @@ void RenderSystem::drawWireframe(
         const Shader& shader = ShaderManager::getUtil(gfx::shader::WIREFRAME);
     
         shader.use();
-        bindCameraGlobals(shader);
     
         Matrix4 model;
         model.translate(sphere.center);
@@ -382,7 +346,6 @@ void RenderSystem::drawWireframe(
         const Shader& shader = ShaderManager::getUtil(gfx::shader::WIREFRAME);
     
         shader.use();
-        bindCameraGlobals(shader);
     
         Matrix4 model;
         model.translate(AABB.center);
@@ -404,8 +367,6 @@ void RenderSystem::draw(
     shader.use();
     shader.setMat4("model",        transform.model);
     shader.setMat3("normalMatrix", transform.model.getNormal());
-
-    bindCameraGlobals(shader);
 
     const uint32_t initialUnit = lastTextureUnit;
 
@@ -452,8 +413,6 @@ void RenderSystem::draw(
 ) {
     const Shader& shader = ShaderManager::getShader(material.shader);
 
-    bindCameraGlobals(shader);
-
     shader.use();
     shader.setMat4("model",      transform.model);
     shader.setVec3("lightColor", pointlight.color);
@@ -495,8 +454,6 @@ void RenderSystem::drawGbuffer(
     shader.use();
     shader.setMat4("model",        transform.model);
     shader.setMat3("normalMatrix", transform.model.getNormal());
-
-    bindCameraGlobals(shader);
 
     const uint32_t initialUnit = lastTextureUnit;
 
@@ -543,7 +500,6 @@ void RenderSystem::drawGbuffer(
     const Shader& shader = ShaderManager::getShader(material.gbufferShader);
 
     shader.use();
-    bindCameraGlobals(shader);
 
     shader.setMat4("model",      transform.model);
     shader.setVec3("lightColor", pointlight.color);
@@ -558,7 +514,6 @@ void RenderSystem::drawGbuffer(
     const Shader& shader = ShaderManager::getShader(material.gbufferShader);
 
     shader.use();
-    bindCameraGlobals(shader);
 
     const uint32_t initialUnit = 0;
 
@@ -713,36 +668,10 @@ void RenderSystem::lightningPass(const ECS& ecs) {
     final_shader.setBool("useSpotLight", DefaultLights::instance().flashlight.isVisible);
     final_shader.setSpotLight("sl", DefaultLights::instance().flashlight);
 
-    // ------------------------ Camera ------------------------- //
-    
-    bindCameraGlobals(final_shader);
-
     // ----------------------- PointLight ---------------------- //
 
     final_shader.setInt("light_count", light_count);
     final_shader.setFloat("far_plane", 25.0f);
-
-    for (uint32_t index = 0; index < light_count; index++) {
-
-        const Entity& entity = entityManager.emissiveEntities[index];
-
-        if (
-            componentManager.has<PointLightComponent>(entity) &&
-            componentManager.has<TransformComponent>(entity)
-        ) {
-            const PointLightComponent& pointlight  = componentManager.get<PointLightComponent>(entity);
-            const TransformComponent&  transform   = componentManager.get<TransformComponent>(entity);
-
-            const std::string e  = "pl[" + std::to_string(index) + "]";
-
-            final_shader.setVec3((e + ".position").c_str(), transform.position);
-            final_shader.setVec3((e + ".color").c_str(),    pointlight.color);
-
-            final_shader.setFloat((e + ".constant").c_str(),  pointlight.constant);
-            final_shader.setFloat((e + ".linear").c_str(),    pointlight.linear);
-            final_shader.setFloat((e + ".quadratic").c_str(), pointlight.quadratic);
-        }
-    }
 
     // ------------------------ DepthMap ----------------------- //
 

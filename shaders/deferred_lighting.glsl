@@ -6,15 +6,15 @@ struct directionalLight {
     vec3 color;
 };
 
-struct pointLight{
+// struct pointLight{
 
-    vec3 position;
-    vec3 color;
+//     vec3 position;
+//     vec3 color;
 
-    float constant;
-    float linear;
-    float quadratic;
-};
+//     float constant;
+//     float linear;
+//     float quadratic;
+// };
 
 struct SpotLight {
 
@@ -32,11 +32,37 @@ struct SpotLight {
     float quadratic;
 };
 
-uniform vec3  camPos;
+struct PointLightUBO {
+
+    vec3 position;
+    float constant;
+
+    vec3 color;
+    float linear;
+
+    vec3 padding0;
+    float quadratic;
+};
+
+layout (std140, binding = 1) uniform PointLightData {
+
+    PointLightUBO lights[MAX_LIGHTS];
+
+    vec3 padding0;
+    uint lightCount;
+};
+
+layout (std140, binding = 0) uniform CameraData {
+
+    mat4 projection;
+    mat4 view;
+    vec3 camPos;
+    float padding1;
+};
+
 uniform float far_plane;
 uniform int   light_count;
 
-uniform pointLight pl[MAX_LIGHTS];
 uniform samplerCube depthMap[MAX_LIGHTS];
 
 uniform directionalLight dl;
@@ -103,84 +129,84 @@ float calcDirectShadow(vec4 lightSpace_vPos) {
     return shadow;
 }
 
-vec3 calcPointLight(pointLight light, vec3 vPos, vec3 tex, vec3 normal) {
+// vec3 calcPointLight(pointLight light, vec3 vPos, vec3 tex, vec3 normal) {
 
-    // Diffuse
-    vec3  light_dir    = normalize(light.position - vPos);
-    float diffuse      = max(dot(normal, light_dir), 0.0);
-    vec3  diffuseLight = diffuse * tex * light.color;
+//     // Diffuse
+//     vec3  light_dir    = normalize(light.position - vPos);
+//     float diffuse      = max(dot(normal, light_dir), 0.0);
+//     vec3  diffuseLight = diffuse * tex * light.color;
 
-    // diffuseLight = vec3(0.0);
+//     // diffuseLight = vec3(0.0);
 
-    // Specular
-    vec3 view_dir    = normalize(camPos - vPos);
-    vec3 reflect_dir = reflect(-light_dir, normal);
+//     // Specular
+//     vec3 view_dir    = normalize(camPos - vPos);
+//     vec3 reflect_dir = reflect(-light_dir, normal);
 
-    float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
-    vec3  specularLight = spec * tex * light.color;
+//     float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+//     vec3  specularLight = spec * tex * light.color;
 
-    // Attenuation
-    float frag_dist   = length(light.position - vPos);
-    float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
+//     // Attenuation
+//     float frag_dist   = length(light.position - vPos);
+//     float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
 
-    attenuation = 1.0;
+//     attenuation = 1.0;
 
-    return (attenuation * vec3(diffuseLight + specularLight));
-}
+//     return (attenuation * vec3(diffuseLight + specularLight));
+// }
 
-vec3 calcSpecPointLight(pointLight light, vec3 vPos, vec3 tex, vec3 tex2, vec3 normal) {
+// vec3 calcSpecPointLight(pointLight light, vec3 vPos, vec3 tex, vec3 tex2, vec3 normal) {
 
-    // Diffuse
-    vec3  light_dir    = normalize(light.position - vPos);
-    float diffuse      = max(dot(normal, light_dir), 0.0);
-    vec3  diffuseLight = diffuse * tex * light.color;
+//     // Diffuse
+//     vec3  light_dir    = normalize(light.position - vPos);
+//     float diffuse      = max(dot(normal, light_dir), 0.0);
+//     vec3  diffuseLight = diffuse * tex * light.color;
 
-    // diffuseLight = vec3(0.0);
+//     // diffuseLight = vec3(0.0);
 
-    // Specular
-    vec3 view_dir    = normalize(camPos - vPos);
-    vec3 reflect_dir = reflect(-light_dir, normal);
+//     // Specular
+//     vec3 view_dir    = normalize(camPos - vPos);
+//     vec3 reflect_dir = reflect(-light_dir, normal);
 
-    float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
-    vec3  specularLight = spec * tex2 * light.color;
+//     float spec          = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
+//     vec3  specularLight = spec * tex2 * light.color;
 
-    // Attenuation
-    float frag_dist   = length(light.position - vPos);
-    float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
+//     // Attenuation
+//     float frag_dist   = length(light.position - vPos);
+//     float attenuation = 1.0 / (light.constant + light.linear*frag_dist + light.quadratic*frag_dist*frag_dist);
 
-    attenuation = 1.0;
+//     attenuation = 1.0;
 
-    return (attenuation * vec3(diffuseLight + specularLight));
-}
+//     return (attenuation * vec3(diffuseLight + specularLight));
+// }
 
-float calcShadow(pointLight light, vec3 vPos, samplerCube map) {
+// float calcShadow(pointLight light, vec3 vPos, samplerCube map) {
 
-    vec3  fragToLight = vPos - light.position;
-    float currentDepth = length(fragToLight);
+//     vec3  fragToLight = vPos - light.position;
+//     float currentDepth = length(fragToLight);
 
-    float shadow  = 0.0;
-    float bias    = 0.05;
-    float samples = 4.0;
-    float offset  = 0.1;
+//     float shadow  = 0.0;
+//     float bias    = 0.05;
+//     float samples = 4.0;
+//     float offset  = 0.1;
 
-    for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
-        for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
-            for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
+//     for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
+//         for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
+//             for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
 
-                float closestDepth = texture(map, fragToLight + vec3(x,y,z)).r;
-                closestDepth *= far_plane;
+//                 float closestDepth = texture(map, fragToLight + vec3(x,y,z)).r;
+//                 closestDepth *= far_plane;
 
-                if (currentDepth - bias > closestDepth) {
-                    shadow += 1.0;
-                }
-            }
-        }
-    }
+//                 if (currentDepth - bias > closestDepth) {
+//                     shadow += 1.0;
+//                 }
+//             }
+//         }
+//     }
 
-    shadow /= (samples * samples * samples);
+//     shadow /= (samples * samples * samples);
 
-    return shadow;
-}
+//     return shadow;
+// }
 
 vec3 calcSpotLight(vec3 vPos, vec3 tex, vec3 normal) {
 
@@ -253,9 +279,14 @@ vec3 fresnalSchlick(float cosTheta, vec3 F0) {
 	return F0 +	(1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 // Global Variables
-// 1. vPos, 2. camPos
-vec3 calcPBR(pointLight light, vec3 vPos, vec3 tex, vec3 normal, vec3 F0, float metallic, float roughness) {
+// 1. camPos
+vec3 calcPointLightPBR(PointLightUBO light, vec3 vPos, vec3 tex, vec3 normal, vec3 F0, float metallic, float roughness) {
 
     vec3 Lo = vec3(0.0);
 
@@ -290,7 +321,31 @@ vec3 calcPBR(pointLight light, vec3 vPos, vec3 tex, vec3 normal, vec3 F0, float 
     return Lo;
 }
 
-vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+float calcShadowUBO(vec3 lightPos, vec3 vPos, samplerCube map) {
 
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    vec3  fragToLight = vPos - lightPos;
+    float currentDepth = length(fragToLight);
+
+    float shadow  = 0.0;
+    float bias    = 0.05;
+    float samples = 4.0;
+    float offset  = 0.1;
+
+    for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
+        for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
+            for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
+
+                float closestDepth = texture(map, fragToLight + vec3(x,y,z)).r;
+                closestDepth *= far_plane;
+
+                if (currentDepth - bias > closestDepth) {
+                    shadow += 1.0;
+                }
+            }
+        }
+    }
+
+    shadow /= (samples * samples * samples);
+
+    return shadow;
 }

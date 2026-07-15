@@ -41,8 +41,8 @@ public:
     void loadFromFile(const char* vertPath, const char* fragPath, const bool preprocess = false);
     void loadFromFile(const char* vertPath, const char* geomPath, const char* fragPath);
 
-    void loadFromString(const std::string& vertStr, const std::string& fragStr);
-    void loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr);
+    bool loadFromString(const std::string& vertStr, const std::string& fragStr);
+    bool loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr);
 
     /*
     Vertex -> Geometry -> Fragment

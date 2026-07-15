@@ -57,7 +57,7 @@ void main() {
     for (int i = 0; i < light_count; i++) { 
 
         vec3 Lo = calcPBR(pl[i], tex, normal, F0, metallic, roughness);
-        Lo *= (1.0 - calcShadow(pl[i], depthMap[i]));;
+        Lo *= (1.0 - calcShadowUBO(lights[i].position, depthMap[i]));
         
         color += Lo;
 	}

@@ -92,11 +92,10 @@ void main() {
     }
 
     // Point Shadow
-    for (int i = 0; i < light_count; i++) {
+    for (uint i = 0; i < lightCount; i++) {
 
-        // vec3 lightColor = calcPointLight(pl[i], vPos, tex, normal);
-        vec3 lightColor = calcPBR(pl[i], vPos, tex, vNormal, F0, metallic, roughness);
-        const float shadow = (1.0 - calcShadow(pl[i], vPos, depthMap[i]));
+        vec3 lightColor = calcPointLightPBR(lights[i], vPos, tex, vNormal, F0, metallic, roughness);
+        const float shadow = (1.0 - calcShadowUBO(lights[i].position, vPos, depthMap[i]));
 
         lightColor *= shadow;
         color += lightColor;

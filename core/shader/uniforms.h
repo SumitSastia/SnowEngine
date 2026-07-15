@@ -1,15 +1,19 @@
 #pragma once
 
+#include <vector>
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include "core/config.h"
+#include "ecs/entity.h"
 
 struct CameraData {
 
     glm::mat4 projection;
     glm::mat4 view;
-    glm::vec3 cameraPos;
+    glm::vec3 camPos;
+    float padding1;
 };
 
 namespace gfx::internal {
@@ -17,10 +21,12 @@ namespace gfx::internal {
     struct PointLight_ubo {
 
         glm::vec3 position;
-        glm::vec3 color;
-
         float constant;
+
+        glm::vec3 color;
         float linear;
+
+        float padding[3];
         float quadratic;
     };
 };
@@ -28,7 +34,9 @@ namespace gfx::internal {
 struct PointLightData {
 
     gfx::internal::PointLight_ubo lights[MAX_LIGHTS];
-    uint lightCount;
+
+    float padding[3];
+    uint  lightCount;
 };
 
 class UBOhandler {
@@ -40,8 +48,18 @@ public:
 private:
 
     GLuint cameraUBO;
-    GLuint plightsUBO;
-
     CameraData cameraDataBuffer;
-    PointLightData plData;
+};
+
+class PointLightUBO {
+
+public:
+
+    void init(const ECS& ecs);
+    void update(const ECS& ecs);
+
+private:
+
+    GLuint UBO;
+    PointLightData data;
 };

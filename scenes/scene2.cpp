@@ -673,6 +673,9 @@ void Scene2::init() {
 
     DebugMenu::printAssetsInitTime();
 
+    // Uniform Buffer
+    plight_UniformBuffer.init(ecs);
+
     // Multi-threaded Work
     AssetManager::compileTextures();
     DebugMenu::log("Texture Compilation: " + running::core::GlobalTimer.endInterval());
@@ -845,6 +848,9 @@ void Scene2::update(const float deltaTime) {
     rain_emitter.update(deltaTime);
     bullet_emitter.update(deltaTime);
     smoke_emitter.update(deltaTime);
+
+    // Uniform Buffer
+    plight_UniformBuffer.update(ecs);
 
     // const glm::vec3& position = ecs.componentManager.get<TransformComponent>(wood_box).position;
     // std::cout << "Position: " << position.x << "," << position.y << "," << position.z << '\n';

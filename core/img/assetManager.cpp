@@ -33,7 +33,7 @@ const TextureHandle AssetManager::loadTexture_flatColor(const glm::vec4& color, 
     const auto lookupID = textureLookup_flat.find(hex);
     if (lookupID != textureLookup_flat.end()) return lookupID->second;
 
-    SNOW_ASSERT(loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!");
+    SNOW_ASSERT(loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!")
 
     const TextureHandle handle = loadedTextures++;
 
@@ -61,7 +61,7 @@ const TextureHandle AssetManager::loadTexture(const std::string& path, const boo
     const auto lookupID = textureLookup.find(index);
     if (lookupID != textureLookup.end()) return lookupID->second;
 
-    SNOW_ASSERT(loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!");
+    SNOW_ASSERT(loadedTextures < MAX_TEXTURES, "MAX_TEXTURES ALLOCATION REACHED!")
 
     const TextureHandle handle = loadedTextures++;
     textureLookup[index] = handle;

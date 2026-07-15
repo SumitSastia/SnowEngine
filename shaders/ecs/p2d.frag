@@ -81,9 +81,9 @@ void main() {
     // color += dirColor;
 
     // Point Shadow
-    for (int i = 0; i < light_count; i++) {
+    for (int i = 0; i < lightCount; i++) {
 
-        vec3 lightColor = calcPointLight(pl[i], tex, normal);
+        vec3 lightColor = calcUBOPointLight(lights[i], tex, normal);
         // lightColor *= (1.0 - calcShadow(pl[i], depthMap[i]));
 
         color += lightColor;

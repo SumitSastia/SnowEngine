@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#define MAX_PARTICLES 10000u
+#define MAX_PARTICLES 10000
 #define PARTICLE_SPEED 1.0f
 
 #include "core/config.h"
@@ -206,4 +206,31 @@ public:
     // void update(const ParticleEffect& effect, const float dt);
 
     void render(const TextureHandle depthTexture = 0) const;
+};
+
+// ----------------------- GPU PARTICLE SYSTEM ----------------------- //
+
+struct GPUparticle {
+
+    glm::vec4 position;  // xyz = position, w = rotation angle
+    glm::vec4 velocity;  // xyz = velocity, w = angular velocity
+    glm::vec4 color;     // rgb = color,    a = alpha
+
+    float lifetime;
+    float maxLifetime;
+
+    float size;
+};
+
+class GPUparticleEmitter {
+
+public:
+
+    void create();
+    void update();
+    void destroy();
+
+private:
+
+    uint probablySomething;
 };
