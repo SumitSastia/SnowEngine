@@ -63,3 +63,13 @@ private:
     GLuint UBO;
     PointLightData data;
 };
+
+class SSBO {
+
+public:
+    SSBO() { init(); }
+    void init();
+
+private:
+    GLuint ssbo;
+};

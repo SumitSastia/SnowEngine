@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #define MAX_TEXTURES 100
@@ -62,7 +63,7 @@ class Line {
     
 public:
     
-    static uint VAO, VBO;
+    static GLuint VAO, VBO;
     static void init();
 
     static void render(

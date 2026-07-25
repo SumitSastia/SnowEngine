@@ -16,13 +16,73 @@
 
 std::filesystem::path base = std::filesystem::current_path();
 
+namespace gfx::shader {
+
+    /*
+    @return Content of a Shader file in string format.
+    @note This was created as a part of createShader, suggested not to be used externally.
+    */
+    const std::string loadShaderFile(const char* path) {
+
+        std::ifstream file(path);
+
+        SNOW_ASSERT (
+            file,
+            std::string("FAILED TO OPEN SHADER FILE!\n") + path
+        )
+
+        std::stringstream ss;
+        ss << file.rdbuf();
+
+        return ss.str();
+    }
+
+    const std::string preprocessFile(const char* path) {
+
+        std::string src_str = gfx::shader::loadShaderFile(path);
+        
+        std::stringstream input(src_str);
+        std::stringstream output;
+        
+        std::string line;
+        
+        // Replacing #include
+        while (std::getline(input, line)) {
+            
+            if (line.find("#include") != std::string::npos) {
+                
+                size_t temp1 = line.find("<");
+                size_t temp2 = line.find(">");
+
+                // Extracting header name
+                std::string headerName = line.substr(temp1 + 1, temp2 - temp1 - 1);
+
+                // Header filePath
+                std::filesystem::path headerPath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / ".." / headerName);
+
+                // std::cout << "Preprocessing: " << path << '\n';
+                // std::cout << "Header: " << headerPath << std::endl;
+
+                std::string header_str = gfx::shader::loadShaderFile(headerPath.c_str());
+
+                output << header_str << '\n';
+            }
+            else {
+                output << line << '\n';
+            }
+        }
+
+        return output.str();
+    }
+}
+
 // ------------------------------ Foward Declarations -------------------------------- //
 
 void Shader::loadFromFile(const char* vertPath, const char* fragPath, const bool preprocess) {
 
     const bool success = (preprocess)?
-        loadFromString(loadShaderFile(vertPath), preprocessFile(fragPath)):
-        loadFromString(loadShaderFile(vertPath), loadShaderFile(fragPath));
+        loadFromString(gfx::shader::loadShaderFile(vertPath), gfx::shader::preprocessFile(fragPath)):
+        loadFromString(gfx::shader::loadShaderFile(vertPath), gfx::shader::loadShaderFile(fragPath));
 
     SNOW_ASSERT(
         success, 
@@ -32,7 +92,11 @@ void Shader::loadFromFile(const char* vertPath, const char* fragPath, const bool
 
 void Shader::loadFromFile(const char* vertPath, const char* geomPath, const char* fragPath) {
     
-    const bool success = loadFromString(loadShaderFile(vertPath), loadShaderFile(geomPath), loadShaderFile(fragPath));
+    const bool success = loadFromString(
+        gfx::shader::loadShaderFile(vertPath),
+        gfx::shader::loadShaderFile(geomPath),
+        gfx::shader::loadShaderFile(fragPath)
+    );
 
     SNOW_ASSERT(
         success, 
@@ -44,10 +108,10 @@ bool Shader::loadFromString(const std::string& vertexStr, const std::string& fra
 
     // Vertex & Fragment Shader //
 
-    const char* vertexShaderSource = vertexStr.c_str();
+    const char* vertexShaderSource   = vertexStr.c_str();
     const char* fragmentShaderSource = fragmentStr.c_str();
 
-    const unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    const unsigned int vertexShader   = glCreateShader(GL_VERTEX_SHADER);
     const unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
     int success;
@@ -173,20 +237,20 @@ bool Shader::loadFromString(const std::string& vertStr, const std::string& geomS
 @return Content of a Shader file in string format.
 @note This was created as a part of createShader, suggested not to be used externally.
 */
-std::string Shader::loadShaderFile(const char* path) {
+// std::string Shader::loadShaderFile(const char* path) {
 
-    std::ifstream file(path);
+//     std::ifstream file(path);
 
-    SNOW_ASSERT (
-        file,
-        std::string("FAILED TO OPEN SHADER FILE!\n") + path
-    )
+//     SNOW_ASSERT (
+//         file,
+//         std::string("FAILED TO OPEN SHADER FILE!\n") + path
+//     )
 
-    std::stringstream ss;
-    ss << file.rdbuf();
+//     std::stringstream ss;
+//     ss << file.rdbuf();
 
-    return ss.str();
-}
+//     return ss.str();
+// }
 
 /*
 EXPERIMENTAL: 
@@ -195,43 +259,43 @@ Replaces "#include" inside file content with header file data.
 @return Content of a Shader file in string format.
 @note This was created as a part of createShader, suggested not to be used externally.
 */
-std::string Shader::preprocessFile(const char* path) {
+// std::string Shader::preprocessFile(const char* path) {
 
-    std::string src_str = loadShaderFile(path);
+//     std::string src_str = gfx::shader::loadShaderFile(path);
     
-    std::stringstream input(src_str);
-    std::stringstream output;
+//     std::stringstream input(src_str);
+//     std::stringstream output;
     
-    std::string line;
+//     std::string line;
     
-    // Replacing #include
-    while (std::getline(input, line)) {
+//     // Replacing #include
+//     while (std::getline(input, line)) {
         
-        if (line.find("#include") != std::string::npos) {
+//         if (line.find("#include") != std::string::npos) {
             
-            size_t temp1 = line.find("<");
-            size_t temp2 = line.find(">");
+//             size_t temp1 = line.find("<");
+//             size_t temp2 = line.find(">");
 
-            // Extracting header name
-            std::string headerName = line.substr(temp1 + 1, temp2 - temp1 - 1);
+//             // Extracting header name
+//             std::string headerName = line.substr(temp1 + 1, temp2 - temp1 - 1);
 
-            // Header filePath
-            std::filesystem::path headerPath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / ".." / headerName);
+//             // Header filePath
+//             std::filesystem::path headerPath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / ".." / headerName);
 
-            // std::cout << "Preprocessing: " << path << '\n';
-            // std::cout << "Header: " << headerPath << std::endl;
+//             // std::cout << "Preprocessing: " << path << '\n';
+//             // std::cout << "Header: " << headerPath << std::endl;
 
-            std::string header_str = loadShaderFile(headerPath.c_str());
+//             std::string header_str = gfx::shader::loadShaderFile(headerPath.c_str());
 
-            output << header_str << '\n';
-        }
-        else {
-            output << line << '\n';
-        }
-    }
+//             output << header_str << '\n';
+//         }
+//         else {
+//             output << line << '\n';
+//         }
+//     }
 
-    return output.str();
-}
+//     return output.str();
+// }
 
 void Shader::use() const {
     glUseProgram(shaderProgram);
@@ -250,6 +314,8 @@ Shader ShaderManager::directLightShadow {};
 
 Shader ShaderManager::pointLightShadow_instanced  {};
 Shader ShaderManager::directLightShadow_instanced {};
+
+ComputeShader ShaderManager::particleComputeShader {};
 
 std::vector <Shader> ShaderManager::objShaders   (MAX_SHADERS);
 std::vector <Shader> ShaderManager::lShadersUtil (MAX_SHADERS);
@@ -304,6 +370,7 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
     ShaderPath("lights/ecs.vert",          "lights/light.frag"),
     ShaderPath("wireframe/generic3d.vert", "wireframe/wireframe.frag"),
     ShaderPath("cubeMap/env.vert",         "cubeMap/env.frag"),
+
     ShaderPath("obj2d/particle.vert",      "obj2d/particle_colored.frag"),
     ShaderPath("obj2d/particle.vert",      "obj2d/particle_textured.frag"),
     ShaderPath("obj2d/particle.vert",      "obj2d/particle_colored_soft.frag"),
@@ -312,6 +379,8 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
     ShaderPath("obj2d/instance.vert",      "obj2d/particle_textured.frag"),
     ShaderPath("obj2d/instance.vert",      "obj2d/particle_colored_soft.frag"),
     ShaderPath("obj2d/instance.vert",      "obj2d/particle_textured_soft.frag"),
+
+    ShaderPath("particles/p.vert",         "particles/p.frag")
 };
 
 bool ShaderManager::initShaders() {

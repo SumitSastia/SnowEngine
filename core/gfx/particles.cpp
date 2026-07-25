@@ -244,8 +244,7 @@ const glm::vec3 ParticleEmitter::generate(const ParticleInitProperties& spawner)
             bool isInverted = false;
             if (spawner.height < 0.0f) isInverted = true;
 
-            const float height = (isInverted)? 
-                Random::Float(-spawner.height, 0.0f) : Random::Float(0.0f, spawner.height);
+            const float height = Random::Float(0.0f, (isInverted)? -spawner.height : spawner.height);
 
             const float maxRadius = (isInverted)?
                 ((1.0f - height/(-spawner.height)) * spawner.radius) : ((height / spawner.height) * spawner.radius);

@@ -9,7 +9,7 @@ namespace gfx::internal {
 
     class Wireframe {
 
-        uint VBO, VAO, EBO;
+        GLuint VBO, VAO, EBO;
         uint indicesCount;
 
     public:

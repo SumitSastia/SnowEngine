@@ -7,8 +7,7 @@
 #include <glm/glm.hpp>
 
 #include "core/config.h"
-
-const uint8_t MAX_SHADERS = 8;
+#include "core/shader/compute.h"
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
@@ -19,14 +18,95 @@ namespace lights {
     struct SpotLight;
 }
 
+#define MAX_SHADERS 30
+
+namespace gfx::shader {
+
+    const uint8_t PARTICLE_SHADER_OFFSET = 5;
+    const uint8_t PARTICLE_INSTANCED_SHADER_OFFSET = 9;
+
+    enum shaders : ShaderHandle {
+
+        S3D_LIGHT,
+        S3D_ALBEDO,
+        S3D_PHONG,
+        S3D_PHONG_NORM,
+        S3D_PHONG_INSTANCE,
+        S3D_PBR,
+        S3D_PBR_NORM,
+        S3D_PBR_INSTANCE,
+        S3D_GBUFFER,
+        S3D_GBUFFER_NORM,
+        S3D_GBUFFER_INSTANCE,
+        S3D_PARALLAX,
+
+        S2D_LIGHT,
+        S2D_ALBEDO,
+        S2D_PHONG,
+        S2D_PHONG_NORM,
+        S2D_PHONG_INSTANCE,
+        S2D_PBR,
+        S2D_PBR_NORM,
+        S2D_PBR_INSTANCE,
+        S2D_GBUFFER,
+        S2D_GBUFFER_NORM,
+        S2D_GBUFFER_INSTANCE,
+        S2D_PARALLAX,
+
+        SHADER_TOTAL_COUNT
+    };
+
+    enum shadersUtil : uint8_t {
+        
+        TEXT,
+        LINE,
+        LIGHT,
+        WIREFRAME,
+        ENVIRONMENT,
+        PARTICLE_HARD_COLORED,
+        PARTICLE_HARD_TEXTURED,
+        PARTICLE_SOFT_COLORED,
+        PARTICLE_SOFT_TEXTURED,
+        PARTICLE_INSTANCED_HARD_COLORED,
+        PARTICLE_INSTANCED_HARD_TEXTURED,
+        PARTICLE_INSTANCED_SOFT_COLORED,
+        PARTICLE_INSTANCED_SOFT_TEXTURED,
+        SSBO,
+
+        SHADERUTIL_TOTAL_COUNT
+    };
+
+    enum shadersFrame : uint8_t {
+
+        FRAME_DEFAULT,
+        FRAME_HDR,
+        FRAME_BLOOM,
+        FRAME_BLUR,
+        FRAME_DEPTH,
+        
+        EQUIRECT_TO_CUBEMAP,
+        BLUR_CUBEMAP,
+        PREFILTER_CUBEMAP,
+        BRDF,
+        SSAO,
+        SSAO_BLUR,
+        DEFERRED_LIGHTNING,
+
+        SHADERFRAME_TOTAL_COUNT
+    };
+
+    const std::string loadShaderFile(const char* path);
+    const std::string preprocessFile(const char* path);
+};
+
 // ------------------------------ Classes -------------------------------------------- //
 
 class Shader {
 
     unsigned int shaderProgram = 0u;
     
-    static std::string loadShaderFile(const char* path);
-    static std::string preprocessFile(const char* path);
+    // static std::string loadShaderFile(const char* path);
+    // static std::string preprocessFile(const char* path);
 
     /* 
     Compile Shaders
@@ -93,83 +173,6 @@ namespace colors {
 
 // ------------------------------ Shaders -------------------------------------------- //
 
-#define MAX_SHADERS 30
-
-namespace gfx::shader {
-
-    const uint8_t PARTICLE_SHADER_OFFSET = 5;
-    const uint8_t PARTICLE_INSTANCED_SHADER_OFFSET = 9;
-
-    enum shaders : ShaderHandle {
-
-        S3D_LIGHT,
-        S3D_ALBEDO,
-        S3D_PHONG,
-        S3D_PHONG_NORM,
-        S3D_PHONG_INSTANCE,
-        S3D_PBR,
-        S3D_PBR_NORM,
-        S3D_PBR_INSTANCE,
-        S3D_GBUFFER,
-        S3D_GBUFFER_NORM,
-        S3D_GBUFFER_INSTANCE,
-        S3D_PARALLAX,
-
-        S2D_LIGHT,
-        S2D_ALBEDO,
-        S2D_PHONG,
-        S2D_PHONG_NORM,
-        S2D_PHONG_INSTANCE,
-        S2D_PBR,
-        S2D_PBR_NORM,
-        S2D_PBR_INSTANCE,
-        S2D_GBUFFER,
-        S2D_GBUFFER_NORM,
-        S2D_GBUFFER_INSTANCE,
-        S2D_PARALLAX,
-
-        SHADER_TOTAL_COUNT
-    };
-
-    enum shadersUtil : uint8_t {
-        
-        TEXT,
-        LINE,
-        LIGHT,
-        WIREFRAME,
-        ENVIRONMENT,
-        PARTICLE_HARD_COLORED,
-        PARTICLE_HARD_TEXTURED,
-        PARTICLE_SOFT_COLORED,
-        PARTICLE_SOFT_TEXTURED,
-        PARTICLE_INSTANCED_HARD_COLORED,
-        PARTICLE_INSTANCED_HARD_TEXTURED,
-        PARTICLE_INSTANCED_SOFT_COLORED,
-        PARTICLE_INSTANCED_SOFT_TEXTURED,
-
-        SHADERUTIL_TOTAL_COUNT
-    };
-
-    enum shadersFrame : uint8_t {
-
-        FRAME_DEFAULT,
-        FRAME_HDR,
-        FRAME_BLOOM,
-        FRAME_BLUR,
-        FRAME_DEPTH,
-        
-        EQUIRECT_TO_CUBEMAP,
-        BLUR_CUBEMAP,
-        PREFILTER_CUBEMAP,
-        BRDF,
-        SSAO,
-        SSAO_BLUR,
-        DEFERRED_LIGHTNING,
-
-        SHADERFRAME_TOTAL_COUNT
-    };
-};
-
 struct ShaderPath {
 
     std::string vert;
@@ -193,6 +196,8 @@ class ShaderManager {
 
     static Shader pointLightShadow_instanced;
     static Shader directLightShadow_instanced;
+
+    static ComputeShader particleComputeShader;
 
     static std::vector <ShaderPath> paths;
     static std::vector <ShaderPath> pathUtil;
@@ -218,6 +223,8 @@ public:
 
     static const Shader& getUtil(const uint8_t index);
     static const Shader& getFrame(const gfx::shader::shadersFrame index) { return shaderFrames[index]; }
+
+    static const ComputeShader& getComputeShader() { return particleComputeShader; }
     
     static uint32_t totat() { return gfx::shader::SHADER_TOTAL_COUNT; }
 };

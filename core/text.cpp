@@ -10,8 +10,8 @@
 FT_Library Text::ft   {};
 FT_Face    Text::font {};
 
-uint Text::VAO = 0;
-uint Text::VBO = 0;
+GLuint Text::VAO = 0;
+GLuint Text::VBO = 0;
 
 std::map <char, TextCharacter> Text::Characters {};
 

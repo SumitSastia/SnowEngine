@@ -121,3 +121,32 @@ void PointLightUBO::update(const ECS& ecs) {
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
+
+// --------------------------------------- SSBO --------------------------------------- //
+
+#include "math/random.h"
+
+void SSBO::init() {
+
+    float numbers[] = {
+
+        Random::Float(0.0f, 1.0f),
+        Random::Float(0.0f, 1.0f),
+        Random::Float(0.0f, 1.0f),
+        Random::Float(0.0f, 1.0f),
+        Random::Float(0.0f, 1.0f)
+    };
+
+    glGenBuffers(1, &ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+
+    glBufferData(
+        GL_SHADER_STORAGE_BUFFER,
+        sizeof(numbers),
+        numbers,
+        GL_DYNAMIC_DRAW
+    );
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}

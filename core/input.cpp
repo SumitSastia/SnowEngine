@@ -3,6 +3,10 @@
 #include <iostream>
 #include <algorithm>
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 bool* Input::currentState  = nullptr;
 bool* Input::previousState = nullptr;
 
@@ -59,6 +63,8 @@ void Input::mouseButton_callback(GLFWwindow* window, int button, int action, int
     else if (action == GLFW_RELEASE) {
         curr_mousebutton[button] = false;
     }
+
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 }
 
 void track_mouse(GLFWwindow* window){

@@ -107,7 +107,7 @@ void Scene2::init() {
         // transform.scale    = glm::vec3(0.1f);
         transform.computeModel();
 
-        // transform.isVisible = false;
+        transform.isVisible = false;
         
         MeshComponent mesh = EntityShapes::instance().cubeNorm;
         
@@ -132,8 +132,7 @@ void Scene2::init() {
         BoundingAABBComponent AABB = createAABB(transform, mesh);
         
         componentManager.addComponent(wood_box, mesh);
-        componentManager.addComponent<TransformComponent>(wood_box);
-        // componentManager.addComponent(wood_box, transform);
+        componentManager.addComponent(wood_box, transform);
         componentManager.addComponent(wood_box, material);
         componentManager.addComponent(wood_box, boundingSphere);
         componentManager.addComponent(wood_box, AABB);
@@ -891,6 +890,22 @@ void Scene2::renderLight() const {
     if (Camera::activeCamera != &cameraComponent.camera) cameraComponent.renderFrustum();
 
     RenderSystem::instance().renderTransparent(ecs);
+    
+    // ---------- SSBO TESTING ---------- //
+
+    // static SSBO ssbObject {};
+
+    // const ComputeShader& computeShader = ShaderManager::getComputeShader();
+    // computeShader.use();
+    // glDispatchCompute(1, 1, 1);
+
+    // const Shader& shader = ShaderManager::getUtil(gfx::shader::SSBO);
+    // shader.use();
+
+    // shader.setMat4("model", glm::mat4(1.0f));
+
+    // MeshComponent mesh = EntityShapes::instance().square;
+    // mesh.draw();
 }
 
 void Scene2::renderParticles(const TextureHandle depthTexture) const {

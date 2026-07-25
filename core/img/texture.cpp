@@ -82,8 +82,8 @@ void Texture::bind(const unsigned int textureUnit) const {
 
 ///////////////////////////////////////////////////////////////
 
-uint Line::VAO = 0;
-uint Line::VBO = 0;
+GLuint Line::VAO = 0;
+GLuint Line::VBO = 0;
 
 void Line::init() {
 

@@ -464,155 +464,155 @@ void ChildComponent::destroy() {
 
 // ------------------------------ Components ----------------------------------------- //
 
-template <>
-ComponentPool<TransformComponent>& ComponentManager::getPool() {
-    return transforms;
-}
+// template <>
+// ComponentPool<TransformComponent>& ComponentManager::getPool() {
+//     return transforms;
+// }
 
-template <>
-ComponentPool<MeshComponent>& ComponentManager::getPool() {
-    return meshes;
-}
+// template <>
+// ComponentPool<MeshComponent>& ComponentManager::getPool() {
+//     return meshes;
+// }
 
-template <>
-ComponentPool<MaterialComponent>& ComponentManager::getPool() {
-    return materials;
-}
+// template <>
+// ComponentPool<MaterialComponent>& ComponentManager::getPool() {
+//     return materials;
+// }
 
-template <>
-ComponentPool<InstanceComponent>& ComponentManager::getPool() {
-    return instances;
-}
+// template <>
+// ComponentPool<InstanceComponent>& ComponentManager::getPool() {
+//     return instances;
+// }
 
-template <>
-ComponentPool<ModelComponent>& ComponentManager::getPool() {
-    return models;
-}
+// template <>
+// ComponentPool<ModelComponent>& ComponentManager::getPool() {
+//     return models;
+// }
 
-template <>
-ComponentPool<PointLightComponent>& ComponentManager::getPool() {
-    return pointlights;
-}
+// template <>
+// ComponentPool<PointLightComponent>& ComponentManager::getPool() {
+//     return pointlights;
+// }
 
-template <>
-ComponentPool<DirectionalLight>& ComponentManager::getPool() {
-    return directlights;
-}
+// template <>
+// ComponentPool<DirectionalLight>& ComponentManager::getPool() {
+//     return directlights;
+// }
 
-template <>
-ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() {
-    return boundingSpheres;
-}
+// template <>
+// ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() {
+//     return boundingSpheres;
+// }
 
-template <>
-ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() {
-    return boundingAABBs;
-}
+// template <>
+// ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() {
+//     return boundingAABBs;
+// }
 
-template <>
-ComponentPool<MeshLODComponent>& ComponentManager::getPool() {
-    return meshLODs;
-}
+// template <>
+// ComponentPool<MeshLODComponent>& ComponentManager::getPool() {
+//     return meshLODs;
+// }
 
-template <>
-ComponentPool<ModelLODComponent>& ComponentManager::getPool() {
-    return modelLODs;
-}
+// template <>
+// ComponentPool<ModelLODComponent>& ComponentManager::getPool() {
+//     return modelLODs;
+// }
 
-template <>
-ComponentPool<CameraComponent>& ComponentManager::getPool() {
-    return cameras;
-}
+// template <>
+// ComponentPool<CameraComponent>& ComponentManager::getPool() {
+//     return cameras;
+// }
 
-template <>
-ComponentPool<ChildComponent>& ComponentManager::getPool() {
-    return childrens;
-}
+// template <>
+// ComponentPool<ChildComponent>& ComponentManager::getPool() {
+//     return childrens;
+// }
 
-template <>
-ComponentPool<SpotLightComponent>& ComponentManager::getPool() {
-    return spotlights;
-}
+// template <>
+// ComponentPool<SpotLightComponent>& ComponentManager::getPool() {
+//     return spotlights;
+// }
 
-template <>
-ComponentPool<AnimatedSprite>& ComponentManager::getPool() {
-    return animSprites;
-}
+// template <>
+// ComponentPool<AnimatedSprite>& ComponentManager::getPool() {
+//     return animSprites;
+// }
 
-template <>
-const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
-    return transforms;
-}
+// template <>
+// const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
+//     return transforms;
+// }
 
-template <>
-const ComponentPool<MeshComponent>& ComponentManager::getPool() const {
-    return meshes;
-}
+// template <>
+// const ComponentPool<MeshComponent>& ComponentManager::getPool() const {
+//     return meshes;
+// }
 
-template <>
-const ComponentPool<MaterialComponent>& ComponentManager::getPool() const {
-    return materials;
-}
+// template <>
+// const ComponentPool<MaterialComponent>& ComponentManager::getPool() const {
+//     return materials;
+// }
 
-template <>
-const ComponentPool<InstanceComponent>& ComponentManager::getPool() const {
-    return instances;
-}
+// template <>
+// const ComponentPool<InstanceComponent>& ComponentManager::getPool() const {
+//     return instances;
+// }
 
-template <>
-const ComponentPool<ModelComponent>& ComponentManager::getPool() const {
-    return models;
-}
+// template <>
+// const ComponentPool<ModelComponent>& ComponentManager::getPool() const {
+//     return models;
+// }
 
-template <>
-const ComponentPool<PointLightComponent>& ComponentManager::getPool() const {
-    return pointlights;
-}
+// template <>
+// const ComponentPool<PointLightComponent>& ComponentManager::getPool() const {
+//     return pointlights;
+// }
 
-template <>
-const ComponentPool<DirectionalLight>& ComponentManager::getPool() const {
-    return directlights;
-}
+// template <>
+// const ComponentPool<DirectionalLight>& ComponentManager::getPool() const {
+//     return directlights;
+// }
 
-template <>
-const ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() const {
-    return boundingSpheres;
-}
+// template <>
+// const ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() const {
+//     return boundingSpheres;
+// }
 
-template <>
-const ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() const {
-    return boundingAABBs;
-}
+// template <>
+// const ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() const {
+//     return boundingAABBs;
+// }
 
-template <>
-const ComponentPool<MeshLODComponent>& ComponentManager::getPool() const {
-    return meshLODs;
-}
+// template <>
+// const ComponentPool<MeshLODComponent>& ComponentManager::getPool() const {
+//     return meshLODs;
+// }
 
-template <>
-const ComponentPool<ModelLODComponent>& ComponentManager::getPool() const {
-    return modelLODs;
-}
+// template <>
+// const ComponentPool<ModelLODComponent>& ComponentManager::getPool() const {
+//     return modelLODs;
+// }
 
-template <>
-const ComponentPool<CameraComponent>& ComponentManager::getPool() const {
-    return cameras;
-}
+// template <>
+// const ComponentPool<CameraComponent>& ComponentManager::getPool() const {
+//     return cameras;
+// }
 
-template <>
-const ComponentPool<ChildComponent>& ComponentManager::getPool() const {
-    return childrens;
-}
+// template <>
+// const ComponentPool<ChildComponent>& ComponentManager::getPool() const {
+//     return childrens;
+// }
 
-template <>
-const ComponentPool<SpotLightComponent>& ComponentManager::getPool() const {
-    return spotlights;
-}
+// template <>
+// const ComponentPool<SpotLightComponent>& ComponentManager::getPool() const {
+//     return spotlights;
+// }
 
-template <>
-const ComponentPool<AnimatedSprite>& ComponentManager::getPool() const {
-    return animSprites;
-}
+// template <>
+// const ComponentPool<AnimatedSprite>& ComponentManager::getPool() const {
+//     return animSprites;
+// }
 
 // ------------------------------ Components ----------------------------------------- //
 

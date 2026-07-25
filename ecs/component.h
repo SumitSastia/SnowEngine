@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <assimp/Importer.hpp>
@@ -90,8 +91,8 @@ struct TransformComponent {
 
 struct MeshComponent {
 
-    uint VAO, VBO, EBO;
-    uint indicesCount;
+    GLuint VAO, VBO, EBO;
+    uint   indicesCount;
 
     // local Radius
     float radius;
@@ -289,7 +290,7 @@ struct CameraComponent {
 struct InstanceComponent {
 
     MeshComponent mesh;
-    uint modelVBO, normalVBO;
+    GLuint modelVBO, normalVBO;
 
     uint count;
     uint visibleCount;
@@ -516,3 +517,172 @@ public:
         );
     }
 };
+
+// --------------------------------------------------------------------------------------------- //
+
+template <>
+inline ComponentPool<TransformComponent>& ComponentManager::getPool() {
+    return transforms;
+}
+
+template <>
+inline ComponentPool<MeshComponent>& ComponentManager::getPool() {
+    return meshes;
+}
+
+template <>
+inline ComponentPool<MaterialComponent>& ComponentManager::getPool() {
+    return materials;
+}
+
+template <>
+inline ComponentPool<InstanceComponent>& ComponentManager::getPool() {
+    return instances;
+}
+
+template <>
+inline ComponentPool<ModelComponent>& ComponentManager::getPool() {
+    return models;
+}
+
+template <>
+inline ComponentPool<PointLightComponent>& ComponentManager::getPool() {
+    return pointlights;
+}
+
+template <>
+inline ComponentPool<DirectionalLight>& ComponentManager::getPool() {
+    return directlights;
+}
+
+template <>
+inline ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() {
+    return boundingSpheres;
+}
+
+template <>
+inline ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() {
+    return boundingAABBs;
+}
+
+template <>
+inline ComponentPool<MeshLODComponent>& ComponentManager::getPool() {
+    return meshLODs;
+}
+
+template <>
+inline ComponentPool<ModelLODComponent>& ComponentManager::getPool() {
+    return modelLODs;
+}
+
+template <>
+inline ComponentPool<CameraComponent>& ComponentManager::getPool() {
+    return cameras;
+}
+
+template <>
+inline ComponentPool<ChildComponent>& ComponentManager::getPool() {
+    return childrens;
+}
+
+template <>
+inline ComponentPool<SpotLightComponent>& ComponentManager::getPool() {
+    return spotlights;
+}
+
+template <>
+inline ComponentPool<AnimatedSprite>& ComponentManager::getPool() {
+    return animSprites;
+}
+
+template <>
+inline const ComponentPool<TransformComponent>& ComponentManager::getPool() const {
+    return transforms;
+}
+
+template <>
+inline const ComponentPool<MeshComponent>& ComponentManager::getPool() const {
+    return meshes;
+}
+
+template <>
+inline const ComponentPool<MaterialComponent>& ComponentManager::getPool() const {
+    return materials;
+}
+
+template <>
+inline const ComponentPool<InstanceComponent>& ComponentManager::getPool() const {
+    return instances;
+}
+
+template <>
+inline const ComponentPool<ModelComponent>& ComponentManager::getPool() const {
+    return models;
+}
+
+template <>
+inline const ComponentPool<PointLightComponent>& ComponentManager::getPool() const {
+    return pointlights;
+}
+
+template <>
+inline const ComponentPool<DirectionalLight>& ComponentManager::getPool() const {
+    return directlights;
+}
+
+template <>
+inline const ComponentPool<BoundingSphereComponent>& ComponentManager::getPool() const {
+    return boundingSpheres;
+}
+
+template <>
+inline const ComponentPool<BoundingAABBComponent>& ComponentManager::getPool() const {
+    return boundingAABBs;
+}
+
+template <>
+inline const ComponentPool<MeshLODComponent>& ComponentManager::getPool() const {
+    return meshLODs;
+}
+
+template <>
+inline const ComponentPool<ModelLODComponent>& ComponentManager::getPool() const {
+    return modelLODs;
+}
+
+template <>
+inline const ComponentPool<CameraComponent>& ComponentManager::getPool() const {
+    return cameras;
+}
+
+template <>
+inline const ComponentPool<ChildComponent>& ComponentManager::getPool() const {
+    return childrens;
+}
+
+template <>
+inline const ComponentPool<SpotLightComponent>& ComponentManager::getPool() const {
+    return spotlights;
+}
+
+template <>
+inline const ComponentPool<AnimatedSprite>& ComponentManager::getPool() const {
+    return animSprites;
+}
+
+// template <>
+// inline void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
+
+//     getPool<MaterialComponent>().addComponent(entity, component);
+//     addShader(component.shader);
+// }
+
+// template <>
+// inline void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
+
+//     getPool<PointLightComponent>().addComponent(entity, component);
+
+//     pointShadowFrames.push_back(
+//         PointShadowData(entity, new PointShadowFrame())
+//     );
+// }

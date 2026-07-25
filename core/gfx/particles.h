@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #define MAX_PARTICLES 10000
@@ -165,8 +167,8 @@ public:
 
 private:
 
-    uint VAO, VBO, QuadVBO;
-    uint total_count;
+    GLuint VAO, VBO, QuadVBO;
+    uint   total_count;
 };
 
 class ParticleEmitter {

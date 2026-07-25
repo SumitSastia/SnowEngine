@@ -2,12 +2,12 @@
 
 #include <map>
 #include <string>
+
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
-class Shader;
 
 struct TextCharacter {
 
@@ -25,7 +25,7 @@ class Text {
     static std::map <char, TextCharacter> Characters;
     static glm::mat4 projection;
 
-    static uint VAO, VBO;
+    static GLuint VAO, VBO;
 
 public:
 
