@@ -7,6 +7,7 @@ using TextureHandle = uint32_t;
 using ShaderHandle  = uint32_t;
 
 using UintRes = uint16_t;
+using uint    = unsigned int;
 
 // WARNING: SHOULD BE SAME AS THAT DEFINED IN GLSL SHADER
 #define MAX_LIGHTS 4U

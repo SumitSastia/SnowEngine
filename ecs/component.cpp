@@ -64,7 +64,7 @@ void MeshComponent::loadMesh2D(
     const std::vector<float>& vertices,
     const std::vector<uint>&  indices
 ) {
-    indicesCount = indices.size();
+    indicesCount = static_cast<uint>(indices.size());
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -94,7 +94,7 @@ void MeshComponent::loadMesh3D(
     const std::vector<float>& vertices,
     const std::vector<uint>&  indices
 ) {
-    indicesCount = indices.size();
+    indicesCount = static_cast<uint>(indices.size());
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -128,7 +128,7 @@ void MeshComponent::loadMesh3D(
     const std::vector<Vertex>& vertices,
     const std::vector<uint>&  indices
 ) {
-    indicesCount = indices.size();
+    indicesCount = static_cast<uint>(indices.size());
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -162,7 +162,7 @@ void MeshComponent::loadMesh3D(
     const std::vector<Vertex_n>& vertices,
     const std::vector<uint>&     indices
 ) {
-    indicesCount = indices.size();
+    indicesCount = static_cast<uint>(indices.size());
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -200,7 +200,7 @@ void MeshComponent::loadMesh3DNormal(
     const std::vector<float>& vertices,
     const std::vector<uint>&  indices
 ) {
-    indicesCount = indices.size();
+    indicesCount = static_cast<uint>(indices.size());
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -256,7 +256,7 @@ void InstanceComponent::bind(
     const std::vector<float>& vertices,
     const std::vector<uint>&  indices
 ) {
-    mesh.indicesCount = indices.size();
+    mesh.indicesCount = static_cast<uint>(indices.size());
     visibleCount = count;
 
     if (!count) DebugMenu::log("ERROR::TRANSFORM-COMPONENTS NOT INITIALIZED!");
@@ -627,19 +627,19 @@ void ComponentManager::addShader(const ShaderHandle shader) {
     if (!skip) uniqueShaders.push_back(shader);
 }
 
-template <>
-void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
+// template <>
+// void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
 
-    getPool<MaterialComponent>().addComponent(entity, component);
-    addShader(component.shader);
-}
+//     getPool<MaterialComponent>().addComponent(entity, component);
+//     addShader(component.shader);
+// }
 
-template <>
-void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
+// template <>
+// void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
 
-    getPool<PointLightComponent>().addComponent(entity, component);
+//     getPool<PointLightComponent>().addComponent(entity, component);
 
-    pointShadowFrames.push_back(
-        PointShadowData(entity, new PointShadowFrame())
-    );
-}
+//     pointShadowFrames.push_back(
+//         PointShadowData(entity, new PointShadowFrame())
+//     );
+// }

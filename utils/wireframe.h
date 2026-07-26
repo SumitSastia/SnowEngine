@@ -5,6 +5,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+#include "core/config.h"
+
 namespace gfx::internal {
 
     class Wireframe {

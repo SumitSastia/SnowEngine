@@ -36,14 +36,14 @@ bool Renderer::init() {
 
     if(!window){
         std::cerr << "Unable to initialize the window!" << std::endl;
-        return -1;
+        return false;
     }
     
     glfwMakeContextCurrent(window);
     
     if(!gladLoadGL()){
         std::cerr << "Unable to Load OpenGL!" << std::endl;
-        return -1;
+        return false;
     }
 
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);

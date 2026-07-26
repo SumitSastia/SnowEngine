@@ -371,7 +371,7 @@ void BloomFrame::render() const {
     bool horizontal = true;
     bool first_itr  = true;
 
-    int amount = 5;
+    unsigned int amount = 5;
 
     const Shader& shaderBlur = ShaderManager::getFrame(gfx::shader::FRAME_BLUR);
     shaderBlur.use();

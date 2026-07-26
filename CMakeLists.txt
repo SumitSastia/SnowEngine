@@ -92,4 +92,19 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR})
 target_include_directories(${TARGET_NAME} PRIVATE include)
 target_include_directories(${TARGET_NAME} PRIVATE include/freetype2)
 
-target_link_libraries(${TARGET_NAME} PRIVATE glfw assimp freetype)
+# target_link_libraries(${TARGET_NAME} PRIVATE glfw assimp freetype)
+
+if(WIN32)
+
+    target_link_directories(${TARGET_NAME} PRIVATE libs)
+    target_link_libraries(${TARGET_NAME} PRIVATE glfw3 opengl32 assimp-vc143-mt freetype)
+
+    add_custom_command(TARGET SnowEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${PROJECT_SOURCE_DIR}/libs/assimp-vc143-mt.dll"
+            $<TARGET_FILE_DIR:SnowEngine>
+    )
+
+elseif(UNIX)
+    target_link_libraries(${TARGET_NAME} PRIVATE glfw assimp freetype)
+endif()

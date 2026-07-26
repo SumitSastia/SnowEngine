@@ -16,6 +16,8 @@
 
 #include "utils/debug.h"
 
+#include "core/frame/frame.h"
+
 // ------------------------------ Foward Declarations -------------------------------- //
 
 #define MAX_ENTITIES 5000
@@ -24,8 +26,8 @@
 #define TEXTURE_DEFAULT_ALBEDO 1U
 #define TEXTURE_DEFAULT_NORMAL 2U
 
-class PointShadowFrame;
-class DirectShadowFrame;
+// class PointShadowFrame;
+// class DirectShadowFrame;
 
 using Entity = uint32_t;
 
@@ -670,19 +672,19 @@ inline const ComponentPool<AnimatedSprite>& ComponentManager::getPool() const {
     return animSprites;
 }
 
-// template <>
-// inline void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
+template <>
+inline void ComponentManager::addComponent<MaterialComponent>(const Entity& entity, const MaterialComponent& component) {
 
-//     getPool<MaterialComponent>().addComponent(entity, component);
-//     addShader(component.shader);
-// }
+    getPool<MaterialComponent>().addComponent(entity, component);
+    addShader(component.shader);
+}
 
-// template <>
-// inline void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
+template <>
+inline void ComponentManager::addComponent<PointLightComponent>(const Entity& entity, const PointLightComponent& component) {
 
-//     getPool<PointLightComponent>().addComponent(entity, component);
+    getPool<PointLightComponent>().addComponent(entity, component);
 
-//     pointShadowFrames.push_back(
-//         PointShadowData(entity, new PointShadowFrame())
-//     );
-// }
+    pointShadowFrames.push_back(
+        PointShadowData(entity, new PointShadowFrame())
+    );
+}

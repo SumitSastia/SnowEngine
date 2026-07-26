@@ -1,5 +1,7 @@
 #include <stb_image.h>
 #include <glad/glad.h>
+
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 #include "texture.h"

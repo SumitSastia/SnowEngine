@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <glm/glm.hpp>
 
+#include "core/config.h"
+
 class IBLFrame {
 
     int width, height;

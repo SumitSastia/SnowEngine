@@ -126,7 +126,7 @@ namespace gfx::particles {
         float radius = 1.0f;
 
         // CONE
-        uint32_t height = 1.0f;
+        float height = 1.0f;
         
         uint32_t total_count = 1;
         ParticleSpawnShape spawnerType = ParticleSpawnShape::POINT;

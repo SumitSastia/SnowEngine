@@ -50,3 +50,10 @@ build
 
 # assets
 *.hdr
+
+# windows libs
+include/GLFW
+include/KHR
+include/glm
+include/assimp
+libs

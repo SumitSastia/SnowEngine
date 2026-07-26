@@ -93,7 +93,7 @@ int main() {
     while (!glfwWindowShouldClose(window) && isRunning) {
 
         // Time
-        float currentTime = glfwGetTime();
+        float currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - lastTime;
         lastTime  = currentTime;
 

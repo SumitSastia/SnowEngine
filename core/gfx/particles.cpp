@@ -183,7 +183,7 @@ namespace gfx::particles {
         smokeProperties.size_max = 2.0;
 
         smokeProperties.lifetime_min = smoke.lifetime;
-        smokeProperties.lifetime_max = 1.5 * smoke.lifetime;
+        smokeProperties.lifetime_max = 1.5f * smoke.lifetime;
 
         smokeProperties.acc_min = glm::vec3(-0.1f, 0.1f,-0.1f);
         smokeProperties.acc_max = glm::vec3( 0.1f, 0.4f, 0.1f);
@@ -637,7 +637,7 @@ void InstancedParticles::init(const size_t count) {
 
 void InstancedParticles::update(const std::vector<gfx::particles::InstancedParticle>& particles) {
 
-    total_count = particles.size();
+    total_count = static_cast<uint>(particles.size());
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, total_count * sizeof(gfx::particles::InstancedParticle), particles.data());

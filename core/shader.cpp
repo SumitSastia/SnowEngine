@@ -63,7 +63,8 @@ namespace gfx::shader {
                 // std::cout << "Preprocessing: " << path << '\n';
                 // std::cout << "Header: " << headerPath << std::endl;
 
-                std::string header_str = gfx::shader::loadShaderFile(headerPath.c_str());
+                const std::string headerPathStr = headerPath.string();
+                std::string header_str = gfx::shader::loadShaderFile(headerPathStr.c_str());
 
                 output << header_str << '\n';
             }

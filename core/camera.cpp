@@ -254,8 +254,8 @@ void Camera::mouse_handler(GLFWwindow* window){
     prev_x = pos_x;
     prev_y = pos_y;
 
-    float offset_x = cursor_dx * camSensitivity;
-    float offset_y = cursor_dy * camSensitivity;
+    float offset_x = static_cast<float>(cursor_dx) * camSensitivity;
+    float offset_y = static_cast<float>(cursor_dy) * camSensitivity;
 
     yaw = glm::mod(yaw+offset_x, 360.0f);
     pitch += offset_y;
@@ -293,8 +293,8 @@ void Camera::handle_mouse(GLFWwindow* window) {
     prev_x = pos_x;
     prev_y = pos_y;
 
-    float offset_x = cursor_dx * camSensitivity;
-    float offset_y = cursor_dy * camSensitivity;
+    float offset_x = static_cast<float>(cursor_dx) * camSensitivity;
+    float offset_y = static_cast<float>(cursor_dy) * camSensitivity;
 
     activeCamera->yaw = glm::mod(activeCamera->yaw + offset_x, 360.0f);
     activeCamera->pitch += offset_y;
