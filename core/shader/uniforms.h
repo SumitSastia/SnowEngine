@@ -64,6 +64,10 @@ private:
     PointLightData data;
 };
 
+struct ComputeData {
+    unsigned int dataSize;
+};
+
 class SSBO {
 
 public:

@@ -11,7 +11,6 @@ set(
 
     math/matrix.cpp
     math/random.cpp
-    core/shader/uniforms.cpp
 )
 
 set(
@@ -31,6 +30,9 @@ set(
     core/frame/frame.cpp
     core/model/model.cpp
     core/deferred/ssao.cpp
+
+    core/shader/uniforms.cpp
+    core/shader/compute.cpp
 
     core/img/assetManager.cpp
     core/img/cubemap.cpp

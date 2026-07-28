@@ -5,7 +5,7 @@
 
 void ComputeShader::init(const char* path) {
 
-    const std::string shaderStr = gfx::shader::loadShaderFile("../shaders/compute/particle.glsl");
+    const std::string shaderStr = gfx::shader::loadShaderFile(path);
     const char* shaderSource = shaderStr.c_str();
 
     computeShader = glCreateShader(GL_COMPUTE_SHADER);

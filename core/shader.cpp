@@ -470,6 +470,10 @@ bool ShaderManager::initShaders() {
         "../shaders/frameBuffs/deferred.frag", true
     );
 
+    // ------------------------------------------------- //
+
+    particleComputeShader.init("../shaders/compute/particle.glsl");
+
     return true;
 }
 

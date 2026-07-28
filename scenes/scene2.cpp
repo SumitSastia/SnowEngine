@@ -893,19 +893,19 @@ void Scene2::renderLight() const {
     
     // ---------- SSBO TESTING ---------- //
 
-    // static SSBO ssbObject {};
+    static SSBO ssbObject {};
 
-    // const ComputeShader& computeShader = ShaderManager::getComputeShader();
-    // computeShader.use();
-    // glDispatchCompute(1, 1, 1);
+    const ComputeShader& computeShader = ShaderManager::getComputeShader();
+    computeShader.use();
+    glDispatchCompute(1, 1, 1);
 
-    // const Shader& shader = ShaderManager::getUtil(gfx::shader::SSBO);
-    // shader.use();
+    const Shader& shader = ShaderManager::getUtil(gfx::shader::SSBO);
+    shader.use();
 
-    // shader.setMat4("model", glm::mat4(1.0f));
+    shader.setMat4("model", glm::mat4(1.0f));
 
-    // MeshComponent mesh = EntityShapes::instance().square;
-    // mesh.draw();
+    MeshComponent mesh = EntityShapes::instance().square;
+    mesh.draw();
 }
 
 void Scene2::renderParticles(const TextureHandle depthTexture) const {
