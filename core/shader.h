@@ -72,6 +72,7 @@ namespace gfx::shader {
         PARTICLE_INSTANCED_SOFT_COLORED,
         PARTICLE_INSTANCED_SOFT_TEXTURED,
         SSBO,
+        GPU_PARTICLE,
 
         SHADERUTIL_TOTAL_COUNT
     };
@@ -118,9 +119,11 @@ public:
 
     Shader() = default;
     
+    void loadFromFile(const char* compPath);
     void loadFromFile(const char* vertPath, const char* fragPath, const bool preprocess = false);
     void loadFromFile(const char* vertPath, const char* geomPath, const char* fragPath);
 
+    bool loadFromString(const std::string& compStr);
     bool loadFromString(const std::string& vertStr, const std::string& fragStr);
     bool loadFromString(const std::string& vertStr, const std::string& geomStr, const std::string& fragStr);
 
@@ -196,8 +199,8 @@ class ShaderManager {
 
     static Shader pointLightShadow_instanced;
     static Shader directLightShadow_instanced;
-
-    static ComputeShader particleComputeShader;
+    
+    static Shader particleComputeShader;
 
     static std::vector <ShaderPath> paths;
     static std::vector <ShaderPath> pathUtil;
@@ -224,7 +227,8 @@ public:
     static const Shader& getUtil(const uint8_t index);
     static const Shader& getFrame(const gfx::shader::shadersFrame index) { return shaderFrames[index]; }
 
-    static const ComputeShader& getComputeShader() { return particleComputeShader; }
+    // static const Shader& getComputeShader() { return particleComputeShader; }
+    static const Shader& getParticleComputeShader() { return particleComputeShader; }
     
     static uint32_t totat() { return gfx::shader::SHADER_TOTAL_COUNT; }
 };

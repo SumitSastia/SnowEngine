@@ -54,8 +54,8 @@ void DebugMenu::printAssetsInitTime() {
     for (const auto& data : colorInit_data) {
 
         std::cout << "Color Loaded: "
-                  << std::setw(8) << std::setfill('0') << std::hex << data.color
-                  << ", Handle: " << std::dec          << data.handle
+                  << std::right   << std::setw(8) << std::setfill('0') << std::hex << data.color
+                  << ", Handle: " << std::dec     << data.handle
                   << '\n';
     }
 

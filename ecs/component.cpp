@@ -241,6 +241,14 @@ void MeshComponent::draw() const {
     glBindVertexArray(0);
 }
 
+void MeshComponent::drawInstance(const uint instanceCount) const {
+
+    glBindVertexArray(VAO);
+    // glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*)0);
+    glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, instanceCount);
+    glBindVertexArray(0);
+}
+
 void MeshComponent::destroy() {
 
     glDeleteBuffers(1, &VBO);

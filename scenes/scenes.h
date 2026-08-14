@@ -75,6 +75,7 @@ class Scene2 : public Scene {
     ParticleEmitter rain_emitter;
     ParticleEmitter bullet_emitter;
     ParticleEmitter smoke_emitter;
+    GPUparticleEmitter gpuEmitter;
 
     glm::vec3 gun_muzzle;
 

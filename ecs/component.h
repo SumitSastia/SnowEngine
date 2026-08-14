@@ -153,6 +153,7 @@ struct MeshComponent {
     );
 
     void draw() const;
+    void drawInstance(const uint instanceCount) const;
     void destroy();
 };
 

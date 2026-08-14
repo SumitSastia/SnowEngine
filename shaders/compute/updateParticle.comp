@@ -1,0 +1,57 @@
+#version 450 core
+
+#define MAX_PARTICLES 10000u
+
+layout (local_size_x = 128) in;
+
+struct Particle {
+
+    vec4 position;       // 16
+    vec4 velocity;       // 16
+    vec4 color;          // 16
+
+    float lifetime;      // 4
+    float remainingLife; // 4
+
+    float size;          // 4
+    uint  isActive;      // 4
+};
+
+layout (std430, binding = 1) buffer ParticleData {
+
+    uint total_particles;
+    uint padding[3];
+
+    Particle particles[MAX_PARTICLES];
+};
+
+uniform float deltaTime;
+
+void main() {
+
+    uint id = gl_GlobalInvocationID.x;
+
+    if (id >= total_particles) return;
+    if (particles[id].isActive == 0) return;
+
+    particles[id].remainingLife -= deltaTime;
+    
+    if (particles[id].remainingLife <= 0.0f) {
+        
+        // particles[id].isActive = 0;
+        particles[id].remainingLife = particles[id].lifetime;
+        // return;
+    }
+
+    // float t = 1.0f - particles[id].remainingLife / particles[id].lifetime;
+    // particles[id].color = mix()
+    
+    particles[id].position += particles[id].velocity * deltaTime;
+    // particles[id].position += vec4(0.1);
+    
+    if (particles[id].position.w > 360.0) particles[id].position.w -= 360.0;
+    if (particles[id].position.w < -360.0) particles[id].position.w += 360.0;
+
+    if (particles[id].color.r >= 1.0) particles[id].color.r = 0.0;
+    particles[id].color.r += 0.01;
+}

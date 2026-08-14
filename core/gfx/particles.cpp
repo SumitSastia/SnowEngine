@@ -650,3 +650,71 @@ void InstancedParticles::draw() const {
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, total_count);
     glBindVertexArray(0);
 }
+
+// ------------------------------------------------------------------------------------------------------- //
+
+const GLuint bindingPoint = 1;
+
+void GPUparticleEmitter::create() {
+
+    total_particles = 100;
+
+    ParticleData data;
+    data.total_particles = total_particles;
+
+    for (uint i = 0; i < data.total_particles; i++) {
+
+        data.particles[i].position = glm::vec4(0.0f);
+        data.particles[i].velocity = glm::vec4(Random::vec3(0.1f), 0.0f);
+        data.particles[i].color    = glm::vec4(1.0f);
+
+        data.particles[i].lifetime = 1.0f;
+        data.particles[i].remainingLife = data.particles[i].lifetime;
+
+        data.particles[i].size = 0.2f;
+        data.particles[i].isActive = 1;
+    }
+
+    size_t size = sizeof(ParticleData);
+
+    glGenBuffers(1, &ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+
+    glBufferData(
+        GL_SHADER_STORAGE_BUFFER,
+        size,
+        &data,
+        GL_STATIC_DRAW
+    );
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+void GPUparticleEmitter::update(const float dt) {
+
+    uint dispatchCount = (total_particles + 127) / 128;
+
+    const Shader& shader = ShaderManager::getParticleComputeShader();
+    
+    shader.use();
+    shader.setFloat("deltaTime", dt);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, ssbo);
+    glDispatchCompute(dispatchCount, 1, 1);
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+void GPUparticleEmitter::render() const {
+
+    const Shader& shader = ShaderManager::getUtil(gfx::shader::GPU_PARTICLE);
+    const MeshComponent& mesh = EntityShapes::instance().square;
+
+    shader.use();
+    mesh.drawInstance(total_particles);
+}
+
+void GPUparticleEmitter::destroy() {
+
+}

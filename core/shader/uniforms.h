@@ -16,6 +16,11 @@ struct CameraData {
     float padding1;
 };
 
+struct ScreenData {
+
+    glm::uvec4 screenSize;
+};
+
 namespace gfx::internal {
 
     struct PointLight_ubo {
@@ -42,12 +47,14 @@ struct PointLightData {
 class UBOhandler {
 
 public:
+
     void init();
     void update();
 
 private:
 
     GLuint cameraUBO;
+    GLuint screenUBO;
     CameraData cameraDataBuffer;
 };
 
@@ -71,8 +78,11 @@ struct ComputeData {
 class SSBO {
 
 public:
+
     SSBO() { init(); }
     void init();
+
+    const GLuint getSSBO() const { return ssbo; }
 
 private:
     GLuint ssbo;

@@ -853,6 +853,15 @@ void Scene2::update(const float deltaTime) {
 
     // const glm::vec3& position = ecs.componentManager.get<TransformComponent>(wood_box).position;
     // std::cout << "Position: " << position.x << "," << position.y << "," << position.z << '\n';
+
+    // const Shader& computeShader = ShaderManager::getParticleComputeShader();
+
+    // static float c_time = 0;
+    // c_time += deltaTime;
+
+    // computeShader.use();
+    // computeShader.setFloat("time", c_time);
+    gpuEmitter.update(deltaTime);
 }
 
 void Scene2::render() const {
@@ -893,19 +902,59 @@ void Scene2::renderLight() const {
     
     // ---------- SSBO TESTING ---------- //
 
-    static SSBO ssbObject {};
+    // static int imageWidth = 600, imageHeight = 450;
 
-    const ComputeShader& computeShader = ShaderManager::getComputeShader();
-    computeShader.use();
-    glDispatchCompute(1, 1, 1);
+    // static SSBO ssbObject {};
 
-    const Shader& shader = ShaderManager::getUtil(gfx::shader::SSBO);
-    shader.use();
+    // const Shader& computeShader = ShaderManager::getComputeShader();
 
-    shader.setMat4("model", glm::mat4(1.0f));
+    // computeShader.use();
+    // computeShader.setVec2("resolution", glm::vec2(imageWidth, imageHeight));
 
-    MeshComponent mesh = EntityShapes::instance().square;
-    mesh.draw();
+    // const Texture computeTexture = AssetManager::getTexture(1);
+
+    // glBindImageTexture(
+    //     0,
+    //     computeTexture.getID(),
+    //     0,
+    //     GL_FALSE,
+    //     0,
+    //     GL_WRITE_ONLY,
+    //     GL_RGBA32F
+    // );
+    
+    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbObject.getSSBO());
+
+    // // Executes Compute Shader (workgroup = 8, local_size_x = 128, total_threads = 8 * 128)
+    // // total_threads = size of array
+    // // glDispatchCompute(8, 1, 1);
+    // glDispatchCompute(
+    //     (imageWidth  + 15) / 16,
+    //     (imageHeight + 15) / 16,
+    //     1
+    // );
+
+    // // Wait for GPU writes to become visible
+    // glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT);
+
+    // const Shader& shader = ShaderManager::getUtil(gfx::shader::SSBO);
+    // shader.use();
+
+    // shader.setMat4("model", glm::mat4(1.0f));
+    // shader.setInt("computeTexture", 0);
+
+    // computeTexture.bind(0);
+
+    // // glTexParameteri(
+    // //     GL_TEXTURE_2D,
+    // //     GL_TEXTURE_MIN_FILTER,
+    // //     GL_NEAREST
+    // // );
+
+    // MeshComponent mesh = EntityShapes::instance().square;
+    // mesh.draw();
+
+    gpuEmitter.render();
 }
 
 void Scene2::renderParticles(const TextureHandle depthTexture) const {

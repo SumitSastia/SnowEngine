@@ -79,6 +79,16 @@ namespace gfx::shader {
 
 // ------------------------------ Foward Declarations -------------------------------- //
 
+void Shader::loadFromFile(const char* compPath) {
+
+    const bool success = loadFromString(gfx::shader::loadShaderFile(compPath));
+
+    SNOW_ASSERT(
+        success, 
+        std::string("INVALID CODE INSIDE THIS SHADER!\n") + compPath
+    )
+}
+
 void Shader::loadFromFile(const char* vertPath, const char* fragPath, const bool preprocess) {
 
     const bool success = (preprocess)?
@@ -103,6 +113,36 @@ void Shader::loadFromFile(const char* vertPath, const char* geomPath, const char
         success, 
         std::string("INVALID CODE INSIDE THIS SHADER!\n") + vertPath + "\n" + geomPath + "\n" + fragPath
     )
+}
+
+bool Shader::loadFromString(const std::string& compStr) {
+
+    const char* shaderSource = compStr.c_str();
+
+    GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
+
+    glShaderSource(computeShader, 1, &shaderSource, nullptr);
+    glCompileShader(computeShader);
+
+    int success;
+    char infoLog[512];
+
+    glGetShaderiv(computeShader, GL_COMPILE_STATUS, &success);
+
+    if (!success) {
+
+        glGetShaderInfoLog(computeShader, 512, nullptr, infoLog);
+        std::cerr << "ERROR: COMPUTE-SHADER COMPILATION FAILED!\n" << infoLog << std::endl;
+        // std::abort();
+        return false;
+    }
+
+    shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, computeShader);
+    glLinkProgram(shaderProgram);
+
+    return true;
 }
 
 bool Shader::loadFromString(const std::string& vertexStr, const std::string& fragmentStr) {
@@ -234,70 +274,6 @@ bool Shader::loadFromString(const std::string& vertStr, const std::string& geomS
 
 // ------------------------------ Class Functions ------------------------------------ //
 
-/*
-@return Content of a Shader file in string format.
-@note This was created as a part of createShader, suggested not to be used externally.
-*/
-// std::string Shader::loadShaderFile(const char* path) {
-
-//     std::ifstream file(path);
-
-//     SNOW_ASSERT (
-//         file,
-//         std::string("FAILED TO OPEN SHADER FILE!\n") + path
-//     )
-
-//     std::stringstream ss;
-//     ss << file.rdbuf();
-
-//     return ss.str();
-// }
-
-/*
-EXPERIMENTAL: 
-Replaces "#include" inside file content with header file data.
-@param path Directory in which headers are present.
-@return Content of a Shader file in string format.
-@note This was created as a part of createShader, suggested not to be used externally.
-*/
-// std::string Shader::preprocessFile(const char* path) {
-
-//     std::string src_str = gfx::shader::loadShaderFile(path);
-    
-//     std::stringstream input(src_str);
-//     std::stringstream output;
-    
-//     std::string line;
-    
-//     // Replacing #include
-//     while (std::getline(input, line)) {
-        
-//         if (line.find("#include") != std::string::npos) {
-            
-//             size_t temp1 = line.find("<");
-//             size_t temp2 = line.find(">");
-
-//             // Extracting header name
-//             std::string headerName = line.substr(temp1 + 1, temp2 - temp1 - 1);
-
-//             // Header filePath
-//             std::filesystem::path headerPath = std::filesystem::weakly_canonical(std::filesystem::path(path).parent_path() / ".." / headerName);
-
-//             // std::cout << "Preprocessing: " << path << '\n';
-//             // std::cout << "Header: " << headerPath << std::endl;
-
-//             std::string header_str = gfx::shader::loadShaderFile(headerPath.c_str());
-
-//             output << header_str << '\n';
-//         }
-//         else {
-//             output << line << '\n';
-//         }
-//     }
-
-//     return output.str();
-// }
-
 void Shader::use() const {
     glUseProgram(shaderProgram);
 }
@@ -316,7 +292,7 @@ Shader ShaderManager::directLightShadow {};
 Shader ShaderManager::pointLightShadow_instanced  {};
 Shader ShaderManager::directLightShadow_instanced {};
 
-ComputeShader ShaderManager::particleComputeShader {};
+Shader ShaderManager::particleComputeShader {};
 
 std::vector <Shader> ShaderManager::objShaders   (MAX_SHADERS);
 std::vector <Shader> ShaderManager::lShadersUtil (MAX_SHADERS);
@@ -381,7 +357,8 @@ std::vector <ShaderPath> ShaderManager::pathUtil = {
     ShaderPath("obj2d/instance.vert",      "obj2d/particle_colored_soft.frag"),
     ShaderPath("obj2d/instance.vert",      "obj2d/particle_textured_soft.frag"),
 
-    ShaderPath("particles/p.vert",         "particles/p.frag")
+    ShaderPath("particles/p.vert",         "particles/p.frag"),
+    ShaderPath("obj2d/gpuParticle.vert",   "obj2d/gpuParticle.frag")
 };
 
 bool ShaderManager::initShaders() {
@@ -472,7 +449,7 @@ bool ShaderManager::initShaders() {
 
     // ------------------------------------------------- //
 
-    particleComputeShader.init("../shaders/compute/particle.glsl");
+    particleComputeShader.loadFromFile("../shaders/compute/updateParticle.comp");
 
     return true;
 }

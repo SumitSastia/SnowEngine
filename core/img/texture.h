@@ -46,7 +46,7 @@ public:
     void load(const std::string& path, const bool isRGBA); // CPU-Work
 
     // Compiles pixelData into VRAM
-    void compile(); // GPU-Work
+    void compile(bool generateMipMaps = true); // GPU-Work
 
     void bind(const unsigned int textureUnit) const;
 

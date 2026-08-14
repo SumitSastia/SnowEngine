@@ -22,7 +22,7 @@ void AssetManager::init() {
     loadingQueue.init();
     
     loadTexture_flatColor(glm::vec4(1.0f));                   // 0 - Non-Existent
-    loadTexture("assets/textures/error_texture.png");         // 1 - Albedo Default
+    loadTexture("assets/textures/error_texture.png", true);         // 1 - Albedo Default
     loadTexture_flatColor(glm::vec4(0.5f, 0.5f, 1.0f, 1.0f)); // 2 - Normal Default
 }
 
@@ -82,7 +82,7 @@ const TextureHandle AssetManager::loadTexture(const std::string& path, const boo
 void AssetManager::compileTextures() {
 
     for (uint32_t i = 0; i < loadedTextures; i++) {
-        textures[i].compile();
+        textures[i].compile((i == 1)? false : true);
     }
 }
 

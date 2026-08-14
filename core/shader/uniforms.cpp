@@ -3,6 +3,7 @@
 
 const uint bindingPoint_camera  = 0;
 const uint bindingPoint_plights = 1;
+const uint bindingPoint_screen  = 2;
 
 void UBOhandler::init() {
     
@@ -10,9 +11,11 @@ void UBOhandler::init() {
     cameraDataBuffer.view       = Camera::activeCamera->getView();
     cameraDataBuffer.camPos     = glm::vec4(Camera::activeCamera->getPos(), 1.0f);
 
+    glGenBuffers(1, &cameraUBO);
+    glGenBuffers(1, &screenUBO);
+
     // ---------------------------------------------------------------------- //
 
-    glGenBuffers(1, &cameraUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, cameraUBO);
 
     glBufferData(
@@ -23,6 +26,29 @@ void UBOhandler::init() {
     );
 
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint_camera, cameraUBO);
+
+    // ---------------------------------------------------------------------- //
+
+    ScreenData screenData;
+    screenData.screenSize = {
+
+        WIN_W,
+        WIN_H,
+        0,
+        0
+    };
+
+    glBindBuffer(GL_UNIFORM_BUFFER, screenUBO);
+
+    glBufferData(
+        GL_UNIFORM_BUFFER,
+        sizeof(ScreenData),
+        &screenData,
+        GL_STATIC_DRAW
+    );
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint_screen, screenUBO);
+
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -128,17 +154,12 @@ void PointLightUBO::update(const ECS& ecs) {
 
 void SSBO::init() {
 
-    float numbers[] = {
-        
-        Random::Float(0.0f, 1.0f),
-        // 0.6f,
-        Random::Float(0.0f, 1.0f),
-        Random::Float(0.0f, 1.0f),
-        Random::Float(0.0f, 1.0f),
-        Random::Float(0.0f, 1.0f)
-    };
+    uint32_t count = 2048;
+    size_t size = sizeof(uint32_t) + sizeof(float) * count;
 
-    size_t size = sizeof(uint32_t) + sizeof(float) * 5;
+    float numbers[count];
+
+    for (uint i = 0; i < count; i++) numbers[i] = i / count;
 
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -150,7 +171,6 @@ void SSBO::init() {
         GL_DYNAMIC_DRAW
     );
 
-    uint32_t count = 5;
 
     glBufferSubData(
         GL_SHADER_STORAGE_BUFFER,
@@ -162,7 +182,7 @@ void SSBO::init() {
     glBufferSubData(
         GL_SHADER_STORAGE_BUFFER,
         sizeof(uint32_t),
-        sizeof(float) * 5,
+        sizeof(float) * count,
         numbers
     );
 

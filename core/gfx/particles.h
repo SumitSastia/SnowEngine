@@ -219,20 +219,36 @@ struct GPUparticle {
     glm::vec4 color;     // rgb = color,    a = alpha
 
     float lifetime;
-    float maxLifetime;
+    float remainingLife;
 
     float size;
+    uint32_t isActive;
+};
+
+struct ParticleData {
+
+    uint32_t total_particles;
+    uint32_t padding[3];
+
+    GPUparticle particles[MAX_PARTICLES];
 };
 
 class GPUparticleEmitter {
 
 public:
 
+    GPUparticleEmitter() {
+        create();
+    }
+
     void create();
-    void update();
+    void update(const float dt);
+    void render() const;
+
     void destroy();
 
 private:
 
-    uint probablySomething;
+    GLuint ssbo;
+    uint   total_particles;
 };
