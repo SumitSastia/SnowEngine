@@ -953,8 +953,6 @@ void Scene2::renderLight() const {
 
     // MeshComponent mesh = EntityShapes::instance().square;
     // mesh.draw();
-
-    gpuEmitter.render();
 }
 
 void Scene2::renderParticles(const TextureHandle depthTexture) const {
@@ -963,6 +961,8 @@ void Scene2::renderParticles(const TextureHandle depthTexture) const {
     rain_emitter.render(depthTexture);
     bullet_emitter.render(depthTexture);
     smoke_emitter.render(depthTexture);
+
+    gpuEmitter.render();
 }
 
 void Scene2::renderPointShadow() const {

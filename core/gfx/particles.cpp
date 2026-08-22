@@ -205,6 +205,85 @@ namespace gfx::particles {
         turbulence.direciton = glm::vec3(1.0f);
         turbulence.forceType = ParticleForceType::TURBULENCE;
     }
+
+    GPUhighParticle cpu_to_gpu(const Particle& cpuParticle) {
+
+        GPUhighParticle gpuParticle;
+
+        gpuParticle.position = {
+
+            cpuParticle.position.x,
+            cpuParticle.position.y,
+            cpuParticle.position.z,
+            cpuParticle.rotation_angle
+        };
+
+        gpuParticle.velocity = {
+
+            cpuParticle.velocity.x,
+            cpuParticle.velocity.y,
+            cpuParticle.velocity.z,
+            cpuParticle.angular_velocity
+        };
+
+        gpuParticle.acceleration = glm::vec4(cpuParticle.acceleration, 1.0f);
+
+        gpuParticle.startProp = {
+
+            cpuParticle.startColor.x,
+            cpuParticle.startColor.y,
+            cpuParticle.startColor.z,
+            cpuParticle.startSize.x
+        };
+
+        gpuParticle.endProp = {
+
+            cpuParticle.endColor.x,
+            cpuParticle.endColor.y,
+            cpuParticle.endColor.z,
+            cpuParticle.endSize.x
+        };
+
+        gpuParticle.color   = gpuParticle.startProp;
+        gpuParticle.color.a = cpuParticle.alpha;
+
+        gpuParticle.lifetime      = cpuParticle.lifetime;
+        gpuParticle.remainingLife = cpuParticle.remainingLife;
+
+        gpuParticle.size = gpuParticle.startProp.w;
+
+        gpuParticle.isActive = 1;
+
+        return gpuParticle;
+    }
+
+    GPUParticleInitProperties cpu_to_gpu(const ParticleInitProperties& properties) {
+
+        GPUParticleInitProperties gpuProperties;
+
+        gpuProperties.center   = { properties.center, 1.0f };
+        gpuProperties.box_size = { properties.box_size, 1.0f };
+
+        gpuProperties.acc_min = { properties.acc_min, 0.0f };
+        gpuProperties.acc_max = { properties.acc_max, 0.0f };
+
+        gpuProperties.velocity_min = { properties.velocity_min, 0.0f };
+        gpuProperties.velocity_max = { properties.velocity_max, 0.0f };
+
+        gpuProperties.size_min = 0.1f;
+        gpuProperties.size_max = 0.3f;
+
+        gpuProperties.lifetime_min = 2.0f;
+        gpuProperties.lifetime_max = 5.0f;
+        
+        gpuProperties.radius = properties.radius;
+        gpuProperties.height = properties.height;
+
+        gpuProperties.spawnerType = static_cast<uint32_t>(properties.spawnerType);
+        gpuProperties.total_count = properties.total_count;
+
+        return gpuProperties;
+    }
 };
 
 ParticleEmitter::ParticleEmitter():
@@ -320,7 +399,7 @@ void ParticleEmitter::create(const Particle& particle, const ParticleInitPropert
             p.size    *= Random::Float(property.size_min,     property.size_max);
             p.lifetime = Random::Float(property.lifetime_min, property.lifetime_max);
 
-            p.startSize       = p.size;
+            p.startSize     = p.size;
             p.remainingLife = p.lifetime;
 
             if (++amount == property.total_count) break;
@@ -659,23 +738,36 @@ void GPUparticleEmitter::create() {
 
     total_particles = 100;
 
-    ParticleData data;
-    data.total_particles = total_particles;
+    ParticleData     data;
+    HighParticleData data2;
 
-    for (uint i = 0; i < data.total_particles; i++) {
+    data.total_particles  = total_particles;
+    // data2.total_particles = total_particles;
+
+    for (uint i = 0; i < total_particles; i++) {
 
         data.particles[i].position = glm::vec4(0.0f);
-        data.particles[i].velocity = glm::vec4(Random::vec3(0.1f), 0.0f);
+        data.particles[i].velocity = glm::vec4(Random::vec3(0.5f), 0.0f);
         data.particles[i].color    = glm::vec4(1.0f);
 
-        data.particles[i].lifetime = 1.0f;
+        data.particles[i].lifetime = 10.0f;
         data.particles[i].remainingLife = data.particles[i].lifetime;
 
-        data.particles[i].size = 0.2f;
+        data.particles[i].size = 0.1f;
         data.particles[i].isActive = 1;
     }
 
-    size_t size = sizeof(ParticleData);
+    for (uint i = 0; i < total_particles; i++) {
+
+        data2.particles[i] = gfx::particles::cpu_to_gpu(gfx::particles::Fire);
+        data2.particles[i].position = glm::vec4(0.0f);
+        data2.particles[i].velocity = Random::vec4(0.2f);
+        data2.particles[i].lifetime = 5.0f;
+        data2.particles[i].remainingLife = data2.particles[i].lifetime;
+    }
+
+    // size_t size = sizeof(ParticleData);
+    size_t size = sizeof(HighParticleData);
 
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -683,8 +775,8 @@ void GPUparticleEmitter::create() {
     glBufferData(
         GL_SHADER_STORAGE_BUFFER,
         size,
-        &data,
-        GL_STATIC_DRAW
+        &data2,
+        GL_DYNAMIC_DRAW
     );
 
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, ssbo);
@@ -692,6 +784,38 @@ void GPUparticleEmitter::create() {
 }
 
 void GPUparticleEmitter::update(const float dt) {
+
+    if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+
+        size_t size = sizeof(HighParticleData);
+
+        HighParticleData data2;
+        data2.total_particles = total_particles;
+
+        data2.properties = gfx::particles::cpu_to_gpu(gfx::particles::FireProperties);
+        data2.properties.total_count = total_particles;
+        
+        for (uint i = 0; i < total_particles; i++) {
+
+            data2.particles[i] = gfx::particles::cpu_to_gpu(gfx::particles::Fire);
+            data2.particles[i].position = glm::vec4(0.0f);
+            data2.particles[i].velocity = Random::vec4(0.2f);
+            data2.particles[i].lifetime = 5.0f;
+            data2.particles[i].remainingLife = data2.particles[i].lifetime;
+        }
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+
+        glBufferSubData(
+            GL_SHADER_STORAGE_BUFFER,
+            0,
+            size,
+            &data2
+        );
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, ssbo);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
 
     uint dispatchCount = (total_particles + 127) / 128;
 

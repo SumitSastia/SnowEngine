@@ -37,6 +37,59 @@ struct Particle {
     bool isActive = false;
 };
 
+struct GPUparticle {
+
+    glm::vec4 position;  // xyz = position, w = rotation angle
+    glm::vec4 velocity;  // xyz = velocity, w = angular velocity
+    glm::vec4 color;     // rgb = color,    a = alpha
+
+    float lifetime;
+    float remainingLife;
+
+    float size;
+    uint32_t isActive;
+};
+
+struct GPUhighParticle {
+
+    glm::vec4 position;     // xyz = position, w = rotation angle
+    glm::vec4 velocity;     // xyz = velocity, w = angular velocity
+    glm::vec4 acceleration; // xyz, w = seed (for continous-Emitters)
+
+    glm::vec4 startProp;   // rgb, a = startSize
+    glm::vec4 endProp;     // rgb, a = endSize
+
+    glm::vec4 color;
+
+    float lifetime;
+    float remainingLife;
+
+    float size;
+    uint32_t isActive;
+};
+
+struct GPUParticleInitProperties {
+
+    glm::vec4 center;   // xyz, w = unused
+    glm::vec4 box_size; // xyz, w = unused
+
+    glm::vec4 acc_min; // xyz, w = unused
+    glm::vec4 acc_max; // xyz, w = unused
+
+    glm::vec4 velocity_min; // xyzw
+    glm::vec4 velocity_max; // xyzw
+
+    float size_min;
+    float size_max;
+    float lifetime_min;
+    float lifetime_max;
+
+    float radius;    
+    float height;
+    uint32_t spawnerType;
+    uint32_t total_count;
+};
+
 enum random_flags : uint8_t {
 
     RANDOM_POSITION = 1 << 0,
@@ -149,6 +202,9 @@ namespace gfx::particles {
     inline ParticleForce turbulence;
     
     void init();
+
+    GPUhighParticle cpu_to_gpu(const Particle& cpuParticle);
+    GPUParticleInitProperties cpu_to_gpu(const ParticleInitProperties& properties);
 };
 
 struct ParticleEffect {
@@ -212,25 +268,21 @@ public:
 
 // ----------------------- GPU PARTICLE SYSTEM ----------------------- //
 
-struct GPUparticle {
-
-    glm::vec4 position;  // xyz = position, w = rotation angle
-    glm::vec4 velocity;  // xyz = velocity, w = angular velocity
-    glm::vec4 color;     // rgb = color,    a = alpha
-
-    float lifetime;
-    float remainingLife;
-
-    float size;
-    uint32_t isActive;
-};
-
 struct ParticleData {
 
     uint32_t total_particles;
     uint32_t padding[3];
 
     GPUparticle particles[MAX_PARTICLES];
+};
+
+struct HighParticleData {
+
+    uint32_t total_particles;
+    uint32_t padding[3];
+
+    GPUParticleInitProperties properties;
+    GPUhighParticle particles[MAX_PARTICLES];
 };
 
 class GPUparticleEmitter {

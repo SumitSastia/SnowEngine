@@ -15,6 +15,46 @@ struct Particle {
     uint  isActive;      // 4
 };
 
+struct HighParticle {
+
+    vec4 position;       // 16
+    vec4 velocity;       // 16
+    vec4 acceleration;   // 16
+
+    vec4 startProp;      // 16
+    vec4 endProp;        // 16
+
+    vec4 color;          // 16
+
+    float lifetime;      // 4
+    float remainingLife; // 4
+
+    float size;          // 4
+    uint  isActive;      // 4
+};
+
+struct ParticleInitProperties {
+
+    vec4 position;
+    vec4 box_size;
+
+    vec4 acc_min;
+    vec4 acc_max;
+
+    vec4 velocity_min;
+    vec4 velocity_max;
+
+    float size_min;
+    float size_max;
+    float lifetime_min;
+    float lifetime_max;
+
+    float radius;
+    float height;
+    uint  spawnerType;
+    uint  total_count;
+};
+
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec2 aTexCords;
 
@@ -31,7 +71,10 @@ layout (std430, binding = 1) buffer ParticleData {
     uint total_particles;
     uint padding[3];
 
-    Particle particles[MAX_PARTICLES];
+    ParticleInitProperties properties;
+
+    // Particle particles[MAX_PARTICLES];
+    HighParticle particles[MAX_PARTICLES];
 };
 
 out vec4 color;
@@ -59,6 +102,7 @@ void main(){
 
     gl_Position = projection * view * model * vec4(aPos, 0.0, 1.0);
 
-    Particle p = particles[id];
+    // Particle p = particles[id];
+    HighParticle p = particles[id];
     color = p.color;
 }

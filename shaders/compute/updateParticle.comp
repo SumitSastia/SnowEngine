@@ -1,6 +1,7 @@
 #version 450 core
 
 #define MAX_PARTICLES 10000u
+#define TWO_PI 6.2831853f
 
 layout (local_size_x = 128) in;
 
@@ -17,41 +18,192 @@ struct Particle {
     uint  isActive;      // 4
 };
 
+struct ParticleInitProperties {
+
+    vec4 center;
+    vec4 box_size;
+
+    vec4 acc_min;
+    vec4 acc_max;
+
+    vec4 velocity_min;
+    vec4 velocity_max;
+
+    float size_min;
+    float size_max;
+    float lifetime_min;
+    float lifetime_max;
+
+    float radius;
+    float height;
+    uint  spawnerType;
+    uint  total_count;
+};
+
+struct HighParticle {
+
+    vec4 position;       // 16
+    vec4 velocity;       // 16
+    vec4 acceleration;   // 16
+
+    vec4 startProp;      // 16
+    vec4 endProp;        // 16
+
+    vec4 color;          // 16
+
+    float lifetime;      // 4
+    float remainingLife; // 4
+
+    float size;          // 4
+    uint  isActive;      // 4
+};
+
 layout (std430, binding = 1) buffer ParticleData {
 
     uint total_particles;
     uint padding[3];
 
-    Particle particles[MAX_PARTICLES];
+    ParticleInitProperties properties;
+    // Particle particles[MAX_PARTICLES];
+    HighParticle particles[MAX_PARTICLES];
 };
 
 uniform float deltaTime;
+
+uint hash(uint x) {
+
+    x ^= x >> 16;
+    x *= 0x7FEB352Du;
+    x ^= x >> 15;
+    x *= 0x846CA68Bu;
+    x ^= x >> 16;
+
+    return x;
+}
+
+float randomHelper(uint seed) {
+
+    seed ^= seed << 13;
+    seed ^= seed >> 17;
+    seed ^= seed << 5;
+
+    return float(seed) / float(0xFFFFFFFFu);
+}
+
+float randomFloat(const uint id, const float min, const float max) {
+    return mix(min, max, randomHelper(hash(id)));
+}
+
+vec3 randomVec3(const uint id, const vec3 min, const vec3 max) {
+
+    vec3 vec;
+
+    vec.x = randomFloat(id + 0u, min.x, max.x);
+    vec.y = randomFloat(id + 1u, min.y, max.y);
+    vec.z = randomFloat(id + 2u, min.z, max.z);
+
+    return vec;
+}
+
+vec4 randomVec4(const uint id, const vec4 min, const vec4 max) {
+
+    vec4 vec;
+
+    vec.x = randomFloat(id + 0u, min.x, max.x);
+    vec.y = randomFloat(id + 1u, min.y, max.y);
+    vec.z = randomFloat(id + 2u, min.z, max.z);
+    vec.w = randomFloat(id + 3u, min.w, max.w);
+
+    return vec;
+}
+
+vec3 generate(const uint id) {
+
+    switch (properties.spawnerType) {
+
+        case 0: return properties.center.xyz;
+
+        case 1: {
+
+            const vec3 direction = randomVec3(id, vec3(-1.0f), vec3(1.0f));
+            return (properties.center.xyz + normalize(direction) * randomFloat(id, 0, properties.radius));
+        }
+
+        case 2: {
+
+            const vec3 pos_min = -properties.box_size.xyz / 2.0f;
+            const vec3 pos_max =  properties.box_size.xyz / 2.0f;
+
+            return (properties.center.xyz + randomVec3(id, pos_min, pos_max));
+        }
+
+        case 3: {
+
+            bool isInverted = false;
+            if (properties.height < 0.0f) isInverted = true;
+
+            const float height = randomFloat(id, 0.0f, (isInverted)? -properties.height : properties.height);
+
+            const float maxRadius = (isInverted)?
+                ((1.0f - height/(-properties.height)) * properties.radius) : ((height / properties.height) * properties.radius);
+
+            const float angle  = randomFloat(id, 0.0f, TWO_PI);
+            const float radius = maxRadius * sqrt(randomFloat(id, 0.0f, 1.0f));
+
+            return properties.center.xyz + vec3(cos(angle) * radius, height, sin(angle) * radius);
+        }
+    }
+
+    return vec3(0.0);
+}
+
+void recreate(const uint id) {
+
+    particles[id].position.xyz = generate(id);
+
+    particles[id].velocity = randomVec4(id, properties.velocity_min, properties.velocity_max); 
+    particles[id].lifetime = randomFloat(id, properties.lifetime_min, properties.lifetime_max);
+
+    particles[id].size = randomFloat(id, properties.size_min, properties.size_max);
+    particles[id].remainingLife = particles[id].lifetime;
+}
 
 void main() {
 
     uint id = gl_GlobalInvocationID.x;
 
-    if (id >= total_particles) return;
+    // if (id >= total_particles) return;
+    if (id >= properties.total_count) return;
     if (particles[id].isActive == 0) return;
 
     particles[id].remainingLife -= deltaTime;
-    
+
     if (particles[id].remainingLife <= 0.0f) {
-        
+
         // particles[id].isActive = 0;
-        particles[id].remainingLife = particles[id].lifetime;
         // return;
+
+        // particles[id].remainingLife = particles[id].lifetime;
+
+        recreate(id);
     }
 
-    // float t = 1.0f - particles[id].remainingLife / particles[id].lifetime;
-    // particles[id].color = mix()
+    // HIGH PARTICLE --------------------------------------------- //
+
+    particles[id].velocity.xyz += particles[id].acceleration.xyz * deltaTime;
+
+    float t = 1.0f - particles[id].remainingLife / particles[id].lifetime;
+
+    particles[id].color.xyz = mix(particles[id].startProp.xyz, particles[id].endProp.xyz, t);
+    particles[id].size      = mix(particles[id].startProp.w,   particles[id].endProp.w,   t);
+
+    particles[id].color.a = mix(1.0, 0.0, t);
+
+    // NORMAL PARTICLE ------------------------------------------- //
     
     particles[id].position += particles[id].velocity * deltaTime;
-    // particles[id].position += vec4(0.1);
     
     if (particles[id].position.w > 360.0) particles[id].position.w -= 360.0;
     if (particles[id].position.w < -360.0) particles[id].position.w += 360.0;
 
-    if (particles[id].color.r >= 1.0) particles[id].color.r = 0.0;
-    particles[id].color.r += 0.01;
 }
